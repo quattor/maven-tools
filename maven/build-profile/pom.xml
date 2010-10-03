@@ -341,7 +341,7 @@
 		<directoryIncluded>false</directoryIncluded>
 		<sources>
 		  <source>
-		    <location>src</location>
+		    <location>${basedir}</location>
 		    <includes>
 		      <include>ChangeLog</include>
 		    </includes>

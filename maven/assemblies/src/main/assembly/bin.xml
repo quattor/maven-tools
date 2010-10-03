@@ -12,7 +12,7 @@
   <fileSets>
 
     <fileSet>
-      <directory>src</directory>
+      <directory>${basedir}</directory>
       <outputDirectory>share/doc/${NAME}-${VERSION}</outputDirectory>
       <includes>
         <include>ChangeLog</include>
