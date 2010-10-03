@@ -341,11 +341,9 @@
 		<directoryIncluded>false</directoryIncluded>
 		<sources>
 		  <source>
-		    <location>${basedir}</location>
+		    <location>src</location>
 		    <includes>
 		      <include>ChangeLog</include>
-		      <include>LICENSE</include>
-		      <include>README</include>
 		    </includes>
 		  </source>
 		</sources>
@@ -402,6 +400,12 @@
 
     <LICENSE>http://cern.ch/eu-datagrid/license.html</LICENSE>
     <SELF>${artifactId}</SELF>
+
+    <BUILD_INFO>
+# 
+# ${artifactId}, ${project.version}, ${maven.build.timestamp}
+#
+</BUILD_INFO>
   </properties>  
 
 </project>
