@@ -11,7 +11,7 @@
     </fileSet>
 
     <fileSet encoding="UTF-8" >
-      <directory>src</directory>
+      <directory></directory>
       <includes>
 	<include>ChangeLog</include>
       </includes>
