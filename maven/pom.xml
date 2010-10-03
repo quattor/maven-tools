@@ -18,6 +18,19 @@
     <module>component</module>
   </modules>
 
+  <distributionManagement>
+    <repository>
+      <id>quattor-releases</id>
+      <name>quattor-releases</name>
+      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>quattor-snapshots</id>
+      <name>quattor-snapshots</name>
+      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+  
   <build>
     <pluginManagement>
       <plugins>
