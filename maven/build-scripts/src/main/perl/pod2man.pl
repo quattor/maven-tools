@@ -68,8 +68,13 @@ sub create_man_page {
 
     $parser->parse_from_file($pod_fname, $ofile);
 
-    `gzip $ofile`;
-
+    # This uses the commandline rather than IO::Compress::Gzip because that
+    # module is not installed by default on current RHEL releases.  This will
+    # not overwrite an existing file.
+    if (! -e $gzfile) {
+	`gzip $ofile`;
+    }
+    
     return;
 }
 
