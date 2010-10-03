@@ -1,0 +1,23 @@
+${BUILD_INFO}
+${LEGAL}
+
+=head1 NAME
+
+@NAME@: Example Quattor component 
+
+=head1 DESCRIPTION
+
+@DESCRIPTION@
+
+=head1 RESOURCES
+
+=head2 /software/components/@COMP@
+
+The configuration information for the component.  Each field should
+be described in this section. 
+
+=head1 AUTHOR
+
+@AUTHOR@
+
+=cut

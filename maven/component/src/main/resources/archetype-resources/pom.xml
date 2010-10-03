@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.quattor.cfg</groupId>
+  <artifactId>example</artifactId>
+
+  <packaging>pom</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>example Quattor configuration component</name>
+
+  <parent>
+    <groupId>org.quattor.maven</groupId>
+    <artifactId>build-profile</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <properties>
+    <AUTHOR>A. Beta</AUTHOR>
+    <MAINTAINER>B. Gamma</MAINTAINER>
+    <LICENSE>http://www.opensource.org/licenses/apache2.0.php</LICENSE>
+  </properties>  
+
+</project>
