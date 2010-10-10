@@ -18,7 +18,7 @@ import org.apache.maven.plugin.logging.Log;
  * 
  * @phase initialize
  */
-public class MyMojo extends AbstractMojo {
+public class QuattorBuild extends AbstractMojo {
 
 	/** @parameter default-value="${project}" */
 	private org.apache.maven.project.MavenProject mavenProject;
