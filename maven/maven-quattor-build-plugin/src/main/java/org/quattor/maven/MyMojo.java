@@ -1,99 +1,112 @@
 package org.quattor.maven;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-
-import org.apache.maven.model.Model;
-import org.apache.maven.model.License;
-
 import java.util.List;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import org.apache.maven.model.Contributor;
+import org.apache.maven.model.Developer;
+import org.apache.maven.model.License;
+import org.apache.maven.model.Model;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
- * Goal which touches a timestamp file.
- *
- * @goal touch
+ * Goal which sets the quattor build properties. Fails if required information
+ * is not available in the pom.xml file.
  * 
- * @phase process-sources
+ * @goal set-build-properties
+ * 
+ * @phase initialize
  */
-public class MyMojo
-    extends AbstractMojo {
+public class MyMojo extends AbstractMojo {
 
-    /** @parameter default-value="${project}" */
-    private org.apache.maven.project.MavenProject mavenProject;
+	/** @parameter default-value="${project}" */
+	private org.apache.maven.project.MavenProject mavenProject;
 
-    /**
-     * Location of the file.
-     * @parameter expression="${project.build.directory}"
-     * @required
-     */
-    private File outputDirectory;
+	final private static String licenseFormat = "#   %s (%s)\n#   %s\n";
 
-    public void execute()
-        throws MojoExecutionException
-    {
+	final private static String developerFormat = "#   %s <%s>\n";
 
-	Model model = mavenProject.getModel();
-	List<License> licenses = model.getLicenses();
-	System.err.println("Printing licenses...");
-	for (License license : licenses) {
-	    System.err.println(license.getName());
-	    System.err.println(license.getUrl());
+	public void execute() throws MojoExecutionException {
+
+		Model model = mavenProject.getModel();
+
+		String licenseInfo = formatLicenseInfo(model);
+		setMavenProperty("license-info", licenseInfo);
+
+		String developerInfo = formatDeveloperInfo(model);
+		setMavenProperty("developer-info", developerInfo);
+
+		String authorInfo = formatAuthorInfo(model);
+		setMavenProperty("author-info", authorInfo);
+
 	}
-	System.err.println("End licenses.");
 
-        File f = outputDirectory;
+	private void setMavenProperty(String name, String value)
+			throws MojoExecutionException {
 
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
+		Log log = getLog();
+		log.info("Setting property " + name + " = " + value + "\n");
 
-        File touch = new File( f, "touch.txt" );
+		mavenProject.getProperties().put(name, value);
+	}
 
-        FileWriter w = null;
-        try
-        {
-            w = new FileWriter( touch );
+	private String formatLicenseInfo(Model model) throws MojoExecutionException {
 
-            w.write( "touch.txt" );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Error creating file " + touch, e );
-        }
-        finally
-        {
-            if ( w != null )
-            {
-                try
-                {
-                    w.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-            }
-        }
-    }
+		List<License> licenses = model.getLicenses();
+
+		if (licenses.size() == 0) {
+			throw new MojoExecutionException(
+					"must provide license section of pom.xml");
+		}
+
+		StringBuffer sb = new StringBuffer(
+				"#\n# Software subject to following license(s):\n");
+		for (License license : licenses) {
+			sb.append(String.format(licenseFormat, license.getName(),
+					license.getUrl(), license.getComments()));
+		}
+		sb.append("#\n");
+
+		return sb.toString();
+	}
+
+	private String formatDeveloperInfo(Model model)
+			throws MojoExecutionException {
+
+		List<Developer> developers = model.getDevelopers();
+
+		if (developers.size() == 0) {
+			throw new MojoExecutionException(
+					"must provide developer section of pom.xml");
+		}
+
+		StringBuffer sb = new StringBuffer("#\n# Current developer(s):\n");
+		for (Developer developer : developers) {
+			sb.append(String.format(developerFormat, developer.getName(),
+					developer.getEmail()));
+		}
+		sb.append("#\n");
+
+		return sb.toString();
+	}
+
+	private String formatAuthorInfo(Model model) throws MojoExecutionException {
+
+		List<Contributor> contributors = model.getContributors();
+
+		int numberOfAuthors = 0;
+
+		StringBuffer sb = new StringBuffer("#\n# Author(s): ");
+		for (Contributor contributor : contributors) {
+			if (contributor.getRoles().contains("author")) {
+				sb.append((numberOfAuthors == 0) ? ", " : "");
+				sb.append(contributor.getName());
+				numberOfAuthors++;
+			}
+		}
+		sb.append("#\n");
+
+		return (numberOfAuthors > 0) ? sb.toString() : "";
+	}
 }
