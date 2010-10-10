@@ -45,6 +45,31 @@
     </profile>
 
     <profile>
+    <id>set-build-properties</id>
+      <activation>
+	<file>
+	  <exists>src</exists>
+	</file>
+      </activation>
+      <build>
+	<plugins>
+	  <plugin>
+	    <groupId>org.quattor.maven</groupId>
+	    <artifactId>maven-quattor-build-plugin</artifactId>
+	    <executions>
+	      <execution>
+		<id>set-build-properties</id>
+		<goals>
+		  <goal>set-build-properties</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
+
+    <profile>
       <id>filter-pan-source</id>
       <activation>
 	<file>
