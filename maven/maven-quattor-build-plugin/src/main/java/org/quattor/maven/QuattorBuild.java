@@ -100,12 +100,12 @@ public class QuattorBuild extends AbstractMojo {
 		StringBuffer sb = new StringBuffer("#\n# Author(s): ");
 		for (Contributor contributor : contributors) {
 			if (contributor.getRoles().contains("author")) {
-				sb.append((numberOfAuthors == 0) ? ", " : "");
+				sb.append((numberOfAuthors > 0) ? ", " : "");
 				sb.append(contributor.getName());
 				numberOfAuthors++;
 			}
 		}
-		sb.append("#\n");
+		sb.append("\n#\n");
 
 		return (numberOfAuthors > 0) ? sb.toString() : "";
 	}

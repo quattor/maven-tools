@@ -17,6 +17,13 @@
     <version>1.0.1-SNAPSHOT</version>
   </parent>
 
+  <repositories>
+    <repository>
+      <id>quattor-releases</id>
+      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+  
   <profiles>
 
     <profile>
@@ -140,16 +147,6 @@
 
 	    <executions>
 	      
-	      <execution>
-		<id>check-source-pan-syntax</id>
-		<phase>compile</phase>
-		<goals>
-		  <goal>check-syntax</goal>
-		</goals>
-		<configuration>
-		</configuration> 
-	      </execution>
-
 	      <execution>
 		<id>check-generated-pan-syntax</id>
 		<phase>compile</phase>
