@@ -9,7 +9,7 @@
   <packaging>pom</packaging>
   <version>1.0.1-SNAPSHOT</version>
   <name>build-profile</name>
-  <url>http://quattor.org</url>
+  <url>http://quattor.org/cfg-modules/</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
@@ -373,18 +373,19 @@
 	  <artifactId>rpm-maven-plugin</artifactId>
 
 	  <configuration>
-	    <release>${RELEASE}</release>
-	    <summary>${NAME}</summary>
-	    <name>${NAME}</name>
+	    <release>1</release>
+	    <summary>ncm-${artifactId}</summary>
+	    <name>ncm-${artifactId}</name>
 	    <group>Quattor</group>
 	    <packager>Quattor</packager>
-	    <copyright>${LICENSE}</copyright>
+	    <vendor>Quattor</vendor>
+	    <copyright>${license-url}</copyright>
 	    <url>${project.url}</url>
 	    <provides>
-	      <provide>${NAME}</provide>
+	      <provide>ncm-${artifactId}</provide>
 	    </provides>
 	    <needarch>noarch</needarch>
-	    <description>${DESCRIPTION}</description>
+	    <description>${name}</description>
 	    <requires>
 	      <require>ncm-ncd</require>
 	      <require>libuser</require>
@@ -406,7 +407,7 @@
 	      </mapping>
 
 	      <mapping>
-		<directory>/usr/share/doc/${NAME}-${VERSION}</directory>
+		<directory>/usr/share/doc/ncm-${artifactId}-${project.version}</directory>
 		<filemode>644</filemode>
 		<username>root</username>
 		<groupname>root</groupname>
@@ -463,16 +464,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
-    <DATE>${maven.build.timestamp}</DATE>
-
-    <COMP>${artifactId}</COMP>
-    <NAME>ncm-${artifactId}</NAME>
-
-    <VERSION>${project.version}</VERSION>
-    <RELEASE>1</RELEASE>
 
     <LICENSE>http://cern.ch/eu-datagrid/license.html</LICENSE>
-    <SELF>${artifactId}</SELF>
 
     <BUILD_INFO>
 # 

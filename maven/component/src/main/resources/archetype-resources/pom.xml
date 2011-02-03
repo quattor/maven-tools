@@ -16,6 +16,13 @@
       <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
     </repository>
   </repositories>
+ 
+  <pluginRepositories>
+    <pluginRepository>
+      <id>quattor-releases</id>
+      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
@@ -23,15 +30,36 @@
     <version>1.0.1-SNAPSHOT</version>
   </parent>
 
-  <properties>
-    <AUTHOR>A. Beta</AUTHOR>
-    <MAINTAINER>B. Gamma</MAINTAINER>
-    <LICENSE>http://www.opensource.org/licenses/apache2.0.php</LICENSE>
-    <LEGAL>
-# 
-# Copyright and license information goes here.
-#
-</LEGAL>
-  </properties>  
+  <licenses>
+    <license>
+      <name>Apache 2 License</name>
+      <url>http://www.opensource.org/licenses/apache2.0</url>
+      <comments>Copyright (c) Responsible Person</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>John SMITH</name>
+      <email>smith@example.org</email>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor>
+      <name>Jane SMITH</name>
+      <email>smith@example.com</email>
+      <roles>
+	<role>author</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <name>Joe DOE</name>
+      <email>doe@example.org</email>
+      <roles>
+	<role>author</role>
+      </roles>
+    </contributor>
+  </contributors>
 
 </project>

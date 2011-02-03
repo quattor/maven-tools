@@ -34,6 +34,9 @@ public class QuattorBuild extends AbstractMojo {
 		String licenseInfo = formatLicenseInfo(model);
 		setMavenProperty("license-info", licenseInfo);
 
+		String licenseUrl = formatLicenseUrl(model);
+		setMavenProperty("license-url", licenseUrl);
+
 		String developerInfo = formatDeveloperInfo(model);
 		setMavenProperty("developer-info", developerInfo);
 
@@ -67,6 +70,24 @@ public class QuattorBuild extends AbstractMojo {
 					license.getUrl(), license.getComments()));
 		}
 		sb.append("#\n");
+
+		return sb.toString();
+	}
+
+	private String formatLicenseUrl(Model model) throws MojoExecutionException {
+
+		List<License> licenses = model.getLicenses();
+
+		if (licenses.size() == 0) {
+			throw new MojoExecutionException(
+					"must provide license section of pom.xml");
+		}
+
+		StringBuffer sb = new StringBuffer();
+		for (License license : licenses) {
+			sb.append(license.getUrl());
+			sb.append(" ");
+		}
 
 		return sb.toString();
 	}

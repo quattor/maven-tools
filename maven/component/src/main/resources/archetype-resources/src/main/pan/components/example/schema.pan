@@ -1,5 +1,7 @@
-# ${BUILD_INFO}
-# ${LEGAL}
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
 
 declaration template components/${quattor.component}/schema;
 
