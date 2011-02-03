@@ -1,12 +1,12 @@
 ${BUILD_INFO}
 ${LEGAL}
 
-package NCM::Component::@COMP@;
+package ${quattor.package}::${quattor.component};
 
 use strict;
 use warnings;
 
-use NCM::Component;
+use base qw(${quattor.parent});
 
 use LC::Exception;
 use LC::Find;
@@ -19,14 +19,10 @@ use CAF::Process;
 use File::Basename;
 use File::Path;
 
-# Base class for a Quattor component.
-use base qw(NCM::Component);
-
 use Readonly;
-Readonly::Scalar my $PATH => '/software/components/@COMP@';
+Readonly::Scalar my $PATH => '/software/components/${quattor.component}';
 
 our $EC=LC::Exception::Context->new->will_store_all;
-
 
 # Restart the process.
 sub restartDaemon {

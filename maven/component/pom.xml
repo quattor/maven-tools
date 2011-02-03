@@ -16,4 +16,9 @@
   <name>archetype-component</name>
   <url>http://quattor.org</url>
 
+  <properties>
+    <quattor.component>example</quattor.component>
+    <quattor.package>NCM::Component</quattor.package>
+    <quattor.parent>NCM::Component</quattor.parent>
+  </properties>
 </project>
