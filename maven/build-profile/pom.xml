@@ -107,7 +107,7 @@
 		    <delimiter>${*}</delimiter>
 		    <delimiter>@</delimiter>
 		  </delimiters>
-		  <outputDirectory>${project.build.directory}/pan/components/${artifactId}</outputDirectory>
+		  <outputDirectory>${project.build.directory}/pan/</outputDirectory>
 		  <resources>
 		    <resource>
 		      <directory>src/main/pan</directory>
