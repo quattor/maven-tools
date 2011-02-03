@@ -8,7 +8,7 @@
 
   <packaging>pom</packaging>
   <version>1.0.0-SNAPSHOT</version>
-  <name>example Quattor configuration component</name>
+  <name>example Quattor configuration module</name>
 
   <repositories>
     <repository>
