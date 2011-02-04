@@ -20,7 +20,7 @@
   </modules>
 
   <scm>
-    <connection>https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/maven</connection>
+    <connection>scm:svn:https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/maven</connection>
   </scm>
 
   <distributionManagement>
