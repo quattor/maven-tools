@@ -15,10 +15,4 @@
   <name>Archetype for Quattor Configuration Module</name>
   <url>http://quattor.org</url>
 
-  <properties>
-    <!-- The correct build profile should always have 
-         same version as this artifact. --> 
-    <build.profile.version>${version}</build.profile.version>
-  </properties>
-
 </project>
