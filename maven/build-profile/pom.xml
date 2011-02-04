@@ -273,14 +273,14 @@
 		    <artifactItem>
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>assemblies</artifactId>
-		      <version>1.1-SNAPSHOT</version>
+		      <version>${assembly.version}</version>
 		      <type>tar.gz</type>
 		      <classifier>assemblies</classifier>
 		    </artifactItem>
 		    <artifactItem>
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>build-scripts</artifactId>
-		      <version>1.1-SNAPSHOT</version>
+		      <version>${assembly.version}</version>
 		      <type>tar.gz</type>
 		      <classifier>scripts</classifier>
 		    </artifactItem>
@@ -461,6 +461,10 @@
   </build>
 
   <properties>
+
+    <!-- Assembly versions should be identical to version of this artiface. -->
+    <assembly.version>${version}</assembly.version>
+ 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
 
