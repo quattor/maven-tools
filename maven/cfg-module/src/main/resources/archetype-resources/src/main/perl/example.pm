@@ -1,12 +1,14 @@
-${BUILD_INFO}
-${LEGAL}
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
 
-package ${quattor.package}::${quattor.component};
+package NCM::Component::example;
 
 use strict;
 use warnings;
 
-use base qw(${quattor.parent});
+use base qw(NCM::Component);
 
 use LC::Exception;
 use LC::Find;
@@ -20,7 +22,7 @@ use File::Basename;
 use File::Path;
 
 use Readonly;
-Readonly::Scalar my $PATH => '/software/components/${quattor.component}';
+Readonly::Scalar my $PATH => '/software/components/example';
 
 our $EC=LC::Exception::Context->new->will_store_all;
 

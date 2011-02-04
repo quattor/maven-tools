@@ -1,23 +1,25 @@
-${BUILD_INFO}
-${LEGAL}
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
 
 =head1 NAME
 
-@NAME@: Example Quattor component 
+ncm-example: Example Quattor configuration module
 
 =head1 DESCRIPTION
 
-@DESCRIPTION@
+${name}
 
 =head1 RESOURCES
 
-=head2 /software/components/@COMP@
+=head2 /software/components/${artifactId}
 
 The configuration information for the component.  Each field should
 be described in this section. 
 
 =head1 AUTHOR
 
-@AUTHOR@
+${author-info}
 
 =cut

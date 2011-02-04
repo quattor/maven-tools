@@ -1,0 +1,46 @@
+<archetype-descriptor
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
+    name="Quattor Configuration Module Archetype"
+    partial="false" >
+
+  <requiredProperties>
+    <requiredProperty key="developer" >
+      <defaultValue/>
+    </requiredProperty>
+    <requiredProperty key="developer-email" >
+      <defaultValue/>
+    </requiredProperty>
+    <requiredProperty key="description" >
+      <defaultValue/>
+    </requiredProperty>
+    <requiredProperty key="groupId" >
+      <defaultValue>org.quattor.cfg.module</defaultValue>
+    </requiredProperty>
+    <requiredProperty key="package" >
+      <defaultValue>components/${artifactId}</defaultValue>
+    </requiredProperty>
+  </requiredProperties>
+  
+  <fileSets>
+    <fileSet filtered="false" packaged="false" encoding="UTF-8" >
+      <directory/>
+      <includes>
+	<include>ChangeLog</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="false" packaged="false" encoding="UTF-8" >
+      <directory>src/main/perl</directory>
+      <includes>
+	<include>**/*</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="false" packaged="true" encoding="UTF-8" >
+      <directory>src/main/pan</directory>
+      <includes>
+	<include>**/*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  
+</archetype-descriptor>

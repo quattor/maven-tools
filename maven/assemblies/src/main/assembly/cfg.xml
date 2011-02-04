@@ -13,7 +13,7 @@
 
     <fileSet>
       <directory>target/lib/perl/NCM/Component</directory>
-      <outputDirectory>components/${COMP}</outputDirectory>
+      <outputDirectory>components/${artifactId}</outputDirectory>
       <includes>
         <include>*.pm</include>
       </includes>

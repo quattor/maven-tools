@@ -3,12 +3,12 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/${quattor.component}/config-common;
+unique template components/example/config-common;
 
-include { 'components/${quattor.component}/schema' };
+include { 'components/example/schema' };
 
 # Set prefix to root of component configuration.
-prefix '/software/components/${quattor.component}';
+prefix '/software/components/example';
 
 'version' = '${version}';
 'package' = '${quattor.package}';

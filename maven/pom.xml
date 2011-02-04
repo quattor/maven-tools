@@ -15,7 +15,7 @@
     <module>assemblies</module>
     <module>build-profile</module>
     <module>build-scripts</module>
-    <module>component</module>
+    <module>cfg-module</module>
     <module>maven-quattor-build-plugin</module>
   </modules>
 
