@@ -19,6 +19,10 @@
     <module>maven-quattor-build-plugin</module>
   </modules>
 
+  <scm>
+    <connection>https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/maven</connection>
+  </scm>
+
   <distributionManagement>
     <repository>
       <id>quattor-releases</id>
