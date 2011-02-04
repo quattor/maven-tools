@@ -5,7 +5,7 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>${groupdId}</groupId>
+  <groupId>${groupId}</groupId>
   <artifactId>${artifactId}</artifactId>
 
   <packaging>pom</packaging>

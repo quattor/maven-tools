@@ -3,6 +3,6 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/example/config;
+unique template components/${artifactId}/config;
 
-include { 'components/example/config-rpm' };
+include { 'components/${artifactId}/config-rpm' };

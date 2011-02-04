@@ -3,17 +3,17 @@
 # ${author-info}
 # ${build-info}
 
-declaration template components/example/schema;
+declaration template components/${artifactId}/schema;
 
 include { 'quattor/schema' };
 
-type example_config = {
+type ${artifactId}_config = {
     'dummy' : string = 'OK'
 } = nlist();
 
-type example_component = {
+type ${artifactId}_component = {
     include structure_component
-    'config' : config_example
+    'config' : config_${artifactId}
 };
 
-bind '/software/components/example' = component_example;
+bind '/software/components/${artifactId}' = component_${artifactId};

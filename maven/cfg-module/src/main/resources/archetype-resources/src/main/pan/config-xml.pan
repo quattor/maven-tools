@@ -3,12 +3,12 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/example/config-xml;
+unique template components/${artifactId}/config-xml;
 
-include { 'components/example/config-common' };
+include { 'components/${artifactId}/config-common' };
 
 # Set prefix to root of component configuration.
-prefix '/software/components/example';
+prefix '/software/components/${artifactId}';
 
 # Embed the Quattor configuration module into XML profile.
-'code' = file('components/example/example.pm'); 
+'code' = file_contents('components/${artifactId}/${artifactId}.pm'); 

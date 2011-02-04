@@ -3,15 +3,15 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/example/config-common;
+unique template components/${artifactId}/config-common;
 
-include { 'components/example/schema' };
+include { 'components/${artifactId}/schema' };
 
 # Set prefix to root of component configuration.
-prefix '/software/components/example';
+prefix '/software/components/${artifactId}';
 
 'version' = '${version}';
-'package' = '${quattor.package}';
+'package' = 'NCM::Component';
 
 'active' ?= true;
 'dispatch' ?= true;

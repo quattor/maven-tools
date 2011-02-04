@@ -465,13 +465,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
 
-    <LICENSE>http://cern.ch/eu-datagrid/license.html</LICENSE>
-
-    <BUILD_INFO>
+    <build-info>
 # 
-# ${artifactId}, ${project.version}, ${maven.build.timestamp}
+# ${artifactId}, ${version}, ${maven.build.timestamp}
 #
-</BUILD_INFO>
+</build-info>
   </properties>  
 
 </project>

@@ -5,11 +5,11 @@
 
 =head1 NAME
 
-ncm-example: Example Quattor configuration module
+ncm-${artifactId}: ${description}
 
 =head1 DESCRIPTION
 
-${name}
+${artifactId}
 
 =head1 RESOURCES
 

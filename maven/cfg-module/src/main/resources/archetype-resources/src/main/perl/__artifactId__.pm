@@ -3,7 +3,7 @@
 # ${author-info}
 # ${build-info}
 
-package NCM::Component::example;
+package NCM::Component::${artifactId};
 
 use strict;
 use warnings;
@@ -22,14 +22,14 @@ use File::Basename;
 use File::Path;
 
 use Readonly;
-Readonly::Scalar my $PATH => '/software/components/example';
+Readonly::Scalar my $PATH => '/software/components/${artifactId}';
 
 our $EC=LC::Exception::Context->new->will_store_all;
 
 # Restart the process.
 sub restartDaemon {
     my ($self) = @_;
-    CAF::Process->new([qw(/etc/init.d/example restart)], log => $self)->run();
+    CAF::Process->new([qw(/etc/init.d/${artifactId} restart)], log => $self)->run();
     return;
 }
 
