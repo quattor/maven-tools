@@ -6,14 +6,14 @@
   <artifactId>build-profile</artifactId>
 
   <packaging>pom</packaging>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3</version>
   <name>build-profile</name>
   <url>http://quattor.org/cfg-modules/</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
   </parent>
 
   <repositories>
