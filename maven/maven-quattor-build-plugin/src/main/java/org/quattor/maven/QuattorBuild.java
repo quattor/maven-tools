@@ -48,9 +48,8 @@ public class QuattorBuild extends AbstractMojo {
 
     }
 
-    private String getNoSnapshotVersion() throws MojoExecutionException {
-        String version = (String) mavenProject.getProperties().get("project.version");
-        return (version!=null) ? version.replaceFirst("-\\.*", "") : "";
+    private String getNoSnapshotVersion(Model model) throws MojoExecutionException {
+        return model.getVersion().replaceFirst("-\\.*", "");
     }
 
     private void setMavenProperty(String name, String value)
