@@ -274,14 +274,14 @@
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>assemblies</artifactId>
 		      <type>tar.gz</type>
-		      <version>1.6</version>
+		      <version>1.7-SNAPSHOT</version>
 		      <classifier>assemblies</classifier>
 		    </artifactItem>
 		    <artifactItem>
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>build-scripts</artifactId>
 		      <type>tar.gz</type>
-		      <version>1.6</version>
+		      <version>1.7-SNAPSHOT</version>
 		      <classifier>scripts</classifier>
 		    </artifactItem>
 		  </artifactItems>
