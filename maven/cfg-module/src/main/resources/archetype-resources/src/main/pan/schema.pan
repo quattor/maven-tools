@@ -13,7 +13,7 @@ type ${artifactId}_config = {
 
 type ${artifactId}_component = {
     include structure_component
-    'config' : config_${artifactId}
+    'config' : ${artifactId}_config
 };
 
-bind '/software/components/${artifactId}' = component_${artifactId};
+bind '/software/components/${artifactId}' = ${artifactId}_component;

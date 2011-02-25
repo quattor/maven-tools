@@ -28,8 +28,7 @@
     <profile>
       <activation>
 	<file>
-	  <exists>src</exists>
-	<!--  <exists>/bin/rpm</exists> -->
+          <exists>/usr/bin/rpmbuild</exists>
 	</file>
       </activation>
       <build>
@@ -373,7 +372,7 @@
 	  <artifactId>rpm-maven-plugin</artifactId>
 
 	  <configuration>
-	    <release>1</release>
+	    <release>${RELEASE}</release>
 	    <summary>ncm-${artifactId}</summary>
 	    <name>ncm-${artifactId}</name>
 	    <group>Quattor</group>
@@ -465,6 +464,7 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
+    <RELEASE>0.${maven.build.timestamp}</RELEASE>
 
     <build-info>
 # 

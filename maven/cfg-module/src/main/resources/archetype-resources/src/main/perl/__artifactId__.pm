@@ -24,12 +24,14 @@ use File::Path;
 use Readonly;
 Readonly::Scalar my $PATH => '/software/components/${artifactId}';
 
+Readonly::Scalar my $RESTART => '/etc/init.d/${artifactId} restart';
+
 our $EC=LC::Exception::Context->new->will_store_all;
 
 # Restart the process.
-sub restartDaemon {
+sub restart_daemon {
     my ($self) = @_;
-    CAF::Process->new([qw(/etc/init.d/${artifactId} restart)], log => $self)->run();
+    CAF::Process->new([qw($RESTART)], log => $self)->run();
     return;
 }
 
@@ -38,11 +40,12 @@ sub Configure {
 
     # Get full tree of configuration information for component.
     my $t = $config->getElement($PATH)->getTree();
+    my $cfg = $t->{'config'};
 
     # Create the configuration file.
 
     # Restart the daemon if necessary.
-
+    restart_daemon();
 }
 
 1; # Required for perl module!
