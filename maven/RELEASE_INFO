@@ -1,9 +1,0 @@
-
-RELEASE NOTES:
-
-The following files need to be changed by hand BEFORE AND AFTER a release.  
-
-build-profile/pom.xml : change assembly and build-script references 
-
-cfg-module/src/main/resources/archetype-resources/pom.xml : change reference to build-profile
-

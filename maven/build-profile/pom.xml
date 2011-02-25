@@ -16,6 +16,36 @@
     <version>1.9-SNAPSHOT</version>
   </parent>
 
+  <properties>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
+    <RELEASE>0.${maven.build.timestamp}</RELEASE>
+
+    <build-info>
+# 
+# ${artifactId}, ${version}, ${maven.build.timestamp}
+#
+</build-info>
+  </properties>  
+
+  <dependencies>
+    <dependency>
+      <groupId>org.quattor.maven</groupId>
+      <artifactId>assemblies</artifactId>
+      <type>tar.gz</type>
+      <version>1.9-SNAPSHOT</version>
+      <classifier>assemblies</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.quattor.maven</groupId>
+      <artifactId>build-scripts</artifactId>
+      <type>tar.gz</type>
+      <version>1.9-SNAPSHOT</version>
+      <classifier>scripts</classifier>
+    </dependency>
+  </dependencies>
+
   <repositories>
     <repository>
       <id>quattor-releases</id>
@@ -26,11 +56,15 @@
   <profiles>
 
     <profile>
+
+      <id>cfg-module-rpm</id>
+
       <activation>
 	<file>
           <exists>/usr/bin/rpmbuild</exists>
 	</file>
       </activation>
+
       <build>
 	<plugins>
 	  <plugin>
@@ -50,14 +84,16 @@
     </profile>
 
     <profile>
-    <id>set-build-properties</id>
+
+    <id>cfg-module-dist</id>
+
       <activation>
-	<file>
-	  <exists>src</exists>
-	</file>
+	<activeByDefault>true</activeByDefault>
       </activation>
+
       <build>
 	<plugins>
+
 	  <plugin>
 	    <groupId>org.quattor.maven</groupId>
 	    <artifactId>maven-quattor-build-plugin</artifactId>
@@ -70,21 +106,6 @@
 	      </execution>
 	    </executions>
 	  </plugin>
-	</plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>filter-pan-source</id>
-      <activation>
-	<file>
-	  <exists>src/main/pan</exists>
-	</file>
-      </activation>
-
-      <build>
-
-	<plugins>
 
 	  <plugin>
 	    
@@ -103,7 +124,6 @@
 		  <encoding>UTF-8</encoding>
 		  <delimiters>
 		    <delimiter>${*}</delimiter>
-		    <delimiter>@</delimiter>
 		  </delimiters>
 		  <outputDirectory>${project.build.directory}/pan/</outputDirectory>
 		  <resources>
@@ -119,23 +139,6 @@
 	    
 	  </plugin>
 	  
-	</plugins>
-	
-      </build>
-
-    </profile>
-
-    <profile>
-      <id>check-pan-syntax</id>
-      <activation>
-	<file>
-	  <exists>src/main/pan</exists>
-	</file>
-      </activation>
-
-      <build>
-
-	<plugins>
 
 	  <plugin>
 	    
@@ -160,23 +163,6 @@
 	    
 	  </plugin>
 	  
-	</plugins>
-	
-      </build>
-
-    </profile>
-
-    <profile>
-      <id>filter-perl-sources</id>
-      <activation>
-	<file>
-	  <exists>src/main/perl</exists>
-	</file>
-      </activation>
-
-      <build>
-
-	<plugins>
 
 	  <plugin>
 	    
@@ -195,7 +181,6 @@
 		  <encoding>UTF-8</encoding>
 		  <delimiters>
 		    <delimiter>${*}</delimiter>
-		    <delimiter>@</delimiter>
 		  </delimiters>
 		  <outputDirectory>${project.build.directory}/lib/perl/NCM/Component</outputDirectory>
 		  <resources>
@@ -220,7 +205,6 @@
 		  <encoding>UTF-8</encoding>
 		  <delimiters>
 		    <delimiter>${*}</delimiter>
-		    <delimiter>@</delimiter>
 		  </delimiters>
 		  <outputDirectory>${project.build.directory}/doc/pod/NCM/Component</outputDirectory>
 		  <resources>
@@ -239,23 +223,6 @@
 	    
 	  </plugin>
 
-	</plugins>
-
-      </build>
-
-    </profile>
-
-    <profile>
-      <id>unpack-dependencies</id>
-      <activation>
-	<file>
-	  <exists>src</exists>
-	</file>
-      </activation>
-
-      <build>
-
-	<plugins>
 	  
 	  <plugin>
 	    <artifactId>maven-dependency-plugin</artifactId>
@@ -274,14 +241,12 @@
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>assemblies</artifactId>
 		      <type>tar.gz</type>
-		      <version>1.9-SNAPSHOT</version>
 		      <classifier>assemblies</classifier>
 		    </artifactItem>
 		    <artifactItem>
 		      <groupId>org.quattor.maven</groupId>
 		      <artifactId>build-scripts</artifactId>
 		      <type>tar.gz</type>
-		      <version>1.9-SNAPSHOT</version>
 		      <classifier>scripts</classifier>
 		    </artifactItem>
 		  </artifactItems>
@@ -291,21 +256,7 @@
 	    </executions>
 	  </plugin>
 	  
-	</plugins>
-      </build>
 
-    </profile>
-
-    <profile>
-      <id>generate-man-pages</id>
-      <activation>
-	<file>
-	  <exists>src</exists>
-	</file>
-      </activation>
-
-      <build>
-	<plugins>
 	  <plugin>
 	    <groupId>org.codehaus.mojo</groupId>
 	    <artifactId>exec-maven-plugin</artifactId>
@@ -353,9 +304,7 @@
 	  </plugin>
 
 	</plugins>
-
       </build>
-
     </profile>
 
   </profiles>
@@ -460,18 +409,5 @@
     </pluginManagement>
 
   </build>
-
-  <properties>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
-    <RELEASE>0.${maven.build.timestamp}</RELEASE>
-
-    <build-info>
-# 
-# ${artifactId}, ${version}, ${maven.build.timestamp}
-#
-</build-info>
-  </properties>  
 
 </project>

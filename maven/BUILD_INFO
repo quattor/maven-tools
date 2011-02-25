@@ -1,0 +1,11 @@
+
+BUILD INFO:
+
+To build this project, two profiles must be explicitly deactivated.
+These are associated with the standard build pom, but we need to make
+sure that they aren't executed here.  
+
+Use the following command options:
+
+$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' <goal> [goal...]
+
