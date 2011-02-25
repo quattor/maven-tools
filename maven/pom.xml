@@ -7,7 +7,7 @@
   <artifactId>maven</artifactId>
 
   <packaging>pom</packaging>
-  <version>1.7</version>
+  <version>1.8-SNAPSHOT</version>
   <name>maven</name>
   <url>http://quattor.org</url>
 
@@ -20,7 +20,7 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:https://quattor.svn.sourceforge.net/svnroot/quattor/tags/maven-1.7</connection>
+    <connection>scm:svn:https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/maven</connection>
   </scm>
 
   <distributionManagement>
@@ -125,7 +125,7 @@
 	<plugin>
           <groupId>org.quattor.maven</groupId>
           <artifactId>maven-quattor-build-plugin</artifactId>
-	  <version>1.7</version>
+	  <version>1.8-SNAPSHOT</version>
 	</plugin>
 	
       </plugins>
