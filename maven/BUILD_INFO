@@ -9,3 +9,14 @@ Use the following command options:
 
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' <goal> [goal...]
 
+To perform a release, do the following:
+
+$ mvn --batch-mode '-P!cfg-module-dist' '-P!cfg-module-rpm' \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
+      clean release:prepare
+
+$ mvn --batch-mode '-P!cfg-module-dist' '-P!cfg-module-rpm' \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
+      clean release:perform
+
+The backslashes are important to avoid shell expansion of the history. 
