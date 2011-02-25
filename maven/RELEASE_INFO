@@ -3,7 +3,7 @@ RELEASE NOTES:
 
 The following files need to be changed by hand BEFORE AND AFTER a release.  
 
-/grid/users/loomis/code/maven/build-profile : change assembly and build-script references 
+build-profile/pom.xml : change assembly and build-script references 
 
 cfg-module/src/main/resources/archetype-resources/pom.xml : change reference to build-profile
 
