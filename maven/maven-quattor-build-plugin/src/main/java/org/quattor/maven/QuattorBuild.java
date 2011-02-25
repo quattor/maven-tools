@@ -20,114 +20,122 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class QuattorBuild extends AbstractMojo {
 
-	/** @parameter default-value="${project}" */
-	private org.apache.maven.project.MavenProject mavenProject;
+    /** @parameter default-value="${project}" */
+    private org.apache.maven.project.MavenProject mavenProject;
 
-	final private static String licenseFormat = "#   %s (%s)\n#   %s\n";
+    final private static String licenseFormat = "#   %s (%s)\n#   %s\n";
 
-	final private static String developerFormat = "#   %s <%s>\n";
+    final private static String developerFormat = "#   %s <%s>\n";
 
-	public void execute() throws MojoExecutionException {
+    public void execute() throws MojoExecutionException {
 
-		Model model = mavenProject.getModel();
+        Model model = mavenProject.getModel();
 
-		String licenseInfo = formatLicenseInfo(model);
-		setMavenProperty("license-info", licenseInfo);
+        String licenseInfo = formatLicenseInfo(model);
+        setMavenProperty("license-info", licenseInfo);
 
-		String licenseUrl = formatLicenseUrl(model);
-		setMavenProperty("license-url", licenseUrl);
+        String licenseUrl = formatLicenseUrl(model);
+        setMavenProperty("license-url", licenseUrl);
 
-		String developerInfo = formatDeveloperInfo(model);
-		setMavenProperty("developer-info", developerInfo);
+        String developerInfo = formatDeveloperInfo(model);
+        setMavenProperty("developer-info", developerInfo);
 
-		String authorInfo = formatAuthorInfo(model);
-		setMavenProperty("author-info", authorInfo);
+        String authorInfo = formatAuthorInfo(model);
+        setMavenProperty("author-info", authorInfo);
+        
+        String noSnapshotVersion = getNoSnapShotVersion();
+        setMavenProperty("no-snapshot-version", noSnapshotVersion);
 
-	}
+    }
 
-	private void setMavenProperty(String name, String value)
-			throws MojoExecutionException {
+    private void getNoSnapshotVersion() throws MojoExecutionException {
+        String version = mavenProject.getProperties().get("version");
+        return version.replaceFirst("-\\.*", "");
+    }
 
-		Log log = getLog();
-		log.info("Setting property " + name + " = " + value + "\n");
+    private void setMavenProperty(String name, String value)
+            throws MojoExecutionException {
 
-		mavenProject.getProperties().put(name, value);
-	}
+        Log log = getLog();
+        log.info("Setting property " + name + " = " + value + "\n");
 
-	private String formatLicenseInfo(Model model) throws MojoExecutionException {
+        mavenProject.getProperties().put(name, value);
+    }
 
-		List<License> licenses = model.getLicenses();
+    private String formatLicenseInfo(Model model) throws MojoExecutionException {
 
-		if (licenses.size() == 0) {
-			throw new MojoExecutionException(
-					"must provide license section of pom.xml");
-		}
+        List<License> licenses = model.getLicenses();
 
-		StringBuffer sb = new StringBuffer(
-				"#\n# Software subject to following license(s):\n");
-		for (License license : licenses) {
-			sb.append(String.format(licenseFormat, license.getName(),
-					license.getUrl(), license.getComments()));
-		}
-		sb.append("#\n");
+        if (licenses.size() == 0) {
+            throw new MojoExecutionException(
+                    "must provide license section of pom.xml");
+        }
 
-		return sb.toString();
-	}
+        StringBuffer sb = new StringBuffer(
+                "#\n# Software subject to following license(s):\n");
+        for (License license : licenses) {
+            sb.append(String.format(licenseFormat, license.getName(), license
+                    .getUrl(), license.getComments()));
+        }
+        sb.append("#\n");
 
-	private String formatLicenseUrl(Model model) throws MojoExecutionException {
+        return sb.toString();
+    }
 
-		List<License> licenses = model.getLicenses();
+    private String formatLicenseUrl(Model model) throws MojoExecutionException {
 
-		if (licenses.size() == 0) {
-			throw new MojoExecutionException(
-					"must provide license section of pom.xml");
-		}
+        List<License> licenses = model.getLicenses();
 
-		StringBuffer sb = new StringBuffer();
-		for (License license : licenses) {
-			sb.append(license.getUrl());
-			sb.append(" ");
-		}
+        if (licenses.size() == 0) {
+            throw new MojoExecutionException(
+                    "must provide license section of pom.xml");
+        }
 
-		return sb.toString();
-	}
+        StringBuffer sb = new StringBuffer();
+        for (License license : licenses) {
+            sb.append(license.getUrl());
+            sb.append(" ");
+        }
 
-	private String formatDeveloperInfo(Model model)
-			throws MojoExecutionException {
+        return sb.toString();
+    }
 
-		List<Developer> developers = model.getDevelopers();
+    private String formatDeveloperInfo(Model model)
+            throws MojoExecutionException {
 
-		if (developers.size() == 0) {
-			throw new MojoExecutionException(
-					"must provide developer section of pom.xml");
-		}
+        List<Developer> developers = model.getDevelopers();
 
-		StringBuffer sb = new StringBuffer("#\n# Current developer(s):\n");
-		for (Developer developer : developers) {
-			sb.append(String.format(developerFormat, developer.getName(),
-					developer.getEmail()));
-		}
-		sb.append("#\n");
+        if (developers.size() == 0) {
+            throw new MojoExecutionException(
+                    "must provide developer section of pom.xml");
+        }
 
-		return sb.toString();
-	}
+        StringBuffer sb = new StringBuffer("#\n# Current developer(s):\n");
+        for (Developer developer : developers) {
+            sb.append(String.format(developerFormat, developer.getName(),
+                    developer.getEmail()));
+        }
+        sb.append("#\n");
 
-	private String formatAuthorInfo(Model model) throws MojoExecutionException {
+        return sb.toString();
+    }
 
-		List<Contributor> contributors = model.getContributors();
+    private String formatAuthorInfo(Model model) throws MojoExecutionException {
 
-		int numberOfAuthors = 0;
+        List<Contributor> contributors = model.getContributors();
 
-		StringBuffer sb = new StringBuffer("#\n# Author(s): ");
-		for (Contributor contributor : contributors) {
-			if (contributor.getRoles().contains("author")) {
-				sb.append((numberOfAuthors > 0) ? ", " : "");
-				sb.append(contributor.getName());
-				numberOfAuthors++;
-			}
-		}
-		sb.append("\n#\n");
+        int numberOfAuthors = 0;
 
-		return (numberOfAuthors > 0) ? sb.toString() : "";
-	}
+        StringBuffer sb = new StringBuffer("#\n# Author(s): ");
+        for (Contributor contributor : contributors) {
+            if (contributor.getRoles().contains("author")) {
+                sb.append((numberOfAuthors > 0) ? ", " : "");
+                sb.append(contributor.getName());
+                numberOfAuthors++;
+            }
+        }
+        sb.append("\n#\n");
+
+        return (numberOfAuthors > 0) ? sb.toString() : "";
+    }
 }
