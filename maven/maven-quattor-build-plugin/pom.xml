@@ -3,14 +3,14 @@
   <groupId>org.quattor.maven</groupId>
   <artifactId>maven-quattor-build-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.8-SNAPSHOT</version>
+  <version>1.8</version>
   <name>maven-quattor-build-plugin Maven Mojo</name>
   <url>http://maven.apache.org</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
   </parent>
 
   <licenses>
