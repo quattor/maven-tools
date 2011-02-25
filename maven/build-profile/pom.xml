@@ -372,6 +372,7 @@
 	  <artifactId>rpm-maven-plugin</artifactId>
 
 	  <configuration>
+	    <version>${no-snapshot-version}</version>
 	    <release>${RELEASE}</release>
 	    <summary>ncm-${artifactId}</summary>
 	    <name>ncm-${artifactId}</name>
