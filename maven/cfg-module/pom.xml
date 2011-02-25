@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6</version>
   </parent>
 
   <groupId>org.quattor.maven</groupId>
   <artifactId>cfg-module</artifactId>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.6</version>
   <name>Archetype for Quattor Configuration Module</name>
   <url>http://quattor.org</url>
 
