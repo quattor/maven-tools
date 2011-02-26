@@ -85,10 +85,12 @@
 
     <profile>
 
-    <id>cfg-module-dist</id>
+      <id>cfg-module-dist</id>
 
       <activation>
-	<activeByDefault>true</activeByDefault>
+	<file>
+	  <missing>deactivate.cfg.module.dist</missing>
+	</file>
       </activation>
 
       <build>
