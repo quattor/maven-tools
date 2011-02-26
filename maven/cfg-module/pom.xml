@@ -5,14 +5,14 @@
 
   <groupId>org.quattor.maven</groupId>
   <artifactId>cfg-module</artifactId>
-  <version>1.10</version>
+  <version>1.11-SNAPSHOT</version>
   <name>quattor cfg. module archetype</name>
   <url>http://quattor.org</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.10</version>
+    <version>1.11-SNAPSHOT</version>
   </parent>
 
   <build>
