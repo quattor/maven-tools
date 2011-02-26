@@ -6,14 +6,14 @@
   <artifactId>build-profile</artifactId>
 
   <packaging>pom</packaging>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.10</version>
   <name>build-profile</name>
   <url>http://quattor.org/cfg-modules/</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.10</version>
   </parent>
 
   <properties>
@@ -34,14 +34,14 @@
       <groupId>org.quattor.maven</groupId>
       <artifactId>assemblies</artifactId>
       <type>tar.gz</type>
-      <version>1.10-SNAPSHOT</version>
+      <version>1.10</version>
       <classifier>assemblies</classifier>
     </dependency>
     <dependency>
       <groupId>org.quattor.maven</groupId>
       <artifactId>build-scripts</artifactId>
       <type>tar.gz</type>
-      <version>1.10-SNAPSHOT</version>
+      <version>1.10</version>
       <classifier>scripts</classifier>
     </dependency>
   </dependencies>
