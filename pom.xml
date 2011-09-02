@@ -1,15 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.quattor.maven</groupId>
   <artifactId>maven</artifactId>
-
-  <packaging>pom</packaging>
   <version>1.11-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
   <name>quattor maven build tools</name>
+  <description>quattor maven build tools</description>
   <url>http://quattor.org</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
   <modules>
     <module>assemblies</module>
@@ -19,23 +37,77 @@
     <module>maven-quattor-build-plugin</module>
   </modules>
 
+  <organization>
+    <name>Quattor</name>
+    <url>http://quattor.org/</url>
+  </organization>
+
   <scm>
-    <connection>scm:svn:https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/maven</connection>
+    <connection>scm:git:git://quattor.git.sourceforge.net/gitroot/quattor/quattor/maven-tools</connection>
+    <developerConnection>scm:git:ssh://quattor.git.sourceforge.net/gitroot/quattor/maven-tools</developerConnection>
+    <url>http://quattor.git.sourceforge.net/git/gitweb.cgi?p=quattor/pan;a=summary</url>
   </scm>
 
-  <distributionManagement>
-    <repository>
-      <id>quattor-releases</id>
-      <name>quattor-releases</name>
-      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
-    </repository>
-    <snapshotRepository>
-      <id>quattor-snapshots</id>
-      <name>quattor-snapshots</name>
-      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
-  
+  <issueManagement>
+    <system>SourceForge Tracker</system>
+    <url>https://sourceforge.net/tracker/?group_id=221766</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>Quattor Discuss</name>
+      <subscribe>https://lists.sourceforge.net/lists/listinfo/quattor-discuss</subscribe>
+      <unsubscribe>https://lists.sourceforge.net/lists/listinfo/quattor-discuss</unsubscribe>
+      <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=quattor-discuss</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <id>loomisc</id>
+      <name>Charles LOOMIS</name>
+      <email>loomis@lal.in2p3.fr</email>
+    </developer>
+  </developers>
+
+  <profiles>
+    <profile>
+      <id>release-signed-artifacts</id>
+      <activation>
+
+	<!--
+        <file>
+          <exists>/tmp</exists>
+        </file>
+	-->
+
+	<property>
+	  <name>performRelease</name>
+	  <value>true</value>
+	</property>
+
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
     <pluginManagement>
       <plugins>
