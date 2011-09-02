@@ -2,13 +2,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.quattor.maven</groupId>
   <artifactId>assemblies</artifactId>
-
   <packaging>pom</packaging>
-  <version>1.11-SNAPSHOT</version>
+
   <name>assemblies</name>
-  <url>http://quattor.org</url>
 
   <parent>
     <groupId>org.quattor.maven</groupId>

@@ -2,11 +2,9 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.quattor.maven</groupId>
   <artifactId>build-profile</artifactId>
-
   <packaging>pom</packaging>
-  <version>1.11-SNAPSHOT</version>
+
   <name>build-profile</name>
   <url>http://quattor.org/cfg-modules/</url>
 
