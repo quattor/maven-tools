@@ -13,19 +13,6 @@
     <version>1.13-SNAPSHOT</version>
   </parent>
 
-<!--
-  <licenses>
-    <license>
-      <name>Dummy license1</name>
-      <url>http://example.org/dummy</url>
-    </license>
-    <license>
-      <name>Dummy license2</name>
-      <url>http://example.org/dummy2</url>
-    </license>
-  </licenses>
--->
-
   <dependencies>
 
     <dependency>
