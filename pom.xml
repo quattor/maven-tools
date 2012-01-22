@@ -31,7 +31,7 @@
     <module>build-profile</module>
     <module>build-scripts</module>
     <module>cfg-module</module>
-    <module>maven-quattor-build-plugin</module>
+    <module>quattor-build-maven-plugin</module>
   </modules>
 
   <organization>
