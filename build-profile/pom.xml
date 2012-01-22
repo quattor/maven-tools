@@ -22,7 +22,7 @@
 
     <build-info>
 # 
-# ${artifactId}, ${version}, ${maven.build.timestamp}
+# ${project.artifactId}, ${project.version}, ${maven.build.timestamp}
 #
 </build-info>
   </properties>  
@@ -135,41 +135,6 @@
 		</configuration> 
 	      </execution>
 
-	    </executions>
-	    
-	  </plugin>
-	  
-
-	  <plugin>
-	    
-	    <groupId>org.quattor.pan</groupId>
-	    <artifactId>panc-maven-plugin</artifactId>
-
-	    <executions>
-	      
-	      <execution>
-		<id>check-generated-pan-syntax</id>
-		<phase>compile</phase>
-		<goals>
-		  <goal>check-syntax</goal>
-		</goals>
-		<configuration>
-		<sourceDirectory>${basedir}/target/pan</sourceDirectory>
-		</configuration> 
-	      </execution>
-
-	    </executions>
-	    
-	  </plugin>
-	  
-
-	  <plugin>
-	    
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-resources-plugin</artifactId>
-
-	    <executions>
-	      
 	      <execution>
 		<id>filter-perl-sources</id>
 		<phase>process-sources</phase>
@@ -221,7 +186,29 @@
 	    </executions>
 	    
 	  </plugin>
+	  
 
+	  <plugin>
+	    
+	    <groupId>org.quattor.pan</groupId>
+	    <artifactId>panc-maven-plugin</artifactId>
+
+	    <executions>
+	      
+	      <execution>
+		<id>check-generated-pan-syntax</id>
+		<phase>compile</phase>
+		<goals>
+		  <goal>check-syntax</goal>
+		</goals>
+		<configuration>
+		<sourceDirectory>${basedir}/target/pan</sourceDirectory>
+		</configuration> 
+	      </execution>
+
+	    </executions>
+	    
+	  </plugin>
 	  
 	  <plugin>
 	    <artifactId>maven-dependency-plugin</artifactId>
@@ -328,18 +315,18 @@
 	  <configuration>
 	    <version>${no-snapshot-version}</version>
 	    <release>${RELEASE}</release>
-	    <summary>ncm-${artifactId}</summary>
-	    <name>ncm-${artifactId}</name>
+	    <summary>ncm-${project.artifactId}</summary>
+	    <name>ncm-${project.artifactId}</name>
 	    <group>Quattor</group>
 	    <packager>Quattor</packager>
 	    <vendor>Quattor</vendor>
 	    <copyright>${license-url}</copyright>
 	    <url>${project.url}</url>
 	    <provides>
-	      <provide>ncm-${artifactId}</provide>
+	      <provide>ncm-${project.artifactId}</provide>
 	    </provides>
 	    <needarch>noarch</needarch>
-	    <description>${name}</description>
+	    <description>${project.name}</description>
 	    <requires>
 	      <require>ncm-ncd</require>
 	      <require>libuser</require>
@@ -361,7 +348,7 @@
 	      </mapping>
 
 	      <mapping>
-		<directory>/usr/share/doc/ncm-${artifactId}-${project.version}</directory>
+		<directory>/usr/share/doc/ncm-${project.artifactId}-${project.version}</directory>
 		<filemode>644</filemode>
 		<username>root</username>
 		<groupname>root</groupname>

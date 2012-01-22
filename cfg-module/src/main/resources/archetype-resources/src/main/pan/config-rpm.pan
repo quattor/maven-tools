@@ -3,14 +3,14 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/${artifactId}/config-rpm;
+unique template components/${project.artifactId}/config-rpm;
 
-include { 'components/${artifactId}/config-common' };
+include { 'components/${project.artifactId}/config-common' };
 
 # Set prefix to root of component configuration.
-prefix '/software/components/${artifactId}';
+prefix '/software/components/${project.artifactId}';
 
 # Install Quattor configuration module via RPM package.
-'/software/packages' = pkg_repl('ncm-${artifactId}','${no-snapshot-version}-${RELEASE}','noarch');
+'/software/packages' = pkg_repl('ncm-${project.artifactId}','${no-snapshot-version}-${RELEASE}','noarch');
 'dependencies/pre' ?= list('spma');
 

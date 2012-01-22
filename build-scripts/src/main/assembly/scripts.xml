@@ -13,7 +13,7 @@
 
     <fileSet>
       <directory>src/main/perl</directory>
-      <outputDirectory>${artifactId}</outputDirectory>
+      <outputDirectory>${project.artifactId}</outputDirectory>
       <fileMode>0755</fileMode>
     </fileSet>
 

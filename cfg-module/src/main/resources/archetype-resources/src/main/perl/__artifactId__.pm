@@ -3,7 +3,7 @@
 # ${author-info}
 # ${build-info}
 
-package NCM::Component::${artifactId};
+package NCM::Component::${project.artifactId};
 
 use strict;
 use warnings;
@@ -22,9 +22,9 @@ use File::Basename;
 use File::Path;
 
 use Readonly;
-Readonly::Scalar my $PATH => '/software/components/${artifactId}';
+Readonly::Scalar my $PATH => '/software/components/${project.artifactId}';
 
-Readonly::Scalar my $RESTART => '/etc/init.d/${artifactId} restart';
+Readonly::Scalar my $RESTART => '/etc/init.d/${project.artifactId} restart';
 
 our $EC=LC::Exception::Context->new->will_store_all;
 

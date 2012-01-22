@@ -13,7 +13,7 @@
 
     <fileSet>
       <directory>${basedir}</directory>
-      <outputDirectory>share/doc/ncm-${artifactId}-${version}</outputDirectory>
+      <outputDirectory>share/doc/ncm-${project.artifactId}-${project.version}</outputDirectory>
       <includes>
         <include>ChangeLog</include>
       </includes>

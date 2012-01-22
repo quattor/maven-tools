@@ -3,14 +3,14 @@
 # ${author-info}
 # ${build-info}
 
-unique template components/${artifactId}/config-common;
+unique template components/${project.artifactId}/config-common;
 
-include { 'components/${artifactId}/schema' };
+include { 'components/${project.artifactId}/schema' };
 
 # Set prefix to root of component configuration.
-prefix '/software/components/${artifactId}';
+prefix '/software/components/${project.artifactId}';
 
-#'version' = '${version}';
+#'version' = '${project.version}';
 #'package' = 'NCM::Component';
 
 'active' ?= true;

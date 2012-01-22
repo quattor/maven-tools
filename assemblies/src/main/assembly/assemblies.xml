@@ -13,7 +13,7 @@
 
     <fileSet>
       <directory>src/main/assembly</directory>
-      <outputDirectory>${artifactId}</outputDirectory>
+      <outputDirectory>${project.artifactId}</outputDirectory>
       <excludes>
         <exclude>assemblies.xml</exclude>
       </excludes>

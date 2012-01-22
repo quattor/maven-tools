@@ -18,7 +18,7 @@
       <defaultValue>org.quattor.cfg.module</defaultValue>
     </requiredProperty>
     <requiredProperty key="package" >
-      <defaultValue>components/${artifactId}</defaultValue>
+      <defaultValue>components/${project.artifactId}</defaultValue>
     </requiredProperty>
   </requiredProperties>
   

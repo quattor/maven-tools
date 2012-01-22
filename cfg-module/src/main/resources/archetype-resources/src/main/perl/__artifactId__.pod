@@ -5,15 +5,15 @@
 
 =head1 NAME
 
-ncm-${artifactId}: ${description}
+ncm-${project.artifactId}: ${description}
 
 =head1 DESCRIPTION
 
-${artifactId}
+${project.artifactId}
 
 =head1 RESOURCES
 
-=head2 /software/components/${artifactId}
+=head2 /software/components/${project.artifactId}
 
 The configuration information for the component.  Each field should
 be described in this section. 
