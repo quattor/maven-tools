@@ -11,12 +11,18 @@ $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' <goal> [goal...]
 
 To perform a release, do the following:
 
-$ mvn --batch-mode '-P!cfg-module-dist' '-P!cfg-module-rpm' \
+$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
       -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
       clean release:prepare
 
-$ mvn --batch-mode '-P!cfg-module-dist' '-P!cfg-module-rpm' \
+$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
       -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
-      clean release:perform
+      release:perform
 
 The backslashes are important to avoid shell expansion of the history. 
+
+You cannot use --batch-mode at the moment because you need to enter
+your SourceForge password as well as the GPG key password.
+
+You will probably also need to use the -Dusername=XXX property if your
+account username is not the same as on SourceForge.
