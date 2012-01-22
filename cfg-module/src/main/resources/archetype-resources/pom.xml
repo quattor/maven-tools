@@ -19,13 +19,6 @@
     </repository>
   </repositories>
  
-  <pluginRepositories>
-    <pluginRepository>
-      <id>quattor-releases</id>
-      <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
@@ -63,5 +56,17 @@
       </roles>
     </contributor>
   </contributors>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.quattor.pan</groupId>
+          <artifactId>maven-panc-plugin</artifactId>
+          <version>8.4.5</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

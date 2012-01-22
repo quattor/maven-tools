@@ -96,7 +96,7 @@
 
 	  <plugin>
 	    <groupId>org.quattor.maven</groupId>
-	    <artifactId>maven-quattor-build-plugin</artifactId>
+	    <artifactId>quattor-build-maven-plugin</artifactId>
 	    <executions>
 	      <execution>
 		<id>set-build-properties</id>
@@ -144,7 +144,6 @@
 	    
 	    <groupId>org.quattor.pan</groupId>
 	    <artifactId>maven-panc-plugin</artifactId>
-	    <version>8.4.5</version>
 
 	    <executions>
 	      
@@ -315,6 +314,12 @@
     <pluginManagement>
 
       <plugins>
+
+        <plugin>
+          <groupId>org.quattor.maven</groupId>
+          <artifactId>quattor-build-maven-plugin</artifactId>
+          <version>1.12-SNAPSHOT</version>
+        </plugin>
 
 	<plugin>
 	  <groupId>org.codehaus.mojo</groupId>
