@@ -143,7 +143,7 @@
 	  <plugin>
 	    
 	    <groupId>org.quattor.pan</groupId>
-	    <artifactId>maven-panc-plugin</artifactId>
+	    <artifactId>panc-maven-plugin</artifactId>
 
 	    <executions>
 	      

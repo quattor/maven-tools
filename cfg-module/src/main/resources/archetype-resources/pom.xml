@@ -62,8 +62,8 @@
       <plugins>
         <plugin>
           <groupId>org.quattor.pan</groupId>
-          <artifactId>maven-panc-plugin</artifactId>
-          <version>8.4.5</version>
+          <artifactId>panc-maven-plugin</artifactId>
+          <version>9.0.0-RC3</version>
         </plugin>
       </plugins>
     </pluginManagement>
