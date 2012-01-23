@@ -92,9 +92,25 @@ sub process_perl_module {
     return;
 }
 
+sub is_perl_file {
+    my ($file) = @_;
+
+    return 0 if (! -f $file);
+
+    if ($file =~ /^.*\.p[ml]\z/sx) {
+	return 1;
+    }
+
+    # If we don't know the file name, it may still be a Perl
+    # script. Check the shebang.
+    open(my $fh, "<", $file);
+    my $head = <$fh>;
+    close($fh);
+    return ($head && $head =~ m{^#!/usr/bin/perl});
+}
 
 sub wanted {
-    /^.*\.pm\z/sx && process_perl_module($name);
+    is_perl_file($name) && process_perl_module($name);
     return;
 }
 
