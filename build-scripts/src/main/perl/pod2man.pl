@@ -60,6 +60,7 @@ sub create_man_page {
 
     my $parser = Pod::Man->new(release => $release, section => $section);
 
+    print "Creating man page for $pod_fname, $module_name.$section";
     my $odir = "target/doc/man/man$section";
     mkpath($odir);
 
