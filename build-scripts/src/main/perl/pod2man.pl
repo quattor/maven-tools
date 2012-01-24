@@ -85,7 +85,7 @@ sub process_perl_module {
 
     print "Generating man page from $name\n";
     
-    my $module_name = extract_module_name($name);
+    my $module_name = eval{extract_module_name($name);} || return;
     my $pod_name = extract_pod_name($name);
     create_man_page($pod_name, $module_name, 8);
 
