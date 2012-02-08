@@ -24,6 +24,10 @@ exit;
 sub extract_module_name {
     my ($name) = @_;
 
+    if ($name =~ m{([^/]+)\.pod\z$}) {
+	return $1;
+    }
+
     my $pkg_name = undef;
 
     open(my $fh, '<', $name) || die "error opening $name: $!\n";
@@ -98,7 +102,7 @@ sub is_perl_file {
 
     return 0 if (! -f $file);
 
-    if ($file =~ /^.*\.p[ml]\z/sx) {
+    if ($file =~ /^.*\.p(?:[ml]|od)\z/sx) {
 	return 1;
     }
 
