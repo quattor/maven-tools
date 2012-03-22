@@ -21,11 +21,11 @@
     <RELEASE>0.${maven.build.timestamp}</RELEASE>
 
     <build-info>
-# 
+#
 # ${project.artifactId}, ${project.version}, ${maven.build.timestamp}
 #
 </build-info>
-  </properties>  
+  </properties>
 
   <dependencies>
     <dependency>
@@ -50,7 +50,7 @@
       <url>http://lapp-repo01.in2p3.fr:8081/nexus/content/repositories/releases/</url>
     </repository>
   </repositories>
-  
+
   <profiles>
 
     <profile>
@@ -108,12 +108,12 @@
 	  </plugin>
 
 	  <plugin>
-	    
+
 	    <groupId>org.apache.maven.plugins</groupId>
 	    <artifactId>maven-resources-plugin</artifactId>
 
 	    <executions>
-	      
+
 	      <execution>
 		<id>filter-pan-sources</id>
 		<phase>process-sources</phase>
@@ -132,7 +132,7 @@
 		      <filtering>true</filtering>
 		    </resource>
 		  </resources>
-		</configuration> 
+		</configuration>
 	      </execution>
 
 	      <execution>
@@ -156,7 +156,7 @@
 		      </includes>
 		    </resource>
 		  </resources>
-		</configuration> 
+		</configuration>
 	      </execution>
 
 	      <execution>
@@ -180,21 +180,21 @@
 		      </includes>
 		    </resource>
 		  </resources>
-		</configuration> 
+		</configuration>
 	      </execution>
 
 	    </executions>
-	    
+
 	  </plugin>
-	  
+
 
 	  <plugin>
-	    
+
 	    <groupId>org.quattor.pan</groupId>
 	    <artifactId>panc-maven-plugin</artifactId>
 
 	    <executions>
-	      
+
 	      <execution>
 		<id>check-generated-pan-syntax</id>
 		<phase>compile</phase>
@@ -203,18 +203,18 @@
 		</goals>
 		<configuration>
 		<sourceDirectory>${basedir}/target/pan</sourceDirectory>
-		</configuration> 
+		</configuration>
 	      </execution>
 
 	    </executions>
-	    
+
 	  </plugin>
-	  
+
 	  <plugin>
 	    <artifactId>maven-dependency-plugin</artifactId>
-	    
+
 	    <executions>
-	      
+
 	      <execution>
 		<id>unpack-assemblies-scripts</id>
 		<phase>process-sources</phase>
@@ -238,17 +238,17 @@
 		  </artifactItems>
 		</configuration>
 	      </execution>
-	      
+
 	    </executions>
 	  </plugin>
-	  
+
 
 	  <plugin>
 	    <groupId>org.codehaus.mojo</groupId>
 	    <artifactId>exec-maven-plugin</artifactId>
-	    
+
 	    <executions>
-	      
+
 	      <execution>
 		<id>pod2man</id>
 		<phase>compile</phase>
@@ -263,17 +263,17 @@
 		  </arguments>
 		</configuration>
 	      </execution>
-	      
+
 	    </executions>
-	    
+
 	  </plugin>
 
 	  <plugin>
 	    <artifactId>maven-assembly-plugin</artifactId>
 	    <extensions>true</extensions>
-	    
+
 	    <executions>
-	      
+
 	      <execution>
 		<id>tarballs</id>
 		<phase>package</phase>
@@ -284,15 +284,49 @@
 		  <descriptorSourceDirectory>target/dependency/assemblies</descriptorSourceDirectory>
 		</configuration>
 	      </execution>
-	      
+
 	    </executions>
-	    
+
 	  </plugin>
 
 	</plugins>
       </build>
     </profile>
-
+    <profile>
+      <id>module-test</id>
+      <activation>
+	<property>
+	  <name>env.PERL5LIB</name>
+	</property>
+      </activation>
+      <build>
+	<plugins>
+	  <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>exec-maven-plugin</artifactId>
+	    <executions>
+	      <execution>
+		<id>prove</id>
+		<phase>test</phase>
+		<goals>
+		  <goal>exec</goal>
+		</goals>
+		<configuration>
+		  <executable>prove</executable>
+		  <workingDirectory>${basedir}</workingDirectory>
+		  <arguments>
+		    <argument>--harness=TAP::Harness::JUnit</argument>
+		    <argument>-I</argument>
+		    <argument>target/lib/perl</argument>
+		    <argument>src/test/perl</argument>
+		  </arguments>
+'		</configuration>
+	      </execution>
+	    </executions>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
   </profiles>
 
 
@@ -363,7 +397,7 @@
 		  </source>
 		</sources>
 	      </mapping>
-	      
+
 	      <mapping>
 		<directory>/usr/share/doc/pan</directory>
 		<filemode>644</filemode>
@@ -377,7 +411,7 @@
 		  </source>
 		</sources>
 	      </mapping>
-	      
+
 	      <mapping>
 		<directory>/usr/share/man</directory>
 		<filemode>644</filemode>
