@@ -1,4 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -21,10 +24,10 @@
     <RELEASE>0.${maven.build.timestamp}</RELEASE>
 
     <build-info>
-#
-# ${project.artifactId}, ${project.version}, ${maven.build.timestamp}
-#
-</build-info>
+      #
+      # ${project.artifactId}, ${project.version}, ${maven.build.timestamp}
+      #
+    </build-info>
   </properties>
 
   <dependencies>
@@ -58,26 +61,26 @@
       <id>cfg-module-rpm</id>
 
       <activation>
-	<file>
+        <file>
           <exists>/usr/bin/rpmbuild</exists>
-	</file>
+        </file>
       </activation>
 
       <build>
-	<plugins>
-	  <plugin>
-	    <groupId>org.codehaus.mojo</groupId>
-	    <artifactId>rpm-maven-plugin</artifactId>
-	    <executions>
-	      <execution>
-		<id>build-rpm</id>
-		<goals>
-		  <goal>attached-rpm</goal>
-		</goals>
-	      </execution>
-	    </executions>
-	  </plugin>
-	</plugins>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>rpm-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-rpm</id>
+                <goals>
+                  <goal>attached-rpm</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
 
@@ -86,245 +89,246 @@
       <id>cfg-module-dist</id>
 
       <activation>
-	<file>
-	  <missing>deactivate.cfg.module.dist</missing>
-	</file>
+        <file>
+          <missing>deactivate.cfg.module.dist</missing>
+        </file>
       </activation>
 
       <build>
-	<plugins>
+        <plugins>
 
-	  <plugin>
-	    <groupId>org.quattor.maven</groupId>
-	    <artifactId>quattor-build-maven-plugin</artifactId>
-	    <executions>
-	      <execution>
-		<id>set-build-properties</id>
-		<goals>
-		  <goal>set-build-properties</goal>
-		</goals>
-	      </execution>
-	    </executions>
-	  </plugin>
+          <plugin>
+            <groupId>org.quattor.maven</groupId>
+            <artifactId>quattor-build-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>set-build-properties</id>
+                <goals>
+                  <goal>set-build-properties</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
 
-	  <plugin>
+          <plugin>
 
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-resources-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
 
-	    <executions>
+            <executions>
 
-	      <execution>
-		<id>filter-pan-sources</id>
-		<phase>process-sources</phase>
-		<goals>
-		  <goal>copy-resources</goal>
-		</goals>
-		<configuration>
-		  <encoding>UTF-8</encoding>
-		  <delimiters>
-		    <delimiter>${*}</delimiter>
-		  </delimiters>
-		  <outputDirectory>${project.build.directory}/pan/</outputDirectory>
-		  <resources>
-		    <resource>
-		      <directory>src/main/pan</directory>
-		      <filtering>true</filtering>
-		    </resource>
-		  </resources>
-		</configuration>
-	      </execution>
+              <execution>
+                <id>filter-pan-sources</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <delimiters>
+                    <delimiter>${*}</delimiter>
+                  </delimiters>
+                  <outputDirectory>${project.build.directory}/pan/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/main/pan</directory>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
 
-	      <execution>
-		<id>filter-perl-sources</id>
-		<phase>process-sources</phase>
-		<goals>
-		  <goal>copy-resources</goal>
-		</goals>
-		<configuration>
-		  <encoding>UTF-8</encoding>
-		  <delimiters>
-		    <delimiter>${*}</delimiter>
-		  </delimiters>
-		  <outputDirectory>${project.build.directory}/lib/perl/NCM/Component</outputDirectory>
-		  <resources>
-		    <resource>
-		      <directory>src/main/perl</directory>
-		      <filtering>true</filtering>
-		      <includes>
-			<include>*.pm</include>
-		      </includes>
-		    </resource>
-		  </resources>
-		</configuration>
-	      </execution>
+              <execution>
+                <id>filter-perl-sources</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <delimiters>
+                    <delimiter>${*}</delimiter>
+                  </delimiters>
+                  <outputDirectory>${project.build.directory}/lib/perl/NCM/Component</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/main/perl</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>*.pm</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
 
-	      <execution>
-		<id>filter-pod-sources</id>
-		<phase>process-sources</phase>
-		<goals>
-		  <goal>copy-resources</goal>
-		</goals>
-		<configuration>
-		  <encoding>UTF-8</encoding>
-		  <delimiters>
-		    <delimiter>${*}</delimiter>
-		  </delimiters>
-		  <outputDirectory>${project.build.directory}/doc/pod/NCM/Component</outputDirectory>
-		  <resources>
-		    <resource>
-		      <directory>src/main/perl</directory>
-		      <filtering>true</filtering>
-		      <includes>
-			<include>*.pod</include>
-		      </includes>
-		    </resource>
-		  </resources>
-		</configuration>
-	      </execution>
+              <execution>
+                <id>filter-pod-sources</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <delimiters>
+                    <delimiter>${*}</delimiter>
+                  </delimiters>
+                  <outputDirectory>${project.build.directory}/doc/pod/NCM/Component</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/main/perl</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>*.pod</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
 
-	    </executions>
+            </executions>
 
-	  </plugin>
-
-
-	  <plugin>
-
-	    <groupId>org.quattor.pan</groupId>
-	    <artifactId>panc-maven-plugin</artifactId>
-
-	    <executions>
-
-	      <execution>
-		<id>check-generated-pan-syntax</id>
-		<phase>compile</phase>
-		<goals>
-		  <goal>check-syntax</goal>
-		</goals>
-		<configuration>
-		<sourceDirectory>${basedir}/target/pan</sourceDirectory>
-		</configuration>
-	      </execution>
-
-	    </executions>
-
-	  </plugin>
-
-	  <plugin>
-	    <artifactId>maven-dependency-plugin</artifactId>
-
-	    <executions>
-
-	      <execution>
-		<id>unpack-assemblies-scripts</id>
-		<phase>process-sources</phase>
-		<goals>
-		  <goal>unpack</goal>
-		</goals>
-		<configuration>
-		  <artifactItems>
-		    <artifactItem>
-		      <groupId>org.quattor.maven</groupId>
-		      <artifactId>assemblies</artifactId>
-		      <type>tar.gz</type>
-		      <classifier>assemblies</classifier>
-		    </artifactItem>
-		    <artifactItem>
-		      <groupId>org.quattor.maven</groupId>
-		      <artifactId>build-scripts</artifactId>
-		      <type>tar.gz</type>
-		      <classifier>scripts</classifier>
-		    </artifactItem>
-		  </artifactItems>
-		</configuration>
-	      </execution>
-
-	    </executions>
-	  </plugin>
+          </plugin>
 
 
-	  <plugin>
-	    <groupId>org.codehaus.mojo</groupId>
-	    <artifactId>exec-maven-plugin</artifactId>
+          <plugin>
 
-	    <executions>
+            <groupId>org.quattor.pan</groupId>
+            <artifactId>panc-maven-plugin</artifactId>
 
-	      <execution>
-		<id>pod2man</id>
-		<phase>compile</phase>
-		<goals>
-		  <goal>exec</goal>
-		</goals>
-		<configuration>
-		  <executable>target/dependency/build-scripts/pod2man.pl</executable>
-		  <workingDirectory>${basedir}</workingDirectory>
-		  <arguments>
-		    <argument>${project.version}</argument>
-		  </arguments>
-		</configuration>
-	      </execution>
+            <executions>
 
-	    </executions>
+              <execution>
+                <id>check-generated-pan-syntax</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>check-syntax</goal>
+                </goals>
+                <configuration>
+                  <sourceDirectory>${basedir}/target/pan</sourceDirectory>
+                </configuration>
+              </execution>
 
-	  </plugin>
+            </executions>
 
-	  <plugin>
-	    <artifactId>maven-assembly-plugin</artifactId>
-	    <extensions>true</extensions>
+          </plugin>
 
-	    <executions>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
 
-	      <execution>
-		<id>tarballs</id>
-		<phase>package</phase>
-		<goals>
-		  <goal>single</goal>
-		</goals>
-		<configuration>
-		  <descriptorSourceDirectory>target/dependency/assemblies</descriptorSourceDirectory>
-		</configuration>
-	      </execution>
+            <executions>
 
-	    </executions>
+              <execution>
+                <id>unpack-assemblies-scripts</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.quattor.maven</groupId>
+                      <artifactId>assemblies</artifactId>
+                      <type>tar.gz</type>
+                      <classifier>assemblies</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.quattor.maven</groupId>
+                      <artifactId>build-scripts</artifactId>
+                      <type>tar.gz</type>
+                      <classifier>scripts</classifier>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
 
-	  </plugin>
+            </executions>
+          </plugin>
 
-	</plugins>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+
+            <executions>
+
+              <execution>
+                <id>pod2man</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>target/dependency/build-scripts/pod2man.pl</executable>
+                  <workingDirectory>${basedir}</workingDirectory>
+                  <arguments>
+                    <argument>${project.version}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+            </executions>
+
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <extensions>true</extensions>
+
+            <executions>
+
+              <execution>
+                <id>tarballs</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <descriptorSourceDirectory>target/dependency/assemblies</descriptorSourceDirectory>
+                </configuration>
+              </execution>
+
+            </executions>
+
+          </plugin>
+
+        </plugins>
       </build>
     </profile>
+
     <profile>
       <id>module-test</id>
       <activation>
-	<property>
-	  <name>env.PERL5LIB</name>
-	</property>
+        <property>
+          <name>env.PERL5LIB</name>
+        </property>
       </activation>
       <build>
-	<plugins>
-	  <plugin>
-	    <groupId>org.codehaus.mojo</groupId>
-	    <artifactId>exec-maven-plugin</artifactId>
-	    <executions>
-	      <execution>
-		<id>prove</id>
-		<phase>test</phase>
-		<goals>
-		  <goal>exec</goal>
-		</goals>
-		<configuration>
-		  <executable>prove</executable>
-		  <workingDirectory>${basedir}</workingDirectory>
-		  <arguments>
-		    <argument>--harness=TAP::Harness::JUnit</argument>
-		    <argument>-I</argument>
-		    <argument>target/lib/perl</argument>
-		    <argument>src/test/perl</argument>
-		  </arguments>
-'		</configuration>
-	      </execution>
-	    </executions>
-	  </plugin>
-	</plugins>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prove</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>prove</executable>
+                  <workingDirectory>${basedir}</workingDirectory>
+                  <arguments>
+                    <argument>--harness=TAP::Harness::JUnit</argument>
+                    <argument>-I</argument>
+                    <argument>target/lib/perl</argument>
+                    <argument>src/test/perl</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>
@@ -342,93 +346,93 @@
           <version>1.16-SNAPSHOT</version>
         </plugin>
 
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>rpm-maven-plugin</artifactId>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
 
-	  <configuration>
-	    <version>${no-snapshot-version}</version>
-	    <release>${RELEASE}</release>
-	    <summary>ncm-${project.artifactId}</summary>
-	    <name>ncm-${project.artifactId}</name>
-	    <group>Quattor</group>
-	    <packager>Quattor</packager>
-	    <vendor>Quattor</vendor>
-	    <copyright>${license-url}</copyright>
-	    <url>${project.url}</url>
-	    <provides>
-	      <provide>ncm-${project.artifactId}</provide>
-	    </provides>
-	    <needarch>noarch</needarch>
-	    <description>${project.name}</description>
-	    <requires>
-	      <require>ncm-ncd</require>
-	      <require>libuser</require>
-	    </requires>
+          <configuration>
+            <version>${no-snapshot-version}</version>
+            <release>${RELEASE}</release>
+            <summary>ncm-${project.artifactId}</summary>
+            <name>ncm-${project.artifactId}</name>
+            <group>Quattor</group>
+            <packager>Quattor</packager>
+            <vendor>Quattor</vendor>
+            <copyright>${license-url}</copyright>
+            <url>${project.url}</url>
+            <provides>
+              <provide>ncm-${project.artifactId}</provide>
+            </provides>
+            <needarch>noarch</needarch>
+            <description>${project.name}</description>
+            <requires>
+              <require>ncm-ncd</require>
+              <require>libuser</require>
+            </requires>
 
-	    <mappings>
+            <mappings>
 
-	      <mapping>
-		<directory>/usr/lib</directory>
-		<filemode>755</filemode>
-		<username>root</username>
-		<groupname>root</groupname>
-		<directoryIncluded>false</directoryIncluded>
-		<sources>
-		  <source>
-		    <location>target/lib</location>
-		  </source>
-		</sources>
-	      </mapping>
+              <mapping>
+                <directory>/usr/lib</directory>
+                <filemode>755</filemode>
+                <username>root</username>
+                <groupname>root</groupname>
+                <directoryIncluded>false</directoryIncluded>
+                <sources>
+                  <source>
+                    <location>target/lib</location>
+                  </source>
+                </sources>
+              </mapping>
 
-	      <mapping>
-		<directory>/usr/share/doc/ncm-${project.artifactId}-${project.version}</directory>
-		<filemode>644</filemode>
-		<username>root</username>
-		<groupname>root</groupname>
-		<documentation>true</documentation>
-		<directoryIncluded>false</directoryIncluded>
-		<sources>
-		  <source>
-		    <location>${basedir}</location>
-		    <includes>
-		      <include>ChangeLog</include>
-		    </includes>
-		  </source>
-		</sources>
-	      </mapping>
+              <mapping>
+                <directory>/usr/share/doc/ncm-${project.artifactId}-${project.version}</directory>
+                <filemode>644</filemode>
+                <username>root</username>
+                <groupname>root</groupname>
+                <documentation>true</documentation>
+                <directoryIncluded>false</directoryIncluded>
+                <sources>
+                  <source>
+                    <location>${basedir}</location>
+                    <includes>
+                      <include>ChangeLog</include>
+                    </includes>
+                  </source>
+                </sources>
+              </mapping>
 
-	      <mapping>
-		<directory>/usr/share/doc/pan</directory>
-		<filemode>644</filemode>
-		<username>root</username>
-		<groupname>root</groupname>
-		<documentation>true</documentation>
-		<directoryIncluded>false</directoryIncluded>
-		<sources>
-		  <source>
-		    <location>target/pan</location>
-		  </source>
-		</sources>
-	      </mapping>
+              <mapping>
+                <directory>/usr/share/doc/pan</directory>
+                <filemode>644</filemode>
+                <username>root</username>
+                <groupname>root</groupname>
+                <documentation>true</documentation>
+                <directoryIncluded>false</directoryIncluded>
+                <sources>
+                  <source>
+                    <location>target/pan</location>
+                  </source>
+                </sources>
+              </mapping>
 
-	      <mapping>
-		<directory>/usr/share/man</directory>
-		<filemode>644</filemode>
-		<username>root</username>
-		<groupname>root</groupname>
-		<documentation>true</documentation>
-		<directoryIncluded>false</directoryIncluded>
-		<sources>
-		  <source>
-		    <location>target/doc/man</location>
-		  </source>
-		</sources>
-	      </mapping>
+              <mapping>
+                <directory>/usr/share/man</directory>
+                <filemode>644</filemode>
+                <username>root</username>
+                <groupname>root</groupname>
+                <documentation>true</documentation>
+                <directoryIncluded>false</directoryIncluded>
+                <sources>
+                  <source>
+                    <location>target/doc/man</location>
+                  </source>
+                </sources>
+              </mapping>
 
-	    </mappings>
-	  </configuration>
-	</plugin>
+            </mappings>
+          </configuration>
+        </plugin>
 
       </plugins>
 
