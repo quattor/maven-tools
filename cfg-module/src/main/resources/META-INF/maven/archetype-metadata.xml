@@ -21,7 +21,7 @@
       <defaultValue>components/${project.artifactId}</defaultValue>
     </requiredProperty>
   </requiredProperties>
-  
+
   <fileSets>
     <fileSet filtered="false" packaged="false" encoding="UTF-8" >
       <directory/>
@@ -41,6 +41,18 @@
 	<include>**/*</include>
       </includes>
     </fileSet>
+    <fileSet filtered="true" packaged="false" encoding="UTF-8">
+      <directory>src/test/perl</directory>
+      <includes>
+	<include>**/*.t</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" packaged="false" encoding="UTF-8">
+      <directory>src/test/resources</directory>
+      <includes>
+	<include>**/*</include>
+      </includes>
+    </fileSet>
   </fileSets>
-  
+
 </archetype-descriptor>
