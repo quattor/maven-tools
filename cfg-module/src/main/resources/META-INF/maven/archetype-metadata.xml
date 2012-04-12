@@ -18,10 +18,10 @@
       <defaultValue>org.quattor.cfg.module</defaultValue>
     </requiredProperty>
     <requiredProperty key="package" >
-      <defaultValue>components/${project.artifactId}</defaultValue>
+      <defaultValue>components/${artifactId}</defaultValue>
     </requiredProperty>
   </requiredProperties>
-  
+
   <fileSets>
     <fileSet filtered="false" packaged="false" encoding="UTF-8" >
       <directory/>
@@ -42,5 +42,5 @@
       </includes>
     </fileSet>
   </fileSets>
-  
+
 </archetype-descriptor>
