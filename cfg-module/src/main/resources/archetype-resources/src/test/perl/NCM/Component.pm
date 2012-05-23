@@ -11,7 +11,11 @@ package NCM::Component;
 
 use strict;
 use warnings;
-use parent 'CAF::Object';
+use parent qw(CAF::Object Exporter);
+
+our @EXPORT = qw($NoAction);
+
+our $NoAction;
 
 sub _initialize
 {
