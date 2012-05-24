@@ -28,7 +28,7 @@ sub _initialize
 }
 
 no strict 'refs';
-foreach my $i (qw(verbose error info ok debug)) {
+foreach my $i (qw(verbose error info ok debug report)) {
     *{$i} = sub {
 	my $self = shift;
 	return $self->{log}->$i(@_) if $self->{log};
