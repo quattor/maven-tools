@@ -31,6 +31,7 @@ no strict 'refs';
 foreach my $i (qw(verbose error info ok debug report)) {
     *{$i} = sub {
 	my $self = shift;
+	$self->{uc($i)}++;
 	return $self->{log}->$i(@_) if $self->{log};
     }
 }
