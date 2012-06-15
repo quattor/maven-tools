@@ -321,6 +321,8 @@
 		    <argument>target/lib/perl</argument>
 		    <argument>-I</argument>
 		    <argument>src/test/perl</argument>
+		    <argument>-I</argument>
+		    <argument>${project.build.directory}/dependency/build-scripts/</argument>
 		    <argument>src/test/perl</argument>
 		  </arguments>
 '		</configuration>
