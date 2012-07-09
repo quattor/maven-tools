@@ -28,7 +28,7 @@ sub _initialize
 }
 
 no strict 'refs';
-foreach my $i (qw(verbose error info ok debug report)) {
+foreach my $i (qw(verbose error info ok debug warn report)) {
     *{$i} = sub {
 	my $self = shift;
 	$self->{uc($i)}++;
