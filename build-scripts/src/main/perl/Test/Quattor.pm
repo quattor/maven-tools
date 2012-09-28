@@ -118,7 +118,7 @@ my %desired_file_contents;
 
 my %configs;
 
-our @EXPORT = qw(get_command set_file_contents get_file
+our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
 		 get_config_for_profile set_command_status);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
@@ -201,7 +201,7 @@ foreach my $method (qw(run execute trun)) {
 	    $? = 0;
 	}
 	if ($self->{opts}->{stdout}) {
-	    $self->{opts}->{stdout} = $desired_outputs{$cmd};
+	    ${$self->{opts}->{stdout}} = $desired_outputs{$cmd};
 	}
 	return 1;
     };
@@ -214,7 +214,7 @@ foreach my $method (qw(output toutput)) {
 	my $cmd = join(" ", @{$self->{COMMAND}});
 	$commands_run{$cmd} = { object => $self,
 				method => $method};
-	$? = 0;
+	$? = $command_status{$cmd} // 0;
 	return $desired_outputs{$cmd};
     };
 }
@@ -348,11 +348,34 @@ sub get_config_for_profile
     return $configs{$profile};
 }
 
+=pod
+
+=item C<set_command_status>
+
+Sets the "exit status" we'll report for a given command.
+
+=cut
+
 sub set_command_status
 {
     my ($cmd, $st) = @_;
 
     $command_status{$cmd} = $st;
+}
+
+=pod
+
+=item C<set_desired_output>
+
+Sets the output we'll return when the caller issues C<output> on this command
+
+=cut
+
+sub set_desired_output
+{
+    my ($cmd, $out) = @_;
+
+    $desired_outputs{$cmd} = $out;
 }
 
 1;
