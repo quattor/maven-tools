@@ -108,6 +108,17 @@ my %desired_outputs;
 
 =pod
 
+=item * C<%desired_err>
+
+When the component may analyse the standard error of a component, we
+supply it through this hash.
+
+=cut
+
+my %desired_err;
+
+=pod
+
 =item * C<%desired_file_contents>
 
 Optionally, initial contents for a file that should be "edited".
@@ -119,7 +130,7 @@ my %desired_file_contents;
 my %configs;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-		 get_config_for_profile set_command_status);
+		 set_desired_err get_config_for_profile set_command_status);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -200,8 +211,15 @@ foreach my $method (qw(run execute trun)) {
 	} else {
 	    $? = 0;
 	}
-	if ($self->{opts}->{stdout}) {
-	    ${$self->{opts}->{stdout}} = $desired_outputs{$cmd};
+	if ($self->{OPTIONS}->{stdout}) {
+	    ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
+	}
+	if ($self->{OPTIONS}->{stderr}) {
+	    if (ref($self->{OPTIONS}->{stderr})) {
+		${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
+	    } else {
+		${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
+	    }
 	}
 	return 1;
     };
@@ -367,7 +385,8 @@ sub set_command_status
 
 =item C<set_desired_output>
 
-Sets the output we'll return when the caller issues C<output> on this command
+Sets the standard output we'll return when the caller issues C<output>
+on this command
 
 =cut
 
@@ -376,6 +395,22 @@ sub set_desired_output
     my ($cmd, $out) = @_;
 
     $desired_outputs{$cmd} = $out;
+}
+
+=pod
+
+=item C<set_desired_err>
+
+Sets the standard error we'll receive when the caller issues
+C<execute> on this command.
+
+=cut
+
+sub set_desired_err
+{
+    my ($cmd, $err) = @_;
+
+    $desired_err{$cmd} = $err;
 }
 
 1;
