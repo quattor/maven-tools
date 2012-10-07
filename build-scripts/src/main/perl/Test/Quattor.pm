@@ -143,12 +143,23 @@ sub prepare_profile_cache
 
     my $cache = "target/test/cache/$profile";
     make_path($cache);
-    system("echo no > $cache/global.lock");
-    system("echo 1 > $cache/current.cid");
-    system("echo 1 > $cache/latest.cid");
-    system(qq{cd src/test/resources &&
-             panc -x json --output-dir=../../../target/test/profiles $profile.pan}) == 0
+
+    my $fh = CAF::FileWriter->new("$cache/global.lock");
+    print $fh "no\n";
+    $fh->close();
+    $fh = CAF::FileWriter->new("$cache/current.cid");
+    print $fh "1\n";
+    $fh->close();
+    $fh = CAF::FileWriter->new("$cache/latest.cid");
+    print $fh "1\n";
+
+    my $d = getcwd();
+
+    chdir("src/test/resources") or croak("Couldn't enter resources directory");
+
+    system(qw(panc -x json --output-dir=../../../target/test/profiles), "$profile.pan") == 0
 	or croak("Unable to compile profile $profile");
+    chdir($d);
     my $f = EDG::WP4::CCM::Fetch->new({
 				       FOREIGN => 0,
 				       CONFIG => 'src/test/resources/ccm.cfg',
