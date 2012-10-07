@@ -135,6 +135,17 @@ our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
+# Modules that will have some methods mocked. These must be globals,
+# or the test script and component will see the original, unmocked
+# versions.
+our $procs = Test::MockModule->new("CAF::Process");
+our $filewriter = Test::MockModule->new("CAF::FileWriter");
+our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+our $iostring = Test::MockModule->new("IO::String");
+
+# Prepares a cache for the profile given as an argument. This means
+# compiling the profile, fetching it and saving the binary cache
+# wherever the CCM configuration tells us.
 sub prepare_profile_cache
 {
     my ($profile) = @_;
@@ -204,7 +215,6 @@ Prevent any command from being executed.
 
 =cut
 
-our $procs = Test::MockModule->new("CAF::Process");
 
 foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
@@ -263,8 +273,6 @@ sub new_filewriter_open
     return $f;
 }
 
-our $filewriter = Test::MockModule->new("CAF::FileWriter");
-
 $filewriter->mock("open", \&new_filewriter_open);
 $filewriter->mock("new", \&new_filewriter_open);
 
@@ -278,7 +286,6 @@ with the value of the appropriate entry in C<%desired_file_contents>
 
 =cut
 
-our $fileeditor = Test::MockModule->new("CAF::FileEditor");
 
 sub new_fileeditor_open
 {
@@ -301,7 +308,6 @@ Prevents the buffers from being released when explicitly closing a file.
 
 =cut
 
-our $iostring = Test::MockModule->new("IO::String");
 
 $iostring->mock("close", undef);
 
