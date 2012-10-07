@@ -61,6 +61,7 @@ use base 'Exporter';
 use Cwd;
 use Carp qw(carp croak);
 use File::Path qw(make_path);
+use Test::MockModule;
 
 =pod
 
@@ -186,55 +187,50 @@ automatically:
 
 =over
 
-=cut
-
-no warnings 'redefine';
-no strict 'refs';
-
-=pod
-
 =item C<CAF::Process::{run,execute,output,trun,toutput}>
 
 Prevent any command from being executed.
 
 =cut
 
+our $procs = Test::MockModule->new("CAF::Process");
+
 foreach my $method (qw(run execute trun)) {
-    *{"CAF::Process::$method"} = sub {
-	my $self = shift;
-	my $cmd = join(" ", @{$self->{COMMAND}});
-	$commands_run{$cmd} = { object => $self,
-				method => $method
-			      };
-	if (exists($command_status{$cmd})) {
-	    $? = $command_status{$cmd};
-	} else {
-	    $? = 0;
-	}
-	if ($self->{OPTIONS}->{stdout}) {
-	    ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
-	}
-	if ($self->{OPTIONS}->{stderr}) {
-	    if (ref($self->{OPTIONS}->{stderr})) {
-		${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
-	    } else {
-		${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
-	    }
-	}
-	return 1;
-    };
+    $procs->mock($method, sub {
+		    my $self = shift;
+		    my $cmd = join(" ", @{$self->{COMMAND}});
+		    $commands_run{$cmd} = { object => $self,
+					    method => $method
+					  };
+		    if (exists($command_status{$cmd})) {
+			$? = $command_status{$cmd};
+		    } else {
+			$? = 0;
+		    }
+		    if ($self->{OPTIONS}->{stdout}) {
+			${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
+		    }
+		    if ($self->{OPTIONS}->{stderr}) {
+			if (ref($self->{OPTIONS}->{stderr})) {
+			    ${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
+			} else {
+			    ${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
+			}
+		    }
+		    return 1;
+		});
 }
 
 foreach my $method (qw(output toutput)) {
-    *{"CAF::Process::$method"} = sub {
-	my $self = shift;
+    $procs->mock($method, sub {
+		    my $self = shift;
 
-	my $cmd = join(" ", @{$self->{COMMAND}});
-	$commands_run{$cmd} = { object => $self,
-				method => $method};
-	$? = $command_status{$cmd} // 0;
-	return $desired_outputs{$cmd};
-    };
+		    my $cmd = join(" ", @{$self->{COMMAND}});
+		    $commands_run{$cmd} = { object => $self,
+					    method => $method};
+		    $? = $command_status{$cmd} // 0;
+		    return $desired_outputs{$cmd};
+		});
 }
 
 =pod
@@ -246,16 +242,21 @@ unit under tests has released it.
 
 =cut
 
-*old_open = \&CAF::FileWriter::new;
+my $old_open = \&CAF::FileWriter::new;
 
-*CAF::FileWriter::new = sub {
-    my $f = old_open(@_);
+sub new_filewriter_open
+{
+    my $f = $old_open->(@_);
 
     $files_contents{*$f->{filename}} = $f;
     return $f;
-};
+}
 
-*CAF::FileWriter::open = \&CAF::FileWriter::new;
+our $filewriter = Test::MockModule->new("CAF::FileWriter");
+
+$filewriter->mock("open", \&new_filewriter_open);
+$filewriter->mock("new", \&new_filewriter_open);
+
 
 =pod
 
@@ -266,13 +267,18 @@ with the value of the appropriate entry in C<%desired_file_contents>
 
 =cut
 
-*CAF::FileEditor::new = sub {
+our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+
+sub new_fileeditor_open
+{
+
     my $f = CAF::FileWriter::new(@_);
     $f->set_contents($desired_file_contents{*$f->{filename}});
     return $f;
-};
+}
 
-*CAF::FileEditor::open = \&CAF::FileEditor::new;
+$fileeditor->mock("new", \&new_fileeditor_open);
+$fileeditor->mock("open", \&new_fileeditor_open);
 
 =pod
 
@@ -284,10 +290,10 @@ Prevents the buffers from being released when explicitly closing a file.
 
 =cut
 
+our $iostring = Test::MockModule->new("IO::String");
 
-*IO::String::close = sub {};
+$iostring->mock("close", undef);
 
-use warnings 'redefine';
 
 =pod
 
@@ -303,6 +309,7 @@ Returns the object that has manipulated C<$filename>
 
 =cut
 
+
 sub get_file
 {
     my ($filename) = @_;
@@ -313,6 +320,7 @@ sub get_file
     return undef;
 }
 
+
 =pod
 
 =item C<set_file_contents>
@@ -321,12 +329,14 @@ For file C<$filename>, sets the initial C<$contents> the component shuold see.
 
 =cut
 
+
 sub set_file_contents
 {
     my ($filename, $contents) = @_;
 
     $desired_file_contents{$filename} = $contents;
 }
+
 
 =pod
 
@@ -338,6 +348,7 @@ C<object> element is the C<CAF::Process> object itself, and the
 C<method> element is the function that executed the command.
 
 =cut
+
 
 sub get_command
 {
