@@ -168,7 +168,7 @@ sub prepare_profile_cache
 
     chdir("src/test/resources") or croak("Couldn't enter resources directory");
 
-    system(qw(panc --formats json --output-dir ../../../target/test/profiles), "$profile.pan") == 0
+    system(qw(panc -x json --output-dir=../../../target/test/profiles), "$profile.pan") == 0
 	or croak("Unable to compile profile $profile");
     chdir($d);
     my $f = EDG::WP4::CCM::Fetch->new({
