@@ -51,4 +51,14 @@ foreach my $i (qw(verbose error info ok debug warn report)) {
     }
 }
 
+use strict 'refs';
+
+sub prefix
+{
+    my $self = shift;
+
+    my @ns = split(/::/, ref($class));
+    return "/software/components/$ns[-1]";
+}
+
 1;
