@@ -57,7 +57,7 @@ sub prefix
 {
     my $self = shift;
 
-    my @ns = split(/::/, ref($class));
+    my @ns = split(/::/, ref($self));
     return "/software/components/$ns[-1]";
 }
 
