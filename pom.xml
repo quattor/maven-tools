@@ -40,9 +40,9 @@
   </organization>
 
   <scm>
-    <connection>scm:git:git://quattor.git.sourceforge.net/gitroot/quattor/quattor/maven-tools</connection>
-    <developerConnection>scm:git:ssh://quattor.git.sourceforge.net/gitroot/quattor/maven-tools</developerConnection>
-    <url>http://quattor.git.sourceforge.net/git/gitweb.cgi?p=quattor/pan;a=summary</url>
+    <connection>scm:git:git://github.com/quattor/maven-tools.git</connection>
+    <developerConnection>scm:git:git@github.com:quattor/maven-tools.git</developerConnection>
+    <url>https://github.com/quattor/maven-tools</url>
   </scm>
 
   <issueManagement>
@@ -127,31 +127,31 @@
 	    <arguments>${arguments} -Psonatype-oss-release</arguments>
 	  </configuration>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-assembly-plugin</artifactId>
 	  <version>2.2</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-plugin-plugin</artifactId>
 	  <version>2.6</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-jar-plugin</artifactId>
 	  <version>2.3.1</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-surefire-plugin</artifactId>
 	  <version>2.6</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-compiler-plugin</artifactId>
@@ -167,57 +167,57 @@
 	  <artifactId>maven-clean-plugin</artifactId>
 	  <version>2.4.1</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-deploy-plugin</artifactId>
 	  <version>2.5</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-install-plugin</artifactId>
 	  <version>2.3.1</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-site-plugin</artifactId>
 	  <version>2.0-beta-7</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-dependency-plugin</artifactId>
 	  <version>2.1</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-resources-plugin</artifactId>
 	  <version>2.4.3</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.codehaus.mojo</groupId>
 	  <artifactId>exec-maven-plugin</artifactId>
 	  <version>1.2</version>
 	</plugin>
-	
+
 	<plugin>
 	  <groupId>org.codehaus.mojo</groupId>
 	  <artifactId>rpm-maven-plugin</artifactId>
 	  <version>2.1-alpha-1</version>
 	</plugin>
-	
+
 	<plugin>
           <groupId>org.quattor.maven</groupId>
           <artifactId>maven-quattor-build-plugin</artifactId>
 	  <version>1.11-SNAPSHOT</version>
 	</plugin>
-	
+
       </plugins>
     </pluginManagement>
   </build>
-  
+
 </project>
