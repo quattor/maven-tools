@@ -18,7 +18,7 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
-    <RELEASE>0.${maven.build.timestamp}</RELEASE>
+    <RELEASE/>
 
     <build-info>
       #
@@ -371,7 +371,6 @@
           <artifactId>rpm-maven-plugin</artifactId>
 
           <configuration>
-            <version>${no-snapshot-version}</version>
             <release>${RELEASE}</release>
             <summary>ncm-${project.artifactId}</summary>
             <name>ncm-${project.artifactId}</name>
