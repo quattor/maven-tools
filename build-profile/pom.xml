@@ -75,6 +75,13 @@
                   <goal>attached-rpm</goal>
                 </goals>
               </execution>
+	      <execution>
+		<id>setup-version</id>
+		<goals>
+		  <goal>version</goal>
+		</goals>
+		<phase>process-sources</phase>
+	      </execution>
             </executions>
           </plugin>
         </plugins>
