@@ -17,12 +17,11 @@
   <properties>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.build.timestamp.format>yyyyMMdd.HHmm.ss</maven.build.timestamp.format>
-    <RELEASE />
+    <RELEASE>${rpm.release}</RELEASE>
 
     <build-info>
       #
-      # ${project.artifactId}, ${project.version}, ${maven.build.timestamp}
+      # ${project.artifactId}, ${project.version}, ${RELEASE}, ${maven.build.timestamp}
       #
     </build-info>
   </properties>
