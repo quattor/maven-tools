@@ -10,7 +10,7 @@ include { 'components/${project.artifactId}/schema' };
 # Set prefix to root of component configuration.
 prefix '/software/components/${project.artifactId}';
 
-#'version' = '${project.version}';
+'version' = '${no-snapshot-version}';
 #'package' = 'NCM::Component';
 
 'active' ?= true;
