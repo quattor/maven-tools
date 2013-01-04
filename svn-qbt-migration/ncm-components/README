@@ -2,14 +2,13 @@ This makefile and the 2 associated scripts will rewrite all history and ensure
 every commit can be built with the new build tools.  Whoever wants the old
 buildtools should go to SF.
 
-First you need to create an empty repository for all the components if
-it doesn't exist yet (with some already migrated components) and add a
-POM file (pom.xml) at its root, copying one of the pom.xml templates provided.
+Normally you should start by cloning repository ncm-components-core
+or ncm-components-grid from GitHub. If you would like to start with 
+a fresh repository for the migrated components, you need to create 
+an empty repository (with git init) and add a POM file (pom.xml)
+ at its root, copying one of the pom.xml templates provided.
 You may want to review the params and edit some of them, in particular
-the version.
-
-<modules>
-</modules>
+the version. 
 
 Then, put the makefile and the two scripts in the parent directory of
 your repository.

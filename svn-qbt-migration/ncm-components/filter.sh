@@ -20,7 +20,7 @@ ls -p
 mv *pm ncm-$1/src/main/perl/ || exit 1
 $MAKEQBT clean
 v=`grep VERSION config.mk|cut -d= -f2`
-git rm --ignore-unmatch -rf *.cin Makefile DEPENDENCIES INSTALL TPL \
+git rm --ignore-unmatch -rf ChangeLog *.cin Makefile DEPENDENCIES INSTALL TPL \
     MAINTAINER CERN-CC conf doc specfile.spec LICENSE config.mk README CHANGES
 #sed -i "s/$2/$v/" ncm-$1/pom.xml
 git add ncm-$1

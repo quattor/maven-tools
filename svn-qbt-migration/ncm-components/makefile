@@ -16,10 +16,8 @@ endef
 
 all: $(GITREPOS)/ncm-$(cmp)
 
-#include $(INCLUDES)
-
 # COMP, VERSION, DESC, auth and email come from the included file
-$(cmp): ncm-$(cmp) ncm-$(cmp)/config.mk
+$(cmp): ncm-$(cmp)
 	$(eval include $(INCLUDES))
 	$(eval auth=$(shell echo "${AUTHOR}"|sed 's/ <.*//'))
 	$(eval email=$(shell echo "${AUTHOR}"|sed 's/.*<\(.*\)>/\1/'))
@@ -30,9 +28,9 @@ $(cmp): ncm-$(cmp) ncm-$(cmp)/config.mk
 
 $(GITREPOS)/ncm-$(cmp): $(cmp)
 	$(call chdir,$(GITREPOS))
-	git remote add $(cmp) ../ncm-$(cmp)
+	git remote add $(cmp) -t $(cmp) ../ncm-$(cmp)
 	git fetch $(cmp)
-	git checkout -b $(cmp) $(cmp)/master
+	git checkout -b $(cmp) $(cmp)/$(cmp)
 	git checkout -b tmp
 	cp -r ../$(cmp) ./ncm-$(cmp)
 	git add ncm-$(cmp)
@@ -40,13 +38,16 @@ $(GITREPOS)/ncm-$(cmp): $(cmp)
 	git filter-branch -f --tree-filter "$(TOP)/../filter.sh $(cmp) $(QBTPATH)" $(cmp)
 	git checkout $(cmp)
 	cd ncm-$(cmp); $(MVNCMD) test
-	git checkout master
-	git merge -m "Integrate ncm-$(cmp) into Git+Maven" $(cmp)
+	git checkout -B master
+        # Merge should be fast forward
+	git merge --ff-only $(cmp)
 	git branch -D tmp
 	sed -i "/<modules>/i<module>ncm-$(cmp)</module>" pom.xml
 	git add pom.xml
-	git commit --amend -C HEAD pom.xml
-#	svn rm $(URL) -m "Migrated ncm-$(cmp) to Git"
+	git commit -m "Integrate ncm-$(cmp) into Git+Maven" pom.xml
+	@echo "After validating the migrated component, push it to GitHub and make it readonly on SourceForge SVN"
 
 ncm-$(cmp):
 	git svn clone $(SVN_SOURCE)
+	git --git-dir=ncm-$(cmp)/.git --work-tree=ncm-$(cmp) checkout -b $(cmp)
+
