@@ -1,0 +1,28 @@
+This makefile and the 2 associated scripts will rewrite all history and ensure 
+every commit can be built with the new build tools.  Whoever wants the old
+buildtools should go to SF.
+
+First you need to create an empty repository for all the components if
+it doesn't exist yet (with some already migrated components) and add a
+POM file (pom.xml) at its root, copying one of the pom.xml templates provided.
+You may want to review the params and edit some of them, in particular
+the version.
+
+<modules>
+</modules>
+
+Then, put the makefile and the two scripts in the parent directory of
+your repository.
+
+Edit the first variables at the beginning of the makefile to reflect
+your actual environment.
+
+Then, just run
+
+make cmp=<component-name, without ncm->
+
+for instance, make cmp=network
+
+If a failure occurs, you may need to remove the directory created for
+the componenent inside the git repository.
+
