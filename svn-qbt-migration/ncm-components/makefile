@@ -28,9 +28,9 @@ $(cmp): ncm-$(cmp)
 
 $(GITREPOS)/ncm-$(cmp): $(cmp)
 	$(call chdir,$(GITREPOS))
-	git remote add $(cmp) -t $(cmp) ../ncm-$(cmp)
+	git remote add $(cmp) -t master ../ncm-$(cmp)
 	git fetch $(cmp)
-	git checkout -b $(cmp) $(cmp)/$(cmp)
+	git checkout -b $(cmp) $(cmp)/master
 	git checkout -b tmp
 	cp -r ../$(cmp) ./ncm-$(cmp)
 	git add ncm-$(cmp)
@@ -38,16 +38,22 @@ $(GITREPOS)/ncm-$(cmp): $(cmp)
 	git filter-branch -f --tree-filter "$(TOP)/../filter.sh $(cmp) $(QBTPATH)" $(cmp)
 	git checkout $(cmp)
 	cd ncm-$(cmp); $(MVNCMD) test
-	git checkout -B master
-        # Merge should be fast forward
-	git merge --ff-only $(cmp)
+	@echo git branch may complain that master branch already exists: ignore it!
+	# Create branch master with the revision before the last one to ensure
+	# that git merge does something else there will be no merge commit added.
+	-git branch --no-track master HEAD~1
+	git checkout master
+	git merge --no-ff -m "Integrate ncm-$(cmp) into Git+Maven" $(cmp)
 	git branch -D tmp
-	sed -i "/<modules>/i<module>ncm-$(cmp)</module>" pom.xml
+	@echo Ignore sed errors...
+	sed -i "/<module>ncm-$(cmp)<\/module>/d" pom.xml
+	sed -i "/<\/modules>/i\    <module>ncm-$(cmp)</module>" pom.xml
 	git add pom.xml
-	git commit -m "Integrate ncm-$(cmp) into Git+Maven" pom.xml
-	@echo "After validating the migrated component, push it to GitHub and make it readonly on SourceForge SVN"
+	git commit --amend -C HEAD pom.xml
+	@echo "After validating the migrated component:"
+	@echo "   - push it to GitHub and make it readonly on SourceForge SVN"
+	@echo "   - remove the remote created for migration: git remote rm $(cmp)"
 
 ncm-$(cmp):
 	git svn clone $(SVN_SOURCE)
-	git --git-dir=ncm-$(cmp)/.git --work-tree=ncm-$(cmp) checkout -b $(cmp)
 

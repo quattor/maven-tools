@@ -25,3 +25,10 @@ for instance, make cmp=network
 If a failure occurs, you may need to remove the directory created for
 the componenent inside the git repository.
 
+The operation can be safely done multiple times for the same component and will
+integrate new modifications made in SVN for the dompoent. To do it you need to:
+- Remove the directory matching the component name (without 'ncm-' prefix)
+- In the target git repository, remote the remote and the branch matching the
+component name
+
+
