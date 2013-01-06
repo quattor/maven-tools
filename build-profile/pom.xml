@@ -189,7 +189,31 @@
                 </configuration>
               </execution>
 
-            </executions>
+              <execution>
+                <id>filter-template-sources</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <delimiters>
+                    <delimiter>${*}</delimiter>
+                  </delimiters>
+                  <outputDirectory>${project.build.directory}/templates</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/main/templates</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>*</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+
+             </executions>
 
           </plugin>
 
@@ -450,6 +474,19 @@
                 <sources>
                   <source>
                     <location>target/doc/man</location>
+                  </source>
+                </sources>
+              </mapping>
+
+              <mapping>
+                <directory>/usr/lib/ncm/config/${project.artifactId}</directory>
+                <filemode>644</filemode>
+                <username>root</username>
+                <groupname>root</groupname>
+                <directoryIncluded>false</directoryIncluded>
+                <sources>
+                  <source>
+                    <location>target/templates</location>
                   </source>
                 </sources>
               </mapping>
