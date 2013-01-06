@@ -1,10 +1,16 @@
 .PHONY: all
+
+ifndef cmp
+    $(error "You must specify component to migrate with cmp=component (without ncm- prefix)")
+endif
+
 INCLUDES:=ncm-$(cmp)/config.mk
 
 TOP=$(shell pwd)
 
 GITREPOS=ncm-components-grid
 SVN_SOURCE=https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/ncm-components/lcg-2/ncm-$(cmp)
+#SVN_SOURCE=https://quattor.svn.sourceforge.net/svnroot/quattor/trunk/ncm-components/core/ncm-$(cmp)
 QBTPATH=/scratch/jouvin/quattor/core/ncm-components/quattor-build-tools
 MVNCMD=/exp/si/jouvin/tools/apache-maven-3.0.4/bin/mvn
 
@@ -57,3 +63,17 @@ $(GITREPOS)/ncm-$(cmp): $(cmp)
 ncm-$(cmp):
 	git svn clone $(SVN_SOURCE)
 
+clean:
+	@echo Removing everything created except git svn clone
+	@echo Some errors are likely to occur and can be safely ignored...
+	rm -Rf $(cmp)
+	$(call chdir,$(GITREPOS))
+	git checkout master
+	-git remote rm $(cmp)
+	-git branch -D tmp
+	-git branch -D $(cmp)
+
+
+reallyclean: clean
+	@echo Removing git svn clone for component $(cmp)
+	rm -Rf ncm-$(cmp)

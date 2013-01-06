@@ -17,7 +17,7 @@ echo "Using Maven command '${mvncmd}'"
 ${mvncmd} archetype:generate \
     -DarchetypeArtifactId=cfg-module \
     -DarchetypeGroupId=org.quattor.maven \
-    -DarchetypeVersion=1.27 \
+    -DarchetypeVersion=1.29 \
     -DartifactId="$module" \
     -Dversion="$version-SNAPSHOT" \
     -Dpackage="components/$module" \
