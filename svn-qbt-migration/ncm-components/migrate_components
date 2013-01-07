@@ -1,0 +1,58 @@
+#!/bin/bash
+
+gitrep=ncm-components-grid
+
+if [ -z "$1" ]
+then
+  echo "You must specify a space-separated list of components"
+  exit 1
+fi
+
+for comp in $*
+do
+  trap "echo Cleaning up uncompleted migration work...;make cmp=$comp clean;exit 11" INT
+  if [ -d ${gitrep}/ncm-${comp}/src/main/perl ]
+  then
+    echo Component $comp already migrated
+  else
+    echo -n Migrating ncm-$comp...
+    make cmp=$comp > logs/${comp}.log 2>&1
+    if [ $? -eq 0 ]
+    then
+      echo "Success" > logs/${comp}.status
+      echo -n " Pushing migrated component to origin..."
+      echo " Pushing migrated component to origin..." >> logs/${comp}.log
+      git --work-tree=$gitrep --git-dir=$gitrep/.git push >> logs/${comp}.log 2>&1
+      if [ $? -eq 0 ]
+      then
+        echo -n " Ok..."
+        echo -n " Cleaning up migration temporary work..."
+        echo "Cleaning up migration temporary work..." >> logs/${comp}.log
+        make cmp=$comp clean >> logs/${comp}.log 2>&1
+        if [ $? -eq 0 ]
+        then
+          echo " Done"
+        else
+          echo " Clean up failed."
+        fi
+      else
+        echo " Push failed"
+        exit 12
+      fi
+    else
+      status=$?
+      echo "Failure: $status" > logs/${comp}.status
+      echo -n " Failed (status=$status, see logs/${comp}.log... "
+      echo -n " Cleaning up uncompleted migration work..."
+      echo "Cleaning up uncompleted migration work..." >> logs/${comp}.log
+      make cmp=$comp clean >> logs/${comp}.log 2>&1
+      if [ $? -eq 0 ]
+      then
+        echo " Done"
+      else
+        echo " Clean up failed. Aborting..."
+        exit 10
+      fi
+    fi
+  fi
+done

@@ -7,6 +7,8 @@ else
   MAKEQBT="make -j3 BTDIR=$2"
 fi
 
+trap "exit 1" ERR
+
 $MAKEQBT
 sed -i '1,12c\
 # ${license-info}\
