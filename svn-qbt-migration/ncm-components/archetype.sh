@@ -25,3 +25,11 @@ ${mvncmd} archetype:generate \
     -Ddeveloper="$developer" \
     -Ddeveloper-email="$email" \
     -B
+
+# Add necessary resources to generated pom.xml if the component
+# has some template configuration files (in DATA directory)
+if [ -d ncm-${module}/DATA ]
+then
+  echo "Adding support for template configuration files in pom.xml"
+  sed -i -e '/<plugins>/r pom.templates_dir' ${module}/pom.xml 
+fi

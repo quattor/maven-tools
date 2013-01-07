@@ -66,12 +66,12 @@ ncm-$(cmp):
 clean:
 	@echo Removing everything created except git svn clone
 	@echo Some errors are likely to occur and can be safely ignored...
-	rm -Rf $(cmp)
 	$(call chdir,$(GITREPOS))
 	git checkout master
 	-git remote rm $(cmp)
 	-git branch -D tmp
 	-git branch -D $(cmp)
+	rm -Rf ../$(cmp)
 
 
 reallyclean: clean
