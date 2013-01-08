@@ -10,20 +10,36 @@ an empty repository (with git init) and add a POM file (pom.xml)
 You may want to review the params and edit some of them, in particular
 the version. 
 
-Then, put the makefile and the two scripts in the parent directory of
+Before running the migration script, ensure that your repository is not configured to 
+do automatic conversion of CRLF. In the repository, execute:
+
+git config core.autocrlf input
+
+Then, copy all the files in this directory in the parent directory of
 your repository.
 
 Edit the first variables at the beginning of the makefile to reflect
 your actual environment.
 
-Then, just run
+Then, just run:
 
-make cmp=<component-name, without ncm->
+migrate_components comp1 [comp2...)
+
+where 'comp1', 'comp2'... is the component name without the ncm- prefix.
+
+The script will produce a migration log file for each components in the logs/
+directory. In case, there is an error, look at the log file for more information.
+
+During troubleshooting, you may want to rerun the conversion keeping the 
+intermediate files to review them. In this case, use:
+
+make cmp=<component-name>  (without ncm- prefix)
 
 for instance, make cmp=network
 
-If a failure occurs, you may need to remove the directory created for
-the componenent inside the git repository.
+When you are done, remove the unnecessary files and git branches with:
+
+make cmp=<component-name> clean
 
 The operation can be safely done multiple times for the same component and will
 integrate new modifications made in SVN for the dompoent. To do it you need to:

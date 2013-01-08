@@ -8,6 +8,15 @@ then
   exit 1
 fi
 
+# Detect if an origin is configured
+git --work-tree=$gitrep --git-dir=$gitrep/.git > /dev/null 2>& 1
+if [ $? -eq 0 ]
+then
+  push_origin=1
+else
+  push_origin=0
+fi
+
 for comp in $*
 do
   trap "echo Cleaning up uncompleted migration work...;make cmp=$comp clean;exit 11" INT
@@ -20,9 +29,12 @@ do
     if [ $? -eq 0 ]
     then
       echo "Success" > logs/${comp}.status
-      echo -n " Pushing migrated component to origin..."
-      echo " Pushing migrated component to origin..." >> logs/${comp}.log
-      git --work-tree=$gitrep --git-dir=$gitrep/.git push >> logs/${comp}.log 2>&1
+      if [ $push_origin -eq 1 ]
+      then
+        echo -n " Pushing migrated component to origin..."
+        echo " Pushing migrated component to origin..." >> logs/${comp}.log
+        git --work-tree=$gitrep --git-dir=$gitrep/.git push >> logs/${comp}.log 2>&1
+      fi
       if [ $? -eq 0 ]
       then
         echo -n " Ok..."
