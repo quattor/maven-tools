@@ -249,7 +249,7 @@ foreach my $method (qw(output toutput)) {
 		    my $cmd = join(" ", @{$self->{COMMAND}});
 		    $commands_run{$cmd} = { object => $self,
 					    method => $method};
-		    $? = $command_status{$cmd} // 0;
+		    $? = $command_status{$cmd} || 0;
 		    return $desired_outputs{$cmd};
 		});
 }
