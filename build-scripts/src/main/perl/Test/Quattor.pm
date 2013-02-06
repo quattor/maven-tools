@@ -60,7 +60,7 @@ use EDG::WP4::CCM::Fetch;
 use base 'Exporter';
 use Cwd;
 use Carp qw(carp croak);
-use File::Path qw(make_path);
+use File::Path qw(mkpath);
 use Test::MockModule;
 
 =pod
@@ -153,7 +153,7 @@ sub prepare_profile_cache
     my $dir = getcwd();
 
     my $cache = "target/test/cache/$profile";
-    make_path($cache);
+    mkpath($cache);
 
     my $fh = CAF::FileWriter->new("$cache/global.lock");
     print $fh "no\n";
@@ -190,7 +190,7 @@ sub import
 {
     my $class = shift;
 
-    make_path("target/test/profiles");
+    mkpath("target/test/profiles");
     foreach my $pf (@_) {
 	prepare_profile_cache($pf);
     }
