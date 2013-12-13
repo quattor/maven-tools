@@ -43,7 +43,7 @@ sub template
 }
 
 no strict 'refs';
-foreach my $i (qw(verbose error info ok debug warn report)) {
+foreach my $i (qw(verbose error info ok debug warn report log)) {
     *{$i} = sub {
 	my $self = shift;
 	$self->{uc($i)}++;
