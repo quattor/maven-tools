@@ -137,7 +137,7 @@ my %desired_file_contents;
 my %configs;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-		 set_desired_err get_config_for_profile set_command_status);
+                 set_desired_err get_config_for_profile set_command_status);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -175,15 +175,15 @@ sub prepare_profile_cache
     chdir("src/test/resources") or croak("Couldn't enter resources directory");
 
     system(qw(panc --formats json --output-dir ../../../target/test/profiles), "$profile.pan") == 0
-	or croak("Unable to compile profile $profile");
+        or croak("Unable to compile profile $profile");
     chdir($d);
     my $f = EDG::WP4::CCM::Fetch->new({
-				       FOREIGN => 0,
-				       CONFIG => 'src/test/resources/ccm.cfg',
-				       CACHE_ROOT => $cache,
-				       PROFILE_URL => "file://$dir/target/test/profiles/$profile.json",
-				       })
-	or croak ("Couldn't create fetch object");
+                                       FOREIGN => 0,
+                                       CONFIG => 'src/test/resources/ccm.cfg',
+                                       CACHE_ROOT => $cache,
+                                       PROFILE_URL => "file://$dir/target/test/profiles/$profile.json",
+                                       })
+        or croak ("Couldn't create fetch object");
     $f->{CACHE_ROOT} = $cache;
     $f->fetchProfile() or croak "Unable to fetch profile $profile";
 
@@ -198,7 +198,7 @@ sub import
 
     mkpath("target/test/profiles");
     foreach my $pf (@_) {
-	prepare_profile_cache($pf);
+        prepare_profile_cache($pf);
     }
 
     $class->SUPER::export_to_level(1, $class, @EXPORT);
@@ -224,47 +224,47 @@ Prevent any command from being executed.
 
 foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
-		    my $self = shift;
-		    my $cmd = join(" ", @{$self->{COMMAND}});
+                    my $self = shift;
+                    my $cmd = join(" ", @{$self->{COMMAND}});
                     diag("$method command $cmd") if $log_cmd;
-		    $commands_run{$cmd} = { object => $self,
-					    method => $method
-					  };
-		    if (exists($command_status{$cmd})) {
-			$? = $command_status{$cmd};
-		    } else {
-			$? = 0;
-		    }
-		    if ($self->{OPTIONS}->{stdout}) {
-			${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
-		    }
-		    if ($self->{OPTIONS}->{stderr}) {
-			if (ref($self->{OPTIONS}->{stderr})) {
-			    ${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
-			} else {
-			    ${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
-			}
-		    }
-		    return 1;
-		});
+                    $commands_run{$cmd} = { object => $self,
+                                            method => $method
+                                          };
+                    if (exists($command_status{$cmd})) {
+                        $? = $command_status{$cmd};
+                    } else {
+                        $? = 0;
+                    }
+                    if ($self->{OPTIONS}->{stdout}) {
+                        ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
+                    }
+                    if ($self->{OPTIONS}->{stderr}) {
+                        if (ref($self->{OPTIONS}->{stderr})) {
+                            ${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
+                        } else {
+                            ${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
+                        }
+                    }
+                    return 1;
+                });
 }
 
 foreach my $method (qw(output toutput)) {
     $procs->mock($method, sub {
-		    my $self = shift;
+                    my $self = shift;
 
-		    my $cmd = join(" ", @{$self->{COMMAND}});
+                    my $cmd = join(" ", @{$self->{COMMAND}});
             diag("$method command $cmd") if $log_cmd;
-		    $commands_run{$cmd} = { object => $self,
-					    method => $method};
-		    $? = $command_status{$cmd} || 0;
+                    $commands_run{$cmd} = { object => $self,
+                                            method => $method};
+                    $? = $command_status{$cmd} || 0;
             if (exists($desired_outputs{$cmd})) {
                 return $desired_outputs{$cmd};
             } else {
                 diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
                 return ""; # always return something, like LC:Process does
             };
-		});
+                });
 }
 
 =pod
@@ -345,7 +345,7 @@ sub get_file
     my ($filename) = @_;
 
     if (exists($files_contents{$filename})) {
-	return $files_contents{$filename};
+        return $files_contents{$filename};
     }
     return undef;
 }
@@ -385,7 +385,7 @@ sub get_command
     my ($cmd) = @_;
 
     if (exists($commands_run{$cmd})) {
-	return $commands_run{$cmd};
+        return $commands_run{$cmd};
     }
     return undef;
 }
