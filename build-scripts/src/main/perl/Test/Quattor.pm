@@ -62,6 +62,12 @@ use Cwd;
 use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Test::MockModule;
+use Test::More;
+
+# boolean to enable logging of each command that is run via CAF::Process
+our $log_cmd = 0;
+# boolean to log each cmd that has output mocked but has no output set
+our $log_cmd_missing = 0;
 
 =pod
 
@@ -220,6 +226,7 @@ foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
 		    my $self = shift;
 		    my $cmd = join(" ", @{$self->{COMMAND}});
+                    diag("$method command $cmd") if $log_cmd;
 		    $commands_run{$cmd} = { object => $self,
 					    method => $method
 					  };
@@ -247,10 +254,16 @@ foreach my $method (qw(output toutput)) {
 		    my $self = shift;
 
 		    my $cmd = join(" ", @{$self->{COMMAND}});
+            diag("$method command $cmd") if $log_cmd;
 		    $commands_run{$cmd} = { object => $self,
 					    method => $method};
 		    $? = $command_status{$cmd} || 0;
-		    return $desired_outputs{$cmd};
+            if (exists($desired_outputs{$cmd})) {
+                return $desired_outputs{$cmd};
+            } else {
+                diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
+                return ""; # always return something, like LC:Process does
+            };
 		});
 }
 
