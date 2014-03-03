@@ -64,10 +64,27 @@ use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
 
-# boolean to enable logging of each command that is run via CAF::Process
-our $log_cmd = 0;
-# boolean to log each cmd that has output mocked but has no output set
-our $log_cmd_missing = 0;
+=pod
+
+=item * C<$log_cmd>
+
+A boolean to enable logging of each command that is run via CAF::Process. 
+Can also be set via the QUATTOR_TEST_LOG_CMD environment variable.
+
+=cut
+
+our $log_cmd = $ENV{QUATTOR_TEST_LOG_CMD} || 0;
+
+=pod
+
+=item * C<$log_cmd_missing>
+
+A boolean to log each cmd that has output mocked but has no output set.
+Can also be set via the QUATTOR_TEST_LOG_CMD_MISSING environment variable.
+
+=cut
+our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING} || 0;
+
 
 =pod
 
