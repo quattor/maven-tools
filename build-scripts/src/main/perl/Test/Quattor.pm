@@ -268,16 +268,16 @@ foreach my $method (qw(output toutput)) {
 
                     my $cmd = join(" ", @{$self->{COMMAND}});
                     push(@command_history, $cmd);
-            diag("$method command $cmd") if $log_cmd;
-                    $commands_run{$cmd} = { object => $self,
-                                            method => $method};
-                    $? = $command_status{$cmd} || 0;
-            if (exists($desired_outputs{$cmd})) {
-                return $desired_outputs{$cmd};
-            } else {
-                diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
-                return ""; # always return something, like LC:Process does
-            };
+                    diag("$method command $cmd") if $log_cmd;
+                            $commands_run{$cmd} = { object => $self,
+                                                    method => $method};
+                            $? = $command_status{$cmd} || 0;
+                    if (exists($desired_outputs{$cmd})) {
+                        return $desired_outputs{$cmd};
+                    } else {
+                        diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
+                        return ""; # always return something, like LC:Process does
+                    };
                 });
 }
 
