@@ -134,10 +134,22 @@ Optionally, initial contents for a file that should be "edited".
 
 my %desired_file_contents;
 
+=pod
+
+=item * C<@command_history>
+
+CAF::Process commands that were run.
+
+=cut
+
+my @command_history = ();
+
+
 my %configs;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-                 set_desired_err get_config_for_profile set_command_status);
+                 set_desired_err get_config_for_profile set_command_status
+                 command_history_reset command_history_ok);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -226,6 +238,7 @@ foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
                     my $self = shift;
                     my $cmd = join(" ", @{$self->{COMMAND}});
+                    push(@command_history, $cmd);
                     diag("$method command $cmd") if $log_cmd;
                     $commands_run{$cmd} = { object => $self,
                                             method => $method
@@ -254,6 +267,7 @@ foreach my $method (qw(output toutput)) {
                     my $self = shift;
 
                     my $cmd = join(" ", @{$self->{COMMAND}});
+                    push(@command_history, $cmd);
             diag("$method command $cmd") if $log_cmd;
                     $commands_run{$cmd} = { object => $self,
                                             method => $method};
@@ -452,6 +466,52 @@ sub set_desired_err
     my ($cmd, $err) = @_;
 
     $desired_err{$cmd} = $err;
+}
+
+=pod
+
+=item C<command_history_reset>
+
+Reset the command history to empty list.
+
+=cut
+
+sub command_history_reset
+{
+    @command_history = ();
+}
+
+=pod
+
+=item C<command_history_ok>
+
+Given a list of commands, it checks the command_history if all commands were 
+called in the given order (it allows for other commands to exist inbetween).
+The commands are interpreted as regular expressions.
+
+E.g. if command_history is (X1, X2, X3) then 
+    command_history_ok([X1,X3]) returns 1 (both X1 and X3 were called and in that order. 
+        The fact that X2 was also called but not checked is allowed.)
+    command_history_ok([X3,X2]) returns 0 (wrong order)
+    command_history_ok([X1,X4]) returns 0 (no X4 command)
+
+=cut
+
+sub command_history_ok
+{
+    my $commands = shift;
+
+    my $lastidx = -1;
+    foreach my $cmd (@$commands) {
+        # start iterating from lastidx+1
+        my ( $index )= grep { $command_history[$_] =~ /$cmd/  } ($lastidx+1)..$#command_history;
+        return 0 if !defined($index);
+        return 0 if $index <= $lastidx;
+        $lastidx = $index;
+    };
+    # in principle, when you get here, all is ok.                                                                                                                                        
+    # but at least 1 command should be found, so lastidx should be > -1                                                                                                                  
+    return $lastidx > -1;
 }
 
 1;
