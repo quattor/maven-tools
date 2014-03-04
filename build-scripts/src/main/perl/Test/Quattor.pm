@@ -64,10 +64,28 @@ use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
 
-# boolean to enable logging of each command that is run via CAF::Process
-our $log_cmd = 0;
-# boolean to log each cmd that has output mocked but has no output set
-our $log_cmd_missing = 0;
+=pod
+
+=item * C<$log_cmd>
+
+A boolean to enable logging of each command that is run via CAF::Process. 
+Can also be set via the QUATTOR_TEST_LOG_CMD environment variable.
+
+=cut
+
+our $log_cmd = $ENV{QUATTOR_TEST_LOG_CMD};
+
+=pod
+
+=item * C<$log_cmd_missing>
+
+A boolean to log each cmd that has output mocked but has no output set.
+Can also be set via the QUATTOR_TEST_LOG_CMD_MISSING environment variable.
+
+=cut
+
+our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING};
+
 
 =pod
 
@@ -134,10 +152,22 @@ Optionally, initial contents for a file that should be "edited".
 
 my %desired_file_contents;
 
+=pod
+
+=item * C<@command_history>
+
+CAF::Process commands that were run.
+
+=cut
+
+my @command_history = ();
+
+
 my %configs;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-                 set_desired_err get_config_for_profile set_command_status);
+                 set_desired_err get_config_for_profile set_command_status
+                 command_history_reset command_history_ok);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -226,6 +256,7 @@ foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
                     my $self = shift;
                     my $cmd = join(" ", @{$self->{COMMAND}});
+                    push(@command_history, $cmd);
                     diag("$method command $cmd") if $log_cmd;
                     $commands_run{$cmd} = { object => $self,
                                             method => $method
@@ -254,16 +285,17 @@ foreach my $method (qw(output toutput)) {
                     my $self = shift;
 
                     my $cmd = join(" ", @{$self->{COMMAND}});
-            diag("$method command $cmd") if $log_cmd;
-                    $commands_run{$cmd} = { object => $self,
-                                            method => $method};
-                    $? = $command_status{$cmd} || 0;
-            if (exists($desired_outputs{$cmd})) {
-                return $desired_outputs{$cmd};
-            } else {
-                diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
-                return ""; # always return something, like LC:Process does
-            };
+                    push(@command_history, $cmd);
+                    diag("$method command $cmd") if $log_cmd;
+                            $commands_run{$cmd} = { object => $self,
+                                                    method => $method};
+                            $? = $command_status{$cmd} || 0;
+                    if (exists($desired_outputs{$cmd})) {
+                        return $desired_outputs{$cmd};
+                    } else {
+                        diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
+                        return ""; # always return something, like LC:Process does
+                    };
                 });
 }
 
@@ -452,6 +484,51 @@ sub set_desired_err
     my ($cmd, $err) = @_;
 
     $desired_err{$cmd} = $err;
+}
+
+=pod
+
+=item C<command_history_reset>
+
+Reset the command history to empty list.
+
+=cut
+
+sub command_history_reset
+{
+    @command_history = ();
+}
+
+=pod
+
+=item C<command_history_ok>
+
+Given a list of commands, it checks the C<@command_history> if all commands were 
+called in the given order (it allows for other commands to exist inbetween).
+The commands are interpreted as regular expressions.
+
+E.g. if C<@command_history> is (x1, x2, x3) then 
+C<command_history_ok([x1,X3])> returns 1 (Both x1 and x3 were called and in that order, 
+the fact that x2 was also called but not checked is allowed.).
+C<command_history_ok([x3,x2])> returns 0 (wrong order),
+C<command_history_ok([x1,x4])> returns 0 (no x4 command).
+
+=cut
+
+sub command_history_ok
+{
+    my $commands = shift;
+
+    my $lastidx = -1;
+    foreach my $cmd (@$commands) {
+        # start iterating from lastidx+1
+        my ( $index )= grep { $command_history[$_] =~ /$cmd/  } ($lastidx+1)..$#command_history;
+        return 0 if !defined($index) or $index <= $lastidx;
+        $lastidx = $index;
+    };
+    # in principle, when you get here, all is ok.                                                                                                                                        
+    # but at least 1 command should be found, so lastidx should be > -1                                                                                                                  
+    return $lastidx > -1;
 }
 
 1;
