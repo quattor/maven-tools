@@ -73,7 +73,7 @@ Can also be set via the QUATTOR_TEST_LOG_CMD environment variable.
 
 =cut
 
-our $log_cmd = $ENV{QUATTOR_TEST_LOG_CMD} || 0;
+our $log_cmd = $ENV{QUATTOR_TEST_LOG_CMD};
 
 =pod
 
@@ -83,7 +83,8 @@ A boolean to log each cmd that has output mocked but has no output set.
 Can also be set via the QUATTOR_TEST_LOG_CMD_MISSING environment variable.
 
 =cut
-our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING} || 0;
+
+our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING};
 
 
 =pod
@@ -502,15 +503,15 @@ sub command_history_reset
 
 =item C<command_history_ok>
 
-Given a list of commands, it checks the command_history if all commands were 
+Given a list of commands, it checks the C<@command_history> if all commands were 
 called in the given order (it allows for other commands to exist inbetween).
 The commands are interpreted as regular expressions.
 
-E.g. if command_history is (X1, X2, X3) then 
-    command_history_ok([X1,X3]) returns 1 (both X1 and X3 were called and in that order. 
-        The fact that X2 was also called but not checked is allowed.)
-    command_history_ok([X3,X2]) returns 0 (wrong order)
-    command_history_ok([X1,X4]) returns 0 (no X4 command)
+E.g. if C<@command_history> is (x1, x2, x3) then 
+C<command_history_ok([x1,X3])> returns 1 (Both x1 and x3 were called and in that order, 
+the fact that x2 was also called but not checked is allowed.).
+C<command_history_ok([x3,x2])> returns 0 (wrong order),
+C<command_history_ok([x1,x4])> returns 0 (no x4 command).
 
 =cut
 
@@ -522,8 +523,7 @@ sub command_history_ok
     foreach my $cmd (@$commands) {
         # start iterating from lastidx+1
         my ( $index )= grep { $command_history[$_] =~ /$cmd/  } ($lastidx+1)..$#command_history;
-        return 0 if !defined($index);
-        return 0 if $index <= $lastidx;
+        return 0 if !defined($index) or $index <= $lastidx;
         $lastidx = $index;
     };
     # in principle, when you get here, all is ok.                                                                                                                                        
