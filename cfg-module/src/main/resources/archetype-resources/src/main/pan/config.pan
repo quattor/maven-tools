@@ -5,4 +5,12 @@
 
 unique template components/${project.artifactId}/config;
 
+include { 'components/${project.artifactId}/schema' };
 include { 'components/${project.artifactId}/config-rpm' };
+
+# Set prefix to root of component configuration.
+prefix '/software/components/${project.artifactId}';
+
+'version' = '${no-snapshot-version}';
+'active' ?= true;
+'dispatch' ?= true;
