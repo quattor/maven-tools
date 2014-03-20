@@ -134,6 +134,7 @@
                   <delimiters>
                     <delimiter>${*}</delimiter>
                   </delimiters>
+                  <useDefaultDelimiters>false</useDefaultDelimiters>
                   <outputDirectory>${project.build.directory}/pan/</outputDirectory>
                   <resources>
                     <resource>
@@ -155,6 +156,7 @@
                   <delimiters>
                     <delimiter>${*}</delimiter>
                   </delimiters>
+                  <useDefaultDelimiters>false</useDefaultDelimiters>
                   <outputDirectory>${project.build.directory}/lib/perl/NCM/Component</outputDirectory>
                   <resources>
                     <resource>
@@ -179,6 +181,7 @@
                   <delimiters>
                     <delimiter>${*}</delimiter>
                   </delimiters>
+                  <useDefaultDelimiters>false</useDefaultDelimiters>
                   <outputDirectory>${project.build.directory}/doc/pod/NCM/Component</outputDirectory>
                   <resources>
                     <resource>
