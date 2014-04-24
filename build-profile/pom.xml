@@ -164,6 +164,7 @@
                       <filtering>true</filtering>
                       <includes>
                         <include>*.pm</include>
+                        <include>**/*.pm</include>
                       </includes>
                     </resource>
                   </resources>
@@ -189,6 +190,7 @@
                       <filtering>true</filtering>
                       <includes>
                         <include>*.pod</include>
+                        <include>**/*.pod</include>
                       </includes>
                     </resource>
                   </resources>
