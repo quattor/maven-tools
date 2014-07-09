@@ -548,7 +548,7 @@ Linux SysV, e.g, C</sbin/service foo start>
 
 Linux, Systemd variant.
 
-=item * C<linux_solaris>
+=item * C<solaris>
 
 Solaris and SMF variant.
 
