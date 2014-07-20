@@ -21,17 +21,42 @@
 
     <fileSet>
       <directory>target/lib</directory>
-      <outputDirectory>lib</outputDirectory>
+      <outputDirectory>usr/lib</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>target/etc</directory>
+      <outputDirectory>etc</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>target/daemon</directory>
+      <outputDirectory>etc/init.d</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>target/sbin</directory>
+      <outputDirectory>usr/sbin</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>target/bin</directory>
+      <outputDirectory>usr/bin</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>target/quattor</directory>
+      <outputDirectory>usr/quattor</outputDirectory>
     </fileSet>
 
     <fileSet>
       <directory>target/pan</directory>
-      <outputDirectory>share/doc/pan</outputDirectory>
+      <outputDirectory>usr/share/doc/pan</outputDirectory>
     </fileSet>
 
     <fileSet>
       <directory>target/doc/man</directory>
-      <outputDirectory>share/man</outputDirectory>
+      <outputDirectory>usr/share/man</outputDirectory>
     </fileSet>
 
   </fileSets>
