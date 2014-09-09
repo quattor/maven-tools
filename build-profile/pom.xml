@@ -27,6 +27,7 @@
     <release.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-releases</release.url>
     <snapshot.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-snapshots/</snapshot.url>
     <man.page.dir>/usr/share/man</man.page.dir>
+    <prove.args>-q</prove.args>
   </properties>
 
   <dependencies>
@@ -333,6 +334,7 @@
 		    <argument>target/lib/perl</argument>
 		    <argument>-I</argument>
 		    <argument>src/test/perl</argument>
+                    <argument>${prove.args}</argument>
 		    <argument>-I</argument>
 		    <argument>${project.build.directory}/dependency/build-scripts/</argument>
 		    <argument>src/test/perl</argument>
