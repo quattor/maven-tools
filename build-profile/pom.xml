@@ -28,6 +28,7 @@
     <snapshot.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-snapshots/</snapshot.url>
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
+    <unittest></unittest>
   </properties>
 
   <dependencies>
@@ -337,7 +338,7 @@
                     <argument>${prove.args}</argument>
 		    <argument>-I</argument>
 		    <argument>${project.build.directory}/dependency/build-scripts/</argument>
-		    <argument>src/test/perl</argument>
+		    <argument>src/test/perl/${unittest}</argument>
 		  </arguments>
 		</configuration>
 	      </execution>
