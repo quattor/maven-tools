@@ -1,24 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>build-profile</artifactId>
   <packaging>pom</packaging>
-
   <name>build-profile</name>
   <url>http://quattor.org/cfg-modules/</url>
-
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
     <version>1.37-SNAPSHOT</version>
   </parent>
-
   <properties>
-
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <RELEASE>${rpm.release}</RELEASE>
-
     <build-info>
       #
       # ${project.artifactId}, ${project.version}, ${RELEASE}, ${maven.build.timestamp}
@@ -28,8 +21,8 @@
     <snapshot.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-snapshots/</snapshot.url>
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
+    <unittest></unittest>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.quattor.maven</groupId>
@@ -46,26 +39,20 @@
       <classifier>scripts</classifier>
     </dependency>
   </dependencies>
-
   <repositories>
     <repository>
       <id>quattor-releases</id>
       <url>${release.url}</url>
     </repository>
   </repositories>
-
   <profiles>
-
     <profile>
-
       <id>cfg-module-rpm</id>
-
       <activation>
         <file>
           <exists>/usr/bin/rpmbuild</exists>
         </file>
       </activation>
-
       <build>
         <plugins>
           <plugin>
@@ -78,32 +65,27 @@
                   <goal>attached-rpm</goal>
                 </goals>
               </execution>
-	      <execution>
-		<id>setup-version</id>
-		<goals>
-		  <goal>version</goal>
-		</goals>
-		<phase>process-sources</phase>
-	      </execution>
+              <execution>
+                <id>setup-version</id>
+                <goals>
+                  <goal>version</goal>
+                </goals>
+                <phase>process-sources</phase>
+              </execution>
             </executions>
           </plugin>
         </plugins>
       </build>
     </profile>
-
     <profile>
-
       <id>cfg-module-dist</id>
-
       <activation>
         <file>
           <missing>deactivate.cfg.module.dist</missing>
         </file>
       </activation>
-
       <build>
         <plugins>
-
           <plugin>
             <groupId>org.quattor.maven</groupId>
             <artifactId>quattor-build-maven-plugin</artifactId>
@@ -116,14 +98,10 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
-
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-resources-plugin</artifactId>
-
             <executions>
-
               <execution>
                 <id>filter-pan-sources</id>
                 <phase>process-sources</phase>
@@ -145,7 +123,6 @@
                   </resources>
                 </configuration>
               </execution>
-
               <execution>
                 <id>filter-perl-sources</id>
                 <phase>process-sources</phase>
@@ -171,7 +148,6 @@
                   </resources>
                 </configuration>
               </execution>
-
               <execution>
                 <id>filter-pod-sources</id>
                 <phase>process-sources</phase>
@@ -197,18 +173,12 @@
                   </resources>
                 </configuration>
               </execution>
-
             </executions>
-
           </plugin>
-
-
           <plugin>
-
             <groupId>org.quattor.pan</groupId>
             <artifactId>panc-maven-plugin</artifactId>
             <executions>
-
               <execution>
                 <id>check-generated-pan-syntax</id>
                 <phase>compile</phase>
@@ -219,16 +189,11 @@
                   <sourceDirectory>${basedir}/target/pan</sourceDirectory>
                 </configuration>
               </execution>
-
             </executions>
-
           </plugin>
-
           <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
-
             <executions>
-
               <execution>
                 <id>unpack-assemblies-scripts</id>
                 <phase>process-sources</phase>
@@ -252,17 +217,12 @@
                   </artifactItems>
                 </configuration>
               </execution>
-
             </executions>
           </plugin>
-
-
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-
             <executions>
-
               <execution>
                 <id>pod2man</id>
                 <phase>compile</phase>
@@ -277,17 +237,12 @@
                   </arguments>
                 </configuration>
               </execution>
-
             </executions>
-
           </plugin>
-
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <extensions>true</extensions>
-
             <executions>
-
               <execution>
                 <id>tarballs</id>
                 <phase>package</phase>
@@ -298,15 +253,11 @@
                   <descriptorSourceDirectory>target/dependency/assemblies</descriptorSourceDirectory>
                 </configuration>
               </execution>
-
             </executions>
-
           </plugin>
-
         </plugins>
       </build>
     </profile>
-
     <profile>
       <id>module-test</id>
       <activation>
@@ -315,76 +266,69 @@
         </property>
       </activation>
       <build>
-	<plugins>
-	  <plugin>
-	    <groupId>org.codehaus.mojo</groupId>
-	    <artifactId>exec-maven-plugin</artifactId>
-	    <executions>
-	      <execution>
-		<id>prove</id>
-		<phase>test</phase>
-		<goals>
-		  <goal>exec</goal>
-		</goals>
-		<configuration>
-		  <executable>prove</executable>
-		  <workingDirectory>${basedir}</workingDirectory>
-		  <arguments>
-		    <argument>-I</argument>
-		    <argument>target/lib/perl</argument>
-		    <argument>-I</argument>
-		    <argument>src/test/perl</argument>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prove</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>prove</executable>
+                  <workingDirectory>${basedir}</workingDirectory>
+                  <arguments>
+                    <argument>-I</argument>
+                    <argument>target/lib/perl</argument>
+                    <argument>-I</argument>
+                    <argument>src/test/perl</argument>
                     <argument>${prove.args}</argument>
-		    <argument>-I</argument>
-		    <argument>${project.build.directory}/dependency/build-scripts/</argument>
-		    <argument>src/test/perl</argument>
-		  </arguments>
-		</configuration>
-	      </execution>
-	    </executions>
-	  </plugin>
-	</plugins>
+                    <argument>-I</argument>
+                    <argument>${project.build.directory}/dependency/build-scripts/</argument>
+                    <argument>src/test/perl/${unittest}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     <profile>
       <id>building-module</id>
       <activation>
-	<file>
-	  <exists>src/main</exists>
-	</file>
+        <file>
+          <exists>src/main</exists>
+        </file>
       </activation>
       <distributionManagement>
-	<repository>
-	  <id>quattor.releases</id>
-	  <name>Releases</name>
-	  <url>${release.url}</url>
-	</repository>
-	<snapshotRepository>
-	  <id>quattor.snapshots</id>
-	  <name>Snapshots</name>
-	  <url>${snapshot.url}</url>
-	</snapshotRepository>
+        <repository>
+          <id>quattor.releases</id>
+          <name>Releases</name>
+          <url>${release.url}</url>
+        </repository>
+        <snapshotRepository>
+          <id>quattor.snapshots</id>
+          <name>Snapshots</name>
+          <url>${snapshot.url}</url>
+        </snapshotRepository>
       </distributionManagement>
     </profile>
   </profiles>
-
-
   <build>
-
     <pluginManagement>
-
       <plugins>
-
         <plugin>
           <groupId>org.quattor.maven</groupId>
           <artifactId>quattor-build-maven-plugin</artifactId>
           <version>1.37-SNAPSHOT</version>
         </plugin>
-
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>rpm-maven-plugin</artifactId>
-
           <configuration>
             <release>${RELEASE}</release>
             <summary>ncm-${project.artifactId}</summary>
@@ -403,9 +347,7 @@
               <require>ncm-ncd</require>
               <require>libuser</require>
             </requires>
-
             <mappings>
-
               <mapping>
                 <directory>/usr/lib</directory>
                 <filemode>755</filemode>
@@ -418,7 +360,6 @@
                   </source>
                 </sources>
               </mapping>
-
               <mapping>
                 <directory>/usr/share/doc/ncm-${project.artifactId}-${project.version}</directory>
                 <filemode>644</filemode>
@@ -435,7 +376,6 @@
                   </source>
                 </sources>
               </mapping>
-
               <mapping>
                 <directory>/usr/share/doc/pan</directory>
                 <filemode>644</filemode>
@@ -449,7 +389,6 @@
                   </source>
                 </sources>
               </mapping>
-
               <mapping>
                 <directory>${man.page.dir}</directory>
                 <filemode>644</filemode>
@@ -463,14 +402,10 @@
                   </source>
                 </sources>
               </mapping>
-
             </mappings>
           </configuration>
         </plugin>
-
       </plugins>
-
     </pluginManagement>
-
   </build>
 </project>
