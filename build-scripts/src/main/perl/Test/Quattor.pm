@@ -63,12 +63,13 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
+use CAF::Service;
 
 =pod
 
 =item * C<$log_cmd>
 
-A boolean to enable logging of each command that is run via CAF::Process. 
+A boolean to enable logging of each command that is run via CAF::Process.
 Can also be set via the QUATTOR_TEST_LOG_CMD environment variable.
 
 =cut
@@ -167,7 +168,7 @@ my %configs;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
-                 command_history_reset command_history_ok);
+                 command_history_reset command_history_ok set_service_variant);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -503,12 +504,12 @@ sub command_history_reset
 
 =item C<command_history_ok>
 
-Given a list of commands, it checks the C<@command_history> if all commands were 
+Given a list of commands, it checks the C<@command_history> if all commands were
 called in the given order (it allows for other commands to exist inbetween).
 The commands are interpreted as regular expressions.
 
-E.g. if C<@command_history> is (x1, x2, x3) then 
-C<command_history_ok([x1,X3])> returns 1 (Both x1 and x3 were called and in that order, 
+E.g. if C<@command_history> is (x1, x2, x3) then
+C<command_history_ok([x1,X3])> returns 1 (Both x1 and x3 were called and in that order,
 the fact that x2 was also called but not checked is allowed.).
 C<command_history_ok([x3,x2])> returns 0 (wrong order),
 C<command_history_ok([x1,x4])> returns 0 (no x4 command).
@@ -526,10 +527,55 @@ sub command_history_ok
         return 0 if !defined($index) or $index <= $lastidx;
         $lastidx = $index;
     };
-    # in principle, when you get here, all is ok.                                                                                                                                        
-    # but at least 1 command should be found, so lastidx should be > -1                                                                                                                  
+    # in principle, when you get here, all is ok.
+    # but at least 1 command should be found, so lastidx should be > -1
     return $lastidx > -1;
 }
+
+=pod
+
+=item C<set_service_variant>
+
+Sets the C<CAF::Service> variant to the one given in the command line:
+
+=over
+
+=item * C<linux_sysv>
+
+Linux SysV, e.g, C</sbin/service foo start>
+
+=item * C<linux_systemd>
+
+Linux, Systemd variant.
+
+=item * C<solaris>
+
+Solaris and SMF variant.
+
+=back
+
+It defaults to C<linux_sysv>.
+
+=cut
+
+sub set_service_variant
+{
+    my $variant = shift;
+
+    # More methods will be added as we agree on them in the
+    # CAF::Service API.
+    foreach my $method (qw(start stop restart create_process)) {
+        no strict 'refs';
+        if (CAF::Service->can("${method}_$variant")) {
+            *{"CAF::Service::$method"} =
+                *{"CAF::Service::${method}_$variant"};
+        } else {
+            croak "Unsupported variant $variant";
+        }
+    }
+}
+
+set_service_variant("linux_sysv");
 
 1;
 
