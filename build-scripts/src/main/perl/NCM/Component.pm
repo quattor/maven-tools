@@ -48,7 +48,11 @@ foreach my $i (qw(verbose error info ok debug warn report log)) {
 	my $self = shift;
 	$self->{uc($i)}++;
 	return $self->{log}->$i(@_) if $self->{log};
-    }
+    };
+    *{ucfirst($i)} = sub {
+        warn "Method ", ucfirst($i), " shouldn't be used. Use $i instead";
+        return $i->(@_);
+    };
 }
 
 use strict 'refs';
@@ -59,6 +63,22 @@ sub prefix
 
     my @ns = split(/::/, ref($self));
     return "/software/components/$ns[-1]";
+}
+
+sub unescape
+{
+    my ($self, $str) = @_;
+
+    $str =~ s!(_[0-9a-f]{2})!sprintf("%c",hex($1))!eg;
+    return $str;
+}
+
+sub escape
+{
+    my ($self, $str) = @_;
+
+    $str =~ s/(^[0-9]|[^a-zA-Z0-9])/sprintf("_%lx", ord($1))/eg;
+    return $str;
 }
 
 1;
