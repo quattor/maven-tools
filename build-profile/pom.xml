@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.37-SNAPSHOT</version>
+    <version>1.37</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,21 +21,21 @@
     <snapshot.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-snapshots/</snapshot.url>
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
-    <unittest></unittest>
+    <unittest />
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.quattor.maven</groupId>
       <artifactId>assemblies</artifactId>
       <type>tar.gz</type>
-      <version>1.37-SNAPSHOT</version>
+      <version>1.37</version>
       <classifier>assemblies</classifier>
     </dependency>
     <dependency>
       <groupId>org.quattor.maven</groupId>
       <artifactId>build-scripts</artifactId>
       <type>tar.gz</type>
-      <version>1.37-SNAPSHOT</version>
+      <version>1.37</version>
       <classifier>scripts</classifier>
     </dependency>
   </dependencies>
@@ -324,7 +324,7 @@
         <plugin>
           <groupId>org.quattor.maven</groupId>
           <artifactId>quattor-build-maven-plugin</artifactId>
-          <version>1.37-SNAPSHOT</version>
+          <version>1.37</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
