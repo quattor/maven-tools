@@ -54,9 +54,6 @@ use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
 use IO::String;
-use EDG::WP4::CCM::Configuration;
-use EDG::WP4::CCM::CacheManager;
-use EDG::WP4::CCM::Fetch;
 use base 'Exporter';
 use Cwd;
 use Carp qw(carp croak);
@@ -64,6 +61,7 @@ use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
 use CAF::Service;
+use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
 
 =pod
 
@@ -164,8 +162,6 @@ CAF::Process commands that were run.
 my @command_history = ();
 
 
-my %configs;
-
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant);
@@ -180,54 +176,10 @@ our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
 our $iostring = Test::MockModule->new("IO::String");
 
-# Prepares a cache for the profile given as an argument. This means
-# compiling the profile, fetching it and saving the binary cache
-# wherever the CCM configuration tells us.
-sub prepare_profile_cache
-{
-    my ($profile) = @_;
-
-    my $dir = getcwd();
-
-    my $cache = "target/test/cache/$profile";
-    mkpath($cache);
-
-    my $fh = CAF::FileWriter->new("$cache/global.lock");
-    print $fh "no\n";
-    $fh->close();
-    $fh = CAF::FileWriter->new("$cache/current.cid");
-    print $fh "1\n";
-    $fh->close();
-    $fh = CAF::FileWriter->new("$cache/latest.cid");
-    print $fh "1\n";
-
-    my $d = getcwd();
-
-    chdir("src/test/resources") or croak("Couldn't enter resources directory");
-
-    system(qw(panc --formats json --output-dir ../../../target/test/profiles), "$profile.pan") == 0
-        or croak("Unable to compile profile $profile");
-    chdir($d);
-    my $f = EDG::WP4::CCM::Fetch->new({
-                                       FOREIGN => 0,
-                                       CONFIG => 'src/test/resources/ccm.cfg',
-                                       CACHE_ROOT => $cache,
-                                       PROFILE_URL => "file://$dir/target/test/profiles/$profile.json",
-                                       })
-        or croak ("Couldn't create fetch object");
-    $f->{CACHE_ROOT} = $cache;
-    $f->fetchProfile() or croak "Unable to fetch profile $profile";
-
-    my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
-    $configs{$profile} = $cm->getUnlockedConfiguration();
-}
-
-
 sub import
 {
     my $class = shift;
 
-    mkpath("target/test/profiles");
     foreach my $pf (@_) {
         prepare_profile_cache($pf);
     }
@@ -421,23 +373,6 @@ sub get_command
         return $commands_run{$cmd};
     }
     return undef;
-}
-
-=pod
-
-=item C<get_config_for_profile>
-
-Returns a configuration object for the profile given as an
-argument. The profile should be one of the arguments given to this
-module when loading it.
-
-=cut
-
-sub get_config_for_profile
-{
-    my ($profile) = @_;
-
-    return $configs{$profile};
 }
 
 =pod
