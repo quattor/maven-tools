@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 =pod
 
 =head1 DESCRIPTION
@@ -7,19 +10,19 @@ with no real logic.
 
 =cut
 
-package NCM::Component;
+package Test::Quattor::Component;
 
-use strict;
-use warnings;
 use parent qw(CAF::Object Exporter);
 use Template;
 use Template::Stash;
+use Readonly;
 
 our @EXPORT = qw($NoAction);
 
 our $NoAction;
 $Template::Stash::PRIVATE = undef;
 
+Readonly my $RELATIVE_TEMPLATE_INCLUDE_PATH => 'target/share/templates/quattor';
 
 sub _initialize
 {
@@ -28,9 +31,9 @@ sub _initialize
     $self->{name} = $name;
     $self->{log} = $log || $main::this_app;
 
-    $self->{template} = Template->new(INCLUDE_PATH =>
-				      'target/share/templates/quattor',
-				      #DEBUG => 'undef'
+    $self->{template} = Template->new(
+        INCLUDE_PATH => $RELATIVE_TEMPLATE_INCLUDE_PATH,
+        #DEBUG => 'undef',
 	);
 
     return 1;
@@ -70,7 +73,7 @@ sub unescape
     my ($self, $str) = @_;
 
     warn "Called unescape through the component. This will be removed soon.",
-        "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element.";
+         "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element.";
 
     $str =~ s!(_[0-9a-f]{2})!sprintf("%c",hex($1))!eg;
     return $str;
