@@ -12,9 +12,7 @@ set_panc_options(debug => undef);
 
 is_deeply(Test::Quattor::ProfileCache::get_panc_options, {debug => undef}, "Options set");
 
-prepare_profile_cache('profilecache');
-
-my $cfg = get_config_for_profile('profilecache');
+my $cfg = prepare_profile_cache('profilecache');
 
 isa_ok($cfg, "EDG::WP4::CCM::Configuration", 
             "get_config_for_profile returns a EDG::WP4::CCM::Configuration instance");
@@ -22,6 +20,10 @@ isa_ok($cfg, "EDG::WP4::CCM::Configuration",
 is_deeply($cfg->getElement("/")->getTree(), 
             {test => "data"}, 
             "getTree of root element returns correct hashref");
+
+my $cfg2 = get_config_for_profile('profilecache');
+is_deeply($cfg, $cfg2, 
+          "get_config_for_profile fecthes same configuration object as returned by prepare_profile_cache");
 
 reset_panc_options();
 

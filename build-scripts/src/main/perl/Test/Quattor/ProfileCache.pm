@@ -121,6 +121,8 @@ Prepares a cache for the profile given as an argument. This means
 compiling the profile, fetching it and saving the binary cache
 wherever the CCM configuration tells us.
 
+Returns the configuration object for this profile.
+
 =cut
 
 sub prepare_profile_cache
@@ -162,6 +164,8 @@ sub prepare_profile_cache
 
     my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
     $configs{$profile} = $cm->getUnlockedConfiguration();
+    
+    return $configs{$profile};
 }
 
 =pod
