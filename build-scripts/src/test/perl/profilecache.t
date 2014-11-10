@@ -3,7 +3,9 @@ use warnings;
 
 use Test::More;
 
-use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile set_panc_options reset_panc_options);
+use Cwd;
+
+use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile set_profile_cache_options set_panc_options reset_panc_options);
 
 # Can't have NoAction here, since no CAF mocking happens
 # and otherwise nothing would be written
@@ -28,5 +30,19 @@ is_deeply($cfg, $cfg2,
 reset_panc_options();
 
 is_deeply(Test::Quattor::ProfileCache::get_panc_options, {}, "Options reset");
+
+# verify defaults; they shouldn't "just" change
+my $currentdir = getcwd();
+my $dirs = Test::Quattor::ProfileCache::get_profile_cache_dirs();
+is_deeply($dirs, {
+    resources => "$currentdir/src/test/resources",
+    profiles => "$currentdir/target/test/profiles",
+    cache => "$currentdir/target/test/cache",
+    }, "Default profile_cache directories");
+
+set_profile_cache_options(resources => 'myresources');
+$dirs = Test::Quattor::ProfileCache::get_profile_cache_dirs();
+is($dirs->{resources}, "$currentdir/myresources", 
+    "Set and retrieved custom profile_cache resources dir");
 
 done_testing();
