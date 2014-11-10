@@ -5,14 +5,10 @@ use Test::More;
 
 use Cwd;
 
-use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile set_profile_cache_options set_panc_options reset_panc_options);
+use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile set_profile_cache_options);
 
 # Can't have NoAction here, since no CAF mocking happens
 # and otherwise nothing would be written
-
-set_panc_options(debug => undef);
-
-is_deeply(Test::Quattor::ProfileCache::get_panc_options, {debug => undef}, "Options set");
 
 my $cfg = prepare_profile_cache('profilecache');
 
@@ -26,10 +22,6 @@ is_deeply($cfg->getElement("/")->getTree(),
 my $cfg2 = get_config_for_profile('profilecache');
 is_deeply($cfg, $cfg2, 
           "get_config_for_profile fecthes same configuration object as returned by prepare_profile_cache");
-
-reset_panc_options();
-
-is_deeply(Test::Quattor::ProfileCache::get_panc_options, {}, "Options reset");
 
 # verify defaults; they shouldn't "just" change
 my $currentdir = getcwd();
