@@ -26,6 +26,15 @@ Readonly::Hash my %DEFAULT_PROFILE_CACHE_DIRS => {
     cache => "target/test/cache",
 };
 
+Readonly my $CCM_CONFIG_DEFAULT_DATA => <<"EOF";
+debug 0
+get_timeout 1
+profile http://www.quattor.org
+cache_root $DEFAULT_PROFILE_CACHE_DIRS{cache}
+retrieve_wait 0
+retrieve_retries 1
+EOF
+
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
                  set_profile_cache_options);
 
@@ -128,10 +137,24 @@ sub prepare_profile_cache
     # Compile profiles
     panc($profile, $dirs->{resources}, $dirs->{profiles});
 
+    # Support non-existing ccm.cfg 
+    # (also prevents having to ship same file over and over again)
+    my $ccmconfig = "$dirs->{resources}/ccm.cfg";
+    if( ! -f $ccmconfig) {
+        # Make a new default one
+        note("Creating default ccm.cfg in $dirs->{cache}");
+        $ccmconfig = "$dirs->{cache}/ccm.cfg";
+        if (! -f $ccmconfig) {
+            my $fh = CAF::FileWriter->new($ccmconfig);
+            print $fh $CCM_CONFIG_DEFAULT_DATA;
+            $fh->close();
+        }
+    }
+
     # Setup CCM
     my $f = EDG::WP4::CCM::Fetch->new({
                FOREIGN => 0,
-               CONFIG => "$dirs->{resources}/ccm.cfg",
+               CONFIG => $ccmconfig,
                CACHE_ROOT => $cache,
                PROFILE_URL => "file://$dirs->{profiles}/$profile.json",
                })
