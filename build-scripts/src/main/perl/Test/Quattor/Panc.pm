@@ -91,9 +91,10 @@ sub panc
         push(@panccmd, "--$option");
         # support options like --debug with no value
         push(@panccmd, $value) if (defined($value));
-    }        
-    push(@panccmd, "$profile.pan");
-    
+    }
+    $profile .= ".pan" if ($profile !~ m/\.pan$/ );
+    push(@panccmd, $profile);
+
     note("Pan compiler called with: ".join(" ", @panccmd));
     system(@panccmd) == 0
         or croak("Unable to compile profile $profile");
