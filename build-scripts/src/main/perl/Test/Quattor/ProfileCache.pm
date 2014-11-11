@@ -17,6 +17,7 @@ use Test::Quattor::Panc qw(panc);
 use EDG::WP4::CCM::Configuration;
 use EDG::WP4::CCM::CacheManager;
 use EDG::WP4::CCM::Fetch;
+use EDG::WP4::CCM::Element qw(escape unescape);
 
 use Readonly;
 
@@ -102,6 +103,26 @@ sub get_profile_cache_dirs
     return \%dirs;
 }
 
+# convert e.g. absolute paths to usable name
+sub profile_cache_name
+{
+    my ($profile) = @_;
+    
+    my $dirs = get_profile_cache_dirs();
+    my $profilename = $profile;
+    # strip extension
+    $profilename =~ s/\.pan$//; 
+    # strip resources dir (if any)
+    $profilename =~ s/^$dirs->{resources}\/+//;
+    # escape final name (to deal with / etc etc)
+    $profilename = escape($profilename);
+    
+    note("Converted profile $profile in name $profilename") if ($profile ne $profilename);
+
+    return $profilename;
+    
+}
+
 =pod
 
 =head2 prepare_profile_cache
@@ -120,7 +141,9 @@ sub prepare_profile_cache
 
     my $dirs = get_profile_cache_dirs();
 
-    my $cache = "$dirs->{cache}/$profile";
+    my $profilename = profile_cache_name($profile);
+
+    my $cache = "$dirs->{cache}/$profilename";
 
     mkpath($cache);
 
@@ -156,16 +179,16 @@ sub prepare_profile_cache
                FOREIGN => 0,
                CONFIG => $ccmconfig,
                CACHE_ROOT => $cache,
-               PROFILE_URL => "file://$dirs->{profiles}/$profile.json",
+               PROFILE_URL => "file://$dirs->{profiles}/".unescape($profilename).".json",
                })
         or croak ("Couldn't create fetch object");
     $f->{CACHE_ROOT} = $cache;
     $f->fetchProfile() or croak "Unable to fetch profile $profile";
 
     my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
-    $configs{$profile} = $cm->getUnlockedConfiguration();
+    $configs{$profilename} = $cm->getUnlockedConfiguration();
     
-    return $configs{$profile};
+    return $configs{$profilename};
 }
 
 =pod
@@ -182,7 +205,7 @@ sub get_config_for_profile
 {
     my ($profile) = @_;
 
-    return $configs{$profile};
+    return $configs{profile_cache_name($profile)};
 }
 
 1;
