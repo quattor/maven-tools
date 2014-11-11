@@ -84,7 +84,7 @@ sub escape
     my ($self, $str) = @_;
 
     warn "Called escape() through the component. This will be removed soon.",
-        "Please upgrade your code to use the version supplied by EDG::WP4::CC::Element.";
+        "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element.";
 
     $str =~ s/(^[0-9]|[^a-zA-Z0-9])/sprintf("_%lx", ord($1))/eg;
     return $str;
