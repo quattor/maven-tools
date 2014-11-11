@@ -11,7 +11,9 @@ use Cwd;
 use Carp qw(carp croak);
 use File::Path qw(mkpath);
 
-our @EXPORT = qw(panc set_panc_options reset_panc_options);
+our @EXPORT = qw(panc 
+                 set_panc_options reset_panc_options get_panc_options
+                 set_panc_includepath get_panc_includepath);
 
 =pod
 
@@ -55,12 +57,56 @@ sub reset_panc_options
     %pancoptions = ();
 }
 
+=pod
 
-# get_panc_options returns hash reference to the additional pancoptions
-# test function only?
+head2 get_panc_options 
+
+Returns the hash reference to the additional pancoptions.
+
+=cut
+
 sub get_panc_options
 {
     return \%pancoptions;
+}
+
+=pod
+
+=head2 set_panc_includepath
+
+Set the inlcudedirs option to the directories passed.
+If undef is passed, remove the 'includepath' option.
+
+=cut
+
+sub set_panc_includepath
+{
+    my (@dirs) = @_;
+    
+    if (@dirs) {
+        $pancoptions{"include-path"} = join(':', @dirs);
+    } else {
+        delete $pancoptions{"include-path"};
+    }
+        
+}
+
+=pod
+
+=head2 get_panc_includepath
+
+Return an array reference with the 'includepath' directories. 
+
+=cut
+
+sub get_panc_includepath
+{
+    if (exists($pancoptions{"include-path"})) {
+        my @dirs = split(':', $pancoptions{"include-path"});
+        return \@dirs;
+    } else {
+        return [];
+    }
 }
 
 =pod
