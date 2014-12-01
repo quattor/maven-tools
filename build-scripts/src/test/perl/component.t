@@ -8,8 +8,8 @@ use NCM::Component;
 use EDG::WP4::CCM::Element qw(escape unescape);
 
 
-my $c = Test::Quattor::Component->new();
-my $nc = NCM::Component->new();
+my $test_comp = Test::Quattor::Component->new();
+my $ncm_comp = NCM::Component->new();
 
 # A method to run shared tests on Test::Quattor::Component and NCM::Component
 sub run
@@ -31,8 +31,8 @@ sub run
     is($txt, $inst->unescape($inst->escape($txt)), "unescape(escape()) returns original");
 }
 
-run($c, "Test::Quattor::Component");
-run($nc, "NCM::Component");
+run($test_comp, "Test::Quattor::Component");
+run($ncm_comp, "NCM::Component");
 
 
 done_testing();

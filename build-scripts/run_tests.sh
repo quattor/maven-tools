@@ -1,7 +1,5 @@
 #!/bin/bash
 
-here=$PWD
+rm -Rf $PWD/target
 
-rm -Rf $here/target
-
-prove -r -v -I$here/src/main/perl -I/usr/lib/perl src/test/perl/$1
+prove -r -v -I$PWD/src/main/perl -I/usr/lib/perl src/test/perl/$1

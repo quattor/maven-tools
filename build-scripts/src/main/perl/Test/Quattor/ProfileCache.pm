@@ -109,17 +109,14 @@ sub profile_cache_name
     my ($profile) = @_;
     
     my $dirs = get_profile_cache_dirs();
-    my $profilename = $profile;
-    # strip extension
-    $profilename =~ s/\.pan$//; 
-    # strip resources dir (if any)
-    $profilename =~ s/^$dirs->{resources}\/+//;
-    # escape final name (to deal with / etc etc)
-    $profilename = escape($profilename);
+    my $cachename = $profile;
+    $cachename =~ s/\.pan$//; 
+    $cachename =~ s/^$dirs->{resources}\/+//;
+    $cachename = escape($cachename);
     
-    note("Converted profile $profile in name $profilename") if ($profile ne $profilename);
+    note("Converted profile $profile in cache name $cachename") if ($profile ne $cachename);
 
-    return $profilename;
+    return $cachename;
     
 }
 
@@ -141,9 +138,9 @@ sub prepare_profile_cache
 
     my $dirs = get_profile_cache_dirs();
 
-    my $profilename = profile_cache_name($profile);
+    my $cachename = profile_cache_name($profile);
 
-    my $cache = "$dirs->{cache}/$profilename";
+    my $cache = "$dirs->{cache}/$cachename";
 
     mkpath($cache);
 
@@ -179,16 +176,16 @@ sub prepare_profile_cache
                FOREIGN => 0,
                CONFIG => $ccmconfig,
                CACHE_ROOT => $cache,
-               PROFILE_URL => "file://$dirs->{profiles}/".unescape($profilename).".json",
+               PROFILE_URL => "file://$dirs->{profiles}/".unescape($cachename).".json",
                })
         or croak ("Couldn't create fetch object");
     $f->{CACHE_ROOT} = $cache;
     $f->fetchProfile() or croak "Unable to fetch profile $profile";
 
     my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
-    $configs{$profilename} = $cm->getUnlockedConfiguration();
+    $configs{$cachename} = $cm->getUnlockedConfiguration();
     
-    return $configs{$profilename};
+    return $configs{$cachename};
 }
 
 =pod
