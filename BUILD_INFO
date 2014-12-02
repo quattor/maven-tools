@@ -7,19 +7,22 @@ sure that they aren't executed here.
 
 Use the following command options:
 
-$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' <goal> [goal...]
+$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' '-P!module-test' <goal> [goal...]
 
 To perform a release, do the following:
 
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
       clean release:prepare
 
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm" \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
       release:perform
 
 The backslashes are important to avoid shell expansion of the history. 
+
+'-P!module-test' allows to run tests in modules other than build-profile if
+PERL5LIB environment variable is defined.
 
 You cannot use --batch-mode at the moment because you need to enter
 your SourceForge password as well as the GPG key password.

@@ -264,6 +264,9 @@
         <property>
           <name>env.PERL5LIB</name>
         </property>
+        <file>
+          <missing>deactivate.module.test</missing>
+        </file>
       </activation>
       <build>
         <plugins>
