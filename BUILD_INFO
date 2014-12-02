@@ -1,7 +1,7 @@
 
 BUILD INFO:
 
-To build this project, two profiles must be explicitly deactivated.
+To build this project, three profiles must be explicitly deactivated.
 These are associated with the standard build pom, but we need to make
 sure that they aren't executed here.  
 
@@ -21,8 +21,13 @@ $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
 
 The backslashes are important to avoid shell expansion of the history. 
 
-'-P!module-test' allows to run tests in modules other than build-profile if
-PERL5LIB environment variable is defined.
+'-P!module-test' disable unit tests in build-profile even if PERL5LIB is defined
+(build-profile delivers a parent pom for other Quattor projects: unit tests
+don't make sense in this context). This allows to run unit tests in other modules.
+
+To run unit tests in build-scripts only, without building other modules, use:
+
+$ mvn -pl build-scripts test
 
 You cannot use --batch-mode at the moment because you need to enter
 your SourceForge password as well as the GPG key password.
