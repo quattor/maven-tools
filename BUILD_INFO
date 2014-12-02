@@ -29,6 +29,12 @@ To run unit tests in build-scripts only, without building other modules, use:
 
 $ mvn -pl build-scripts test
 
+When modifying maven build tools, it is possible to test a version snapshot without
+making a release. To do this, use the 'install' goal that will put the snapshot
+version in the local repository area defined in your ~m2/settings. To use this
+snapshot version, edit your module (e.g. configuration module) pom.xml and
+update the build-profile version to match the snapshot version.
+
 You cannot use --batch-mode at the moment because you need to enter
 your SourceForge password as well as the GPG key password.
 
