@@ -268,6 +268,10 @@ sub new_filewriter_open
 {
     my $f = $old_open->(@_);
 
+    my $fn = *$f->{filename};
+    delete $files_contents{$fn};
+    $files_contents{$fn} = $f;
+
     $files_contents{*$f->{filename}} = $f;
     return $f;
 }
@@ -276,7 +280,7 @@ sub new_filewriter_close
 {
     my ($self, @rest) = @_;
 
-    $desired_file_contents{*$self->{filename}} = $self->stringify;
+    $desired_file_contents{*$self->{filename}} = $self->stringify  if *$self->{save};
     return $old_close->(@_);
 }
 
