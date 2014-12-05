@@ -262,6 +262,7 @@ unit under tests has released it.
 =cut
 
 my $old_open = \&CAF::FileWriter::new;
+my $old_close = \&CAF::FileWriter::close;
 
 sub new_filewriter_open
 {
@@ -271,8 +272,17 @@ sub new_filewriter_open
     return $f;
 }
 
+sub new_filewriter_close
+{
+    my ($self, @rest) = @_;
+
+    $desired_file_contents{*$self->{filename}} = $self->stringify;
+    return $old_close->(@_);
+}
+
 $filewriter->mock("open", \&new_filewriter_open);
 $filewriter->mock("new", \&new_filewriter_open);
+$filewriter->mock("close", \&new_filewriter_close);
 
 
 =pod
