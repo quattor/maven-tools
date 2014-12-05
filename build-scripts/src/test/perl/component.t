@@ -12,7 +12,7 @@ my $test_comp = Test::Quattor::Component->new();
 my $ncm_comp = NCM::Component->new();
 
 # A method to run shared tests on Test::Quattor::Component and NCM::Component
-sub run
+sub test
 {
     my ($inst, $name) = @_;
 
@@ -31,8 +31,8 @@ sub run
     is($txt, $inst->unescape($inst->escape($txt)), "unescape(escape()) returns original");
 }
 
-run($test_comp, "Test::Quattor::Component");
-run($ncm_comp, "NCM::Component");
+test($test_comp, "Test::Quattor::Component");
+test($ncm_comp, "NCM::Component");
 
 
 done_testing();
