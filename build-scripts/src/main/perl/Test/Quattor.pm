@@ -161,10 +161,28 @@ CAF::Process commands that were run.
 
 my @command_history = ();
 
+=pod
+
+=item * C<caf_file_close_diff>
+
+A boolean to mimick the regular (i.e. when no C<NoAction> is set) behaviour of a 
+C<CAF::FileWriter> or C<CAF::FileEditor> C<close> (it returns wheter or not the 
+file changed). With C<NoAction> set, this check is skipped and C<undef> is returned.
+
+With this boolean set to true, contents difference is reported ( but not any chanegs 
+due to e.g. file permissions or anything else checked with C<LC::Check::file)>.
+
+Defaults to false (to keep regular C<NoAction> behaviour).
+
+=cut
+
+my $caf_file_close_diff = 0;
+
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
-                 command_history_reset command_history_ok set_service_variant);
+                 command_history_reset command_history_ok set_service_variant
+                 set_caf_file_close_diff);
 
 $main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
 
@@ -280,8 +298,21 @@ sub new_filewriter_close
 {
     my ($self, @rest) = @_;
 
-    $desired_file_contents{*$self->{filename}} = $self->stringify  if *$self->{save};
-    return $old_close->(@_);
+    my $ret;
+    my $current_content = $desired_file_contents{*$self->{filename}};
+    my $new_content = $self->stringify;
+
+    # keep the save value here, since save is forced to 0 in old_close with NoAction set
+    my $save = *$self->{save};
+
+    $desired_file_contents{*$self->{filename}} =  $new_content if $save;
+    $ret = $old_close->(@_);
+
+    if ($caf_file_close_diff && $save) {
+        $ret = (! defined($current_content)) || $current_content ne $new_content;
+    }
+    
+    return $ret;
 }
 
 $filewriter->mock("open", \&new_filewriter_open);
@@ -525,6 +556,20 @@ sub set_service_variant
 }
 
 set_service_variant("linux_sysv");
+
+=pod
+
+=item C<set_caf_file_close_diff>
+
+Set the C<caf_file_close_diff> boolean.
+
+=cut
+
+sub set_caf_file_close_diff
+{
+    my $state = shift;
+    $caf_file_close_diff = $state ? 1 :0;
+};
 
 1;
 
