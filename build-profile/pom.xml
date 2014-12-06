@@ -178,6 +178,7 @@
           <plugin>
             <groupId>org.quattor.pan</groupId>
             <artifactId>panc-maven-plugin</artifactId>
+            <version>10.2</version>
             <executions>
               <execution>
                 <id>check-generated-pan-syntax</id>
