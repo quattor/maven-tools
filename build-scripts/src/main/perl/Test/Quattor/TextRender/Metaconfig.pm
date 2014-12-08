@@ -61,6 +61,8 @@ If a specific version is to be tested (undef assumes no version).
 
 =back
 
+=back
+
 =cut
 
 sub _initialize

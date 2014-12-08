@@ -55,10 +55,18 @@ my (%configs, %profilecacheoptions);
 
 Set additional options for prepare_profile_cache
 
-=item cache, resources and/or profiles
-
 Set specific values for the C<cache>, C<resources> and/or C<profiles> directory.
 Will be used by C<get_profile_cache_dirs>
+
+=over
+
+=item cache
+
+=item resources 
+
+=item profiles
+
+=back
 
 =cut
 
@@ -190,7 +198,7 @@ sub prepare_profile_cache
 
 =pod
 
-=item C<get_config_for_profile>
+=head2 C<get_config_for_profile>
 
 Returns a configuration object for the profile given as an
 argument. The profile should be one of the arguments given to this

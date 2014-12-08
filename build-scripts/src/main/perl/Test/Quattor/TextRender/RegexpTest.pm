@@ -51,6 +51,8 @@ The includepath for CAF::TextRender.
 
 =back
 
+=back
+
 =cut
 
 # Render the text using config and flags-renderpath

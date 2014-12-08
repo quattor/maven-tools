@@ -70,6 +70,8 @@ The text to test.
 
 =back
 
+=back
+
 =cut
 
 sub _initialize
@@ -299,6 +301,7 @@ Lines starting with C<\s*#{3} > (trailing space!) are comments.
 
 Lines ending with C<\s#{3}> are interpreted as having options set. 
 Supported options 
+
 =over
 
 =item COUNT

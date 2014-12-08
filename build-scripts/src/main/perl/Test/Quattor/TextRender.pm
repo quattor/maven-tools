@@ -86,8 +86,6 @@ Use with care, better to fix the actual problem.
 main reason of existence is to unittest 
 these test modules).
 
-=over
-
 =item invalidtt
 
 Array reference of invalid TT files to pass the C<test_gather_tt> test method.
