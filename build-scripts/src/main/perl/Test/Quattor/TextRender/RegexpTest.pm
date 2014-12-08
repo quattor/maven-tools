@@ -70,11 +70,13 @@ sub render
         $srv->{contents},
         eol         => 0,
         includepath => $self->{includepath},
+        log         => $self, 
     );
 
     $self->{text} = $self->{trd}->get_text;
-    $self->verbose("Rendertext:\n$self->{text}");
-
+    if(defined($self->{text})) {
+        $self->verbose("Rendertext:\n$self->{text}");
+    }
 }
 
 # Implement the preprocess method by rendering the text as defined in the flags

@@ -15,6 +15,7 @@ use Test::Quattor::Panc qw(set_panc_includepath);
 
 use Test::Quattor::TextRender::Suite;
 
+use File::Path qw(mkpath);
 use Cwd qw(getcwd abs_path);
 
 use base qw(Test::Quattor::TextRender);
@@ -70,11 +71,8 @@ sub _initialize
     my ($self) = @_;
 
     if (!$self->{basepath}) {
-
-        # TODO determine final path in tests
-        $self->{basepath} = getcwd() . "/../metaconfig";
+        $self->{basepath} = getcwd() . "/src/main/metaconfig";
     }
-
     ok($self->{service}, "service $self->{service} defined for ttpath");
 
     # derive ttpath from service
@@ -82,6 +80,14 @@ sub _initialize
 
     $self->{panpath}      = "$self->{ttpath}/pan";
     $self->{pannamespace} = "metaconfig/$self->{service}";
+
+    if (!$self->{namespacepath}) {
+        my $dest = getcwd() . "/target/pan";
+        if (!-d $dest) {
+            mkpath($dest)
+        }
+        $self->{namespacepath} = $dest;
+    }
 
     $self->SUPER::_initialize();
 

@@ -384,6 +384,11 @@ sub match
 {
     my ($self) = @_;
 
+    if (!defined($self->{text})) {
+        $self->error("No text to match defined");
+        return;
+    }
+    
     foreach my $test (@{$self->{tests}}) {
 
         # always make all matches for the whole text
@@ -415,6 +420,11 @@ sub postprocess
         my $test  = $self->{tests}->[$idx];
         my $match = $self->{matches}->[$idx];
         my $msg   = "for test idx $idx (pattern $test->{reg})";
+
+        if(! defined($match->{count})) {
+            $self->notok("Match count is missing/undefined. Something went wrong before.");
+            next;
+        }
 
         # Verify that the (global) count is ok.
         if (exists($test->{count})) {

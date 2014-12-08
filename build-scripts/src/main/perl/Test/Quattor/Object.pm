@@ -69,6 +69,20 @@ sub verbose
 
 =pod
 
+=head2 debug
+
+verbose logger, ignores debug level
+
+=cut
+
+sub debug
+{
+    my ($self, $level, @args) = @_;
+    return $self->verbose(@args);
+}
+
+=pod
+
 =head2 error
 
 error-type logger, calls diag

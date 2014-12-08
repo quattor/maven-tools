@@ -20,7 +20,7 @@ isa_ok($dt, "Test::Quattor::Object", "Returns Test::Quattor::Object instance");
 
 is($dt->{x}, 'x', "Set attribute x");
 
-my @methods = qw(info verbose error notok gather_pan);
+my @methods = qw(info verbose debug error notok gather_pan);
 foreach my $method (@methods) {
     ok($dt->can($method), "Object instance has $method method");
 }
