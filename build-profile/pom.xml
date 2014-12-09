@@ -13,9 +13,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <RELEASE>${rpm.release}</RELEASE>
     <build-info>
-      #
-      # ${project.artifactId}, ${project.version}, ${RELEASE}, ${maven.build.timestamp}
-      #
+#
+# ${project.artifactId}, ${project.version}, ${RELEASE}, ${maven.build.timestamp}
+#
     </build-info>
     <release.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-releases</release.url>
     <snapshot.url>http://stratuslab-srv01.lal.in2p3.fr:8081/content/repositories/quattor-snapshots/</snapshot.url>
