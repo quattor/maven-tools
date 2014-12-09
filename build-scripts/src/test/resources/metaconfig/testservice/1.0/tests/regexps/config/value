@@ -1,0 +1,6 @@
+Simple test
+---
+/test/file
+---
+^default$
+^EXTRA more$

@@ -1,0 +1,8 @@
+[% FOREACH p IN data %]
+{
+[%   FILTER indent %]
+[%      p.data %]
+[%      INCLUDE 'metaconfig/testservice/2.0/extra.tt' data=p.extra %]
+[%   END %]
+}
+[% END %]

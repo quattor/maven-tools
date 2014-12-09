@@ -1,0 +1,2 @@
+[% data %]
+[% INCLUDE 'metaconfig/testservice/1.0/extra.tt' data=extra %]

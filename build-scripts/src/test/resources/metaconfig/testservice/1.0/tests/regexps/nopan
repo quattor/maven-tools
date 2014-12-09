@@ -1,0 +1,9 @@
+Nopan
+---
+//metaconfig2
+casesensitive
+ordered
+singleline=0
+---
+^default_simple$
+^EXTRA more_simple$

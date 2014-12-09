@@ -1,0 +1,2 @@
+[% # needs quotes around the inlcude path
+   INCLUDE metaconfig/testservice/1.0/extra.tt data=extra %]

@@ -41,8 +41,6 @@ being run, and allow for inspection by a test.
 This is done with several functions, see B<Redefined functions> below,
 that control the following variables:
 
-=over 4
-
 =cut
 
 package Test::Quattor;
@@ -64,6 +62,8 @@ use CAF::Service;
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
 
 =pod
+
+=over
 
 =item * C<$log_cmd>
 
