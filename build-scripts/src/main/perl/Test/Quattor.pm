@@ -305,6 +305,10 @@ sub new_filewriter_close
     # keep the save value here, since save is forced to 0 in old_close with NoAction set
     my $save = *$self->{save};
 
+    if ($self->noAction()) {
+        $self->cancel();
+    }
+    
     $desired_file_contents{*$self->{filename}} =  $new_content if $save;
     $ret = $old_close->(@_);
 
