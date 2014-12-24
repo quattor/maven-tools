@@ -233,7 +233,7 @@ sub test_gather_tt
     my ($tts, $invalid_tts) = $self->gather_tt();
 
     my $ntts = scalar @$tts;
-    ok($tts, "found $ntts TT files in ttpath $self->{ttpath}");
+    ok($ntts, "found $ntts TT files in ttpath $self->{ttpath}");
     $self->verbose("found $ntts TT files: ", join(", ", @$tts));
 
     # Fail test and log any invalid TTs
