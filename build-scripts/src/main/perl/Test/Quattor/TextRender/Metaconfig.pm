@@ -107,6 +107,8 @@ sub _initialize
     $self->{relpath} = 'metaconfig';
     $self->{includepath} = dirname($self->{basepath});
 
+    $self->{testspath} = "$self->{basepath}/$self->{service}";
+
     $self->SUPER::_initialize();
 
 }

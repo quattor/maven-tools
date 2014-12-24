@@ -6,6 +6,9 @@ use Test::Quattor::TextRender;
 
 use Test::Quattor::TextRender::Suite;
 
+# only use it like this for this particular unittest
+use Test::Quattor::TextRender::Base;
+
 use Test::Quattor::Panc qw(set_panc_includepath);
 
 use Cwd qw(abs_path getcwd);
@@ -26,7 +29,6 @@ my $tr = Test::Quattor::TextRender->new(
     pannamespace => 'metaconfig/testservice',
 );
 $tr->make_namespace($tr->{panpath}, $tr->{pannamespace});
-set_panc_includepath($tr->{namespacepath}, abs_path($ENV{QUATTOR_TEST_TEMPLATE_LIBRARY_CORE}));
 
 diag("Start actual Suite tests v2.0");
 
@@ -36,6 +38,9 @@ my $st = Test::Quattor::TextRender::Suite->new(
     includepath => $base,
     testspath => "$base/metaconfig/testservice/2.0/tests",
     );
+
+set_panc_includepath($tr->{namespacepath}, 
+    Test::Quattor::TextRender::Base::get_template_library_core($st));
 
 $st->test();
 

@@ -94,7 +94,7 @@ sub test
     $self->make_namespace($self->{panpath}, $self->{pannamespace});
     set_panc_includepath($self->{namespacepath}, $self->get_template_library_core);
 
-    my $testspath = "$self->{basepath}/$self->{service}";
+    my $testspath = $self->{testspath};
     $testspath .= "/$self->{version}" if (exists($self->{version}));
 
     my $base = getcwd() . "/src/test/resources";

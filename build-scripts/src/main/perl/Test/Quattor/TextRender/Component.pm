@@ -107,6 +107,8 @@ sub _initialize
     ok($self->{pannamespace}, "Pannamespace set " .  ($self->{pannamespace} || "<undef>"));
     ok(-d $self->{panpath},   "Panpath directory " . ($self->{panpath} || "<undef>"));
 
+    $self->{testspath} = $self->{basepath};
+
     $self->SUPER::_initialize();
 
 }

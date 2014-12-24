@@ -6,7 +6,7 @@ use Test::Quattor::TextRender;
 
 use Test::Quattor::TextRender::Suite;
 
-# only use it like this for this particula unittest
+# only use it like this for this particular unittest
 use Test::Quattor::TextRender::Base;
 
 use Test::Quattor::Panc qw(set_panc_includepath);
