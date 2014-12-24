@@ -39,6 +39,14 @@ To be used as
         version => '1.2',
         )->test();
 
+The tests require access to the C<template-library-core>
+repository for using standard types in the schema files.
+
+By default, the C<template-library-core> is expected to be in the 
+same directory as the one this test is being ran from.
+One can also specify the location via the C<QUATTOR_TEST_TEMPLATE_LIBRARY_CORE> 
+environment variable.
+
 =head2 Public methods
 
 =over
@@ -103,9 +111,20 @@ sub _initialize
 
 }
 
-#
-# Return path to template-library-core to allow "include 'pan/types';"
-#
+=pod 
+
+=head2 get_template_library_core
+
+Return path to template-library-core to allow "include 'pan/types';" 
+and friends being used in the templates (in particular the schema).
+
+By default, the C<template-library-core> is expected to be in the 
+same directory as the one this test is being ran from.
+One can also specify the location via the C<QUATTOR_TEST_TEMPLATE_LIBRARY_CORE> 
+environment variable.
+
+=cut
+
 sub get_template_library_core
 {
     # only for logging
@@ -131,7 +150,7 @@ sub get_template_library_core
         $tlc = abs_path($tlc);
         $self->verbose("template-library-core path found $tlc");
     } else {
-        $self->error(
+        $self->notok(
             "No template-library-core path found (set QUATTOR_TEST_TEMPLATE_LIBRARY_CORE?)");
     }
     return $tlc;
