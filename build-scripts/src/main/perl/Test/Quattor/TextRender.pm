@@ -76,6 +76,11 @@ relative to the current working directory.
 
 If no value is set, a random directory will be used.
 
+=item panunroll
+
+Boolean to force or disable the "unrolling" of the pan templates
+in the namespacepath with correct pannamespace. Default is true.
+
 =item expect
 
 Expect is a hash reference to bypass some built-in tests 
@@ -159,6 +164,11 @@ sub _sanitize
         $self->{namespacepath} = tempdir(DIR => $dest);
     }
     ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
+
+    if (! defined($self->{panunroll})) {
+        $self->{panunroll} = 1;
+    }
+    ok($self->{panunroll}, "panunroll $self->{panunroll}");
 
 }
 
@@ -290,24 +300,29 @@ sub make_namespace
 
     my @copies;
     while (my ($pan, $value) = each %$pans) {
+        my $dest = $pan;
+        if ($self->{panunroll}) {
 
-        # pan is relative wrt basepath; copy it to $destination/
-        my $dest    = "$self->{namespacepath}/$value->{expected}";
-        my $destdir = dirname($dest);
-        if (!-d $destdir) {
-            mkpath($destdir)
-                or croak "make_namespace Unable to create directory $destdir $!";
-        }
+            # pan is relative wrt basepath; copy it to $destination/
+            $dest = "$self->{namespacepath}/$value->{expected}";
+            my $destdir = dirname($dest);
+            if (!-d $destdir) {
+                mkpath($destdir)
+                    or croak "make_namespace Unable to create directory $destdir $!";
+            }
 
-        my $src;
-        if ($pan =~ m/^\//) {
-            $src = $pan;
-            $self->verbose("Absolute pan source $src");
+            my $src;
+            if ($pan =~ m/^\//) {
+                $src = $pan;
+                $self->verbose("Absolute pan source $src");
+            } else {
+                $src = "$self->{basepath}/$pan";
+                $self->verbose("Pan source $src from relative $pan");
+            }
+            copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
         } else {
-            $src = "$self->{basepath}/$pan";
-            $self->verbose("Pan source $src from relative $pan");
+            $self->verbose("No unroll of pantemplate $dest.");
         }
-        copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
         push(@copies, $dest);
     }
 
