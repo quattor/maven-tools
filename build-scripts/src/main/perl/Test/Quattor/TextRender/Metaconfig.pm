@@ -60,6 +60,11 @@ The name of the service (the service is a subdirectory of the basepath).
 
 If a specific version is to be tested (undef assumes no version).
 
+=item usett
+
+Force (or disable) the TT gather and verification test. E.g. disable when a 
+builtin TextRender module is used. (By default, C<usett> is true).    
+
 =back
 
 =back
@@ -69,6 +74,11 @@ If a specific version is to be tested (undef assumes no version).
 sub _initialize
 {
     my ($self) = @_;
+
+    if(! defined($self->{usett})) {
+        $self->{usett} = 1;
+    }
+    $self->verbose("usett $self->{usett}");
 
     if (!$self->{basepath}) {
         $self->{basepath} = getcwd() . "/src/main/metaconfig";
@@ -139,7 +149,12 @@ sub test
 {
     my ($self) = @_;
 
-    $self->test_gather_tt();
+    if ($self->{usett}) {
+        $self->test_gather_tt();
+    } else {
+        $self->info("TT gather and verification test disabled");
+    };
+
     $self->test_gather_pan();
 
     # Set panc include dirs
