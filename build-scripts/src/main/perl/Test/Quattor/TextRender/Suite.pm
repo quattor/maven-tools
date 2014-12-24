@@ -74,12 +74,23 @@ sub _initialize
 {
     my ($self) = @_;
 
+    # includepath
     $self->{includepath} = abs_path($self->{includepath});
-    ok(-d $self->{includepath}, "includepath $self->{includepath} exists");
+    if (defined($self->{includepath})) {
+        ok(-d $self->{includepath}, "includepath $self->{includepath} exists");
+    } else {
+        $self->notok("includepath not defined");
+    }
 
+    # testspath
     $self->{testspath} = abs_path($self->{testspath});
-    ok(-d $self->{testspath}, "testspath $self->{testspath} exists");
+    if (defined($self->{testspath})) {
+        ok(-d $self->{testspath}, "testspath $self->{testspath} exists");
+    } else {
+        $self->notok("testspath not defined");
+    }
 
+    # profilespath
     if ($self->{profilespath}) {
         if ($self->{profilespath} !~ m/^\//) {
             $self->verbose("Relative profilespath $self->{profilespath} found");
@@ -89,8 +100,13 @@ sub _initialize
         $self->{profilespath} = "$self->{testspath}/profiles";
     }
     $self->{profilespath} = abs_path($self->{profilespath});
-    ok(-d $self->{profilespath}, "profilespath $self->{profilespath} exists");
+    if (defined($self->{profilespath})) {
+        ok(-d $self->{profilespath}, "profilespath $self->{profilespath} exists");
+    } else {
+        $self->notok("profilespath not defined");
+    }
 
+    # regexpspath
     if ($self->{regexpspath}) {
         if ($self->{regexpspath} !~ m/^\//) {
             $self->verbose("Relative regexpspath $self->{regexpspath} found");
@@ -100,7 +116,11 @@ sub _initialize
         $self->{regexpspath} = "$self->{testspath}/regexps";
     }
     $self->{regexpspath} = abs_path($self->{regexpspath});
-    ok(-d $self->{regexpspath}, "Init regexpspath $self->{regexpspath} exists");
+    if (defined($self->{regexpspath})) {
+        ok(-d $self->{regexpspath}, "regexpspath $self->{regexpspath} exists");
+    } else {
+        $self->notok("regexpspath not defined");
+    }
 
 }
 
@@ -119,6 +139,11 @@ sub gather_regexp
     my ($self) = @_;
 
     my %regexps;
+
+    if(! -d $self->{regexpspath}) {
+        $self->notok("regexpspath $self->{regexpspath} is not a directory");
+        return \%regexps;
+    }
 
     opendir(DIR, $self->{regexpspath});
 
