@@ -64,6 +64,14 @@ Path to the suite object templates (C<testspath>/profiles is default when not sp
 
 Includepath to use for CAF::TextRender.
 
+=item filter
+
+A compiled regular expression that is used to filter the found regexptest files 
+(matching relative filenames are kept; non-matcing ones are removed).
+
+One can also set the C<QUATTOR_TEST_SUITE_FILTER> enviroment variable, which will be
+used as regular expression pattern for the filter.
+
 =back
 
 =cut
@@ -122,6 +130,17 @@ sub _initialize
         $self->notok("regexpspath not defined");
     }
 
+    # Filter
+    my $filter=$ENV{QUATTOR_TEST_SUITE_FILTER};
+    if($filter) {
+        $self->{filter} = qr{$filter};
+        $self->info("Filter $self->{filter} set via environment variable QUATTOR_TEST_SUITE_FILTER");
+    }
+    
+    if($self->{filter}) {
+        $self->verbose("Filter $self->{filter} defined");
+    }
+
 }
 
 =pod
@@ -149,21 +168,28 @@ sub gather_regexp
 
     foreach my $name (grep {!m/^\./} sort readdir(DIR)) {
         my $abs = "$self->{regexpspath}/$name";
+        my @files;
         if (-f $abs) {
             $self->verbose("Found regexps file $name (abs $abs)");
-            $regexps{$name} = [$name];
+            push(@files, $name);
         } elsif (-d $abs) {
             opendir(my $dh, $abs);
 
             # only files
-            my @files = map {"$name/$_"} grep {!m/^\./ && -T "$abs/$_"} sort readdir($dh);
+            @files = map {"$name/$_"} grep {!m/^\./ && -T "$abs/$_"} sort readdir($dh);
             closedir $dh;
             $self->verbose(
                 "Found regexps directory $name (abs $abs) with files " . join(", ", @files));
-            $regexps{$name} = \@files;
         } else {
             $self->notok("Invalid regexp abs $abs found");
         }
+
+        if ($self->{filter}) {
+            @files = grep { /$self->{filter}/ } @files;
+            $self->verbose("After filter $self->{filter} files " . join(", ", @files));
+        }
+
+        $regexps{$name} = \@files if @files;
     }
 
     closedir(DIR);
