@@ -9,6 +9,7 @@ Ordered test v2.0
 ^\s{4}$
 ^$
 ^\}$
+^RANDOM NO MATCH TEXT$ ### COUNT 0
 ^$
 ^\{$
 ^\s{4}$

@@ -421,8 +421,10 @@ sub postprocess
         my $match = $self->{matches}->[$idx];
         my $msg   = "for test idx $idx (pattern $test->{reg})";
 
+        my $test_ordered = $self->{flags}->{ordered};
+
         if(! defined($match->{count})) {
-            $self->notok("Match count is missing/undefined. Something went wrong before.");
+            $self->notok("Match count is missing/undefined $msg. Something went wrong before.");
             next;
         }
 
@@ -430,6 +432,10 @@ sub postprocess
         if (exists($test->{count})) {
             is($test->{count}, $match->{count},
                 "Number of matches as expected (test $test->{count} match $match->{count}) $msg");
+            if ($test->{count} == 0) {
+                $self->verbose("No ordering test since no match is expected $msg");
+                $test_ordered = 0;
+            }
         } else {
 
             # there should be at least one match
@@ -439,7 +445,7 @@ sub postprocess
 
         # In ordered mode, we check that there is a match after the match of the previous test
         #   This allows multiple matches (or even repeated tests).
-        if ($self->{flags}->{ordered}) {
+        if ($test_ordered) {
             my $orderok = 0;    # order not ok by default
             my ($before, $after) = (-1, -1);
             foreach my $midx (0 .. $match->{count} - 1) {
