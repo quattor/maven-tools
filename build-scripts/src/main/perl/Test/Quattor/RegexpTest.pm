@@ -105,7 +105,7 @@ sub parse
     my @blocks = split($BLOCK_SEPARATOR, join("", <REG>));
     close REG;
 
-    is(scalar @blocks, $EXPECTED_BLOCKS, "Expected number of blocks");
+    is(scalar @blocks, $EXPECTED_BLOCKS, "Expected number of blocks in regexptest $self->{regexp}");
 
     $self->parse_description($blocks[0]);
 
@@ -357,6 +357,11 @@ sub parse_tests
             # redefine line
             $line = $1;
         }
+        
+        if ($line =~ m/\s+$/) {
+            # No auto-chomp, but help figuring out why something doesn't match
+            $self->verbose("Trailing whitespace found on line $line.");
+        }
 
         # make regexp
         $test->{reg} = qr{(?$flags:$line)};
@@ -483,6 +488,8 @@ sub test
     ok(-f $self->{regexp}, "Regexp file $self->{regexp} found.");
 
     $self->parse;
+
+    ok($self->{description}, "Description: $self->{description}");
 
     $self->info("BEGIN test for $self->{description}");
 
