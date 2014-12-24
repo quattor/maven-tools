@@ -1,0 +1,2 @@
+[% data %]
+[% INCLUDE 'mycomp/extra.tt' data=extra %]
