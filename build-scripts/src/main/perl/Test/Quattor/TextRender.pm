@@ -168,7 +168,7 @@ sub _sanitize
     if (! defined($self->{panunroll})) {
         $self->{panunroll} = 1;
     }
-    ok($self->{panunroll}, "panunroll $self->{panunroll}");
+    ok(defined($self->{panunroll}), "panunroll $self->{panunroll}");
 
 }
 

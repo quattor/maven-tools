@@ -50,7 +50,7 @@ environment variable.
 =item new
 
 Returns a new object, basepath is the default location
-for metaconfig-unittests.
+for metaconfig-unittests (src/main/metaconfig).
 
 Accepts the following options
 
