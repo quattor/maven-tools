@@ -7,7 +7,7 @@ use Test::Quattor::TextRender;
 use Test::Quattor::TextRender::Suite;
 
 # only use it like this for this particula unittest
-use Test::Quattor::TextRender::Metaconfig;
+use Test::Quattor::TextRender::Base;
 
 use Test::Quattor::Panc qw(set_panc_includepath);
 
@@ -41,7 +41,7 @@ my $st = Test::Quattor::TextRender::Suite->new(
 
 # get_template_library_core should never be used like this
 set_panc_includepath($tr->{namespacepath}, 
-    Test::Quattor::TextRender::Metaconfig::get_template_library_core($st));
+    Test::Quattor::TextRender::Base::get_template_library_core($st));
 
 isa_ok($st, "Test::Quattor::TextRender::Suite", 
        "Returns Test::Quattor::TextRender::Suite instance for service");
