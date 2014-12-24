@@ -299,7 +299,15 @@ sub make_namespace
                 or croak "make_namespace Unable to create directory $destdir $!";
         }
 
-        copy("$self->{basepath}/$pan", $dest) or die "make_namespace: Copy failed: $!";
+        my $src;
+        if ($pan =~ m/^\//) {
+            $src = $pan;
+            $self->verbose("Absolute pan source $src");
+        } else {
+            $src = "$self->{basepath}/$pan";
+            $self->verbose("Pan source $src from relative $pan");
+        }
+        copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
         push(@copies, $dest);
     }
 
