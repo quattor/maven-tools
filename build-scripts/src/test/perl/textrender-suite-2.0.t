@@ -32,6 +32,7 @@ diag("Start actual Suite tests v2.0");
 
 my $base = getcwd()."/src/test/resources";
 my $st = Test::Quattor::TextRender::Suite->new(
+    relpath => 'metaconfig',
     includepath => $base,
     testspath => "$base/metaconfig/testservice/2.0/tests",
     );

@@ -34,6 +34,7 @@ $tr->make_namespace($tr->{panpath}, $tr->{pannamespace});
 diag("Start actual Suite tests");
 
 my $st = Test::Quattor::TextRender::Suite->new(
+    relpath => 'metaconfig',
     includepath => $base,
     testspath => "$base/metaconfig/testservice/1.0/tests",
     );

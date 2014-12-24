@@ -64,6 +64,10 @@ Path to the suite object templates (C<testspath>/profiles is default when not sp
 
 Includepath to use for CAF::TextRender.
 
+=item relpath
+
+relpath to use for CAF::TextRender.
+
 =item filter
 
 A compiled regular expression that is used to filter the found regexptest files 
@@ -90,6 +94,9 @@ sub _initialize
         $self->notok("includepath not defined");
     }
 
+    # relpath
+    ok($self->{relpath}, "repath defined ".($self->{relpath} || '<undef>'));
+    
     # testspath
     $self->{testspath} = abs_path($self->{testspath});
     if (defined($self->{testspath})) {
@@ -131,13 +138,14 @@ sub _initialize
     }
 
     # Filter
-    my $filter=$ENV{QUATTOR_TEST_SUITE_FILTER};
-    if($filter) {
+    my $filter = $ENV{QUATTOR_TEST_SUITE_FILTER};
+    if ($filter) {
         $self->{filter} = qr{$filter};
-        $self->info("Filter $self->{filter} set via environment variable QUATTOR_TEST_SUITE_FILTER");
+        $self->info(
+            "Filter $self->{filter} set via environment variable QUATTOR_TEST_SUITE_FILTER");
     }
-    
-    if($self->{filter}) {
+
+    if ($self->{filter}) {
         $self->verbose("Filter $self->{filter} defined");
     }
 
@@ -159,7 +167,7 @@ sub gather_regexp
 
     my %regexps;
 
-    if(! -d $self->{regexpspath}) {
+    if (!-d $self->{regexpspath}) {
         $self->notok("regexpspath $self->{regexpspath} is not a directory");
         return \%regexps;
     }
@@ -185,7 +193,7 @@ sub gather_regexp
         }
 
         if ($self->{filter}) {
-            @files = grep { /$self->{filter}/ } @files;
+            @files = grep {/$self->{filter}/} @files;
             $self->verbose("After filter $self->{filter} files " . join(", ", @files));
         }
 
@@ -244,6 +252,7 @@ sub regexptest
         my $regexptest = Test::Quattor::TextRender::RegexpTest->new(
             regexp      => "$self->{regexpspath}/$regexp",
             config      => $cfg,
+            relpath     => $self->{relpath},
             includepath => $self->{includepath},
         )->test();
     }

@@ -107,6 +107,10 @@ sub _initialize
         $self->{namespacepath} = $dest;
     }
 
+    # Fix TextRender relpath and includepath
+    $self->{relpath} = 'metaconfig';
+    $self->{includepath} = dirname($self->{basepath});
+
     $self->SUPER::_initialize();
 
 }
@@ -185,7 +189,8 @@ sub test
 
     my $base = getcwd() . "/src/test/resources";
     my $st   = Test::Quattor::TextRender::Suite->new(
-        includepath => dirname($self->{basepath}),    # metaconfig relpath
+        relpath => $self->{relpath},
+        includepath => $self->{includepath},
         testspath   => "$testspath/tests",
     );
 

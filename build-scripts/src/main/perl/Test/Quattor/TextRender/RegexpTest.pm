@@ -49,6 +49,10 @@ The configuration instance to retreive the values from.
 
 The includepath for CAF::TextRender.
 
+=item relpath
+
+The relpath for CAF::TextRender.
+
 =back
 
 =back
@@ -63,18 +67,21 @@ sub render
 
     my $srv = $self->{config}->getElement($self->{flags}->{renderpath})->getTree();
 
+    ok($self->{includepath}, "includepath specified " . ($self->{includepath} || '<undef>'));
+    ok($self->{relpath}, "relpath specified " . ($self->{relpath} || '<undef>'));
+
     # TODO how to keep this in sync with what metaconfig does? esp the options
-    # TODO add log => $self; but then we need warn and debug in Test::Quattor::Object
     $self->{trd} = CAF::TextRender->new(
         $srv->{module},
         $srv->{contents},
         eol         => 0,
+        relpath     => $self->{relpath},
         includepath => $self->{includepath},
-        log         => $self, 
+        log         => $self,
     );
 
     $self->{text} = $self->{trd}->get_text;
-    if(defined($self->{text})) {
+    if (defined($self->{text})) {
         $self->verbose("Rendertext:\n$self->{text}");
     }
 }
