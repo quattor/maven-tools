@@ -52,6 +52,15 @@ is_deeply($regexps, {
             'nopan' => ['nopan'],
             }, "Found regexps");
 
+# test filter
+$st->{filter} = qr{base};
+$regexps = $st->gather_regexp();
+is_deeply($regexps, {
+            'config' => ['config/base'],
+            }, "Found regexps with filter");
+
+$st->{filter} = undef;
+
 my $objs = $st->gather_profile();
 is_deeply($objs, {
             'config'=>'config.pan', 
