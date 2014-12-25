@@ -99,8 +99,8 @@ sub test
 
     my $base = getcwd() . "/src/test/resources";
     my $st   = Test::Quattor::TextRender::Suite->new(
-        relpath => $self->{relpath},
-        includepath => $self->{includepath},
+        ttrelpath => $self->{ttrelpath},
+        ttincludepath => $self->{ttincludepath},
         testspath   => "$testspath/tests",
     );
 

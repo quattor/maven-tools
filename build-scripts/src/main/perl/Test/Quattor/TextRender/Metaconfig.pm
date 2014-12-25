@@ -104,8 +104,8 @@ sub _initialize
     }
 
     # Fix TextRender relpath and includepath
-    $self->{relpath} = 'metaconfig';
-    $self->{includepath} = dirname($self->{basepath});
+    $self->{ttrelpath} = 'metaconfig';
+    $self->{ttincludepath} = dirname($self->{basepath});
 
     $self->{testspath} = "$self->{basepath}/$self->{service}";
 

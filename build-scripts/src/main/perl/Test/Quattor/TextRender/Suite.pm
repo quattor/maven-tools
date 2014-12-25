@@ -60,11 +60,11 @@ Path to the suite regexptests  (C<testspath>/regexps is default when not specifi
 
 Path to the suite object templates (C<testspath>/profiles is default when not specified).
 
-=item includepath
+=item ttincludepath
 
 Includepath to use for CAF::TextRender.
 
-=item relpath
+=item ttrelpath
 
 relpath to use for CAF::TextRender.
 
@@ -86,16 +86,16 @@ sub _initialize
 {
     my ($self) = @_;
 
-    # includepath
-    $self->{includepath} = abs_path($self->{includepath});
-    if (defined($self->{includepath})) {
-        ok(-d $self->{includepath}, "includepath $self->{includepath} exists");
+    # TT includepath
+    $self->{ttincludepath} = abs_path($self->{ttincludepath});
+    if (defined($self->{ttincludepath})) {
+        ok(-d $self->{ttincludepath}, "TT includepath $self->{ttincludepath} exists");
     } else {
-        $self->notok("includepath not defined");
+        $self->notok("ttincludepath not defined");
     }
 
-    # relpath
-    ok($self->{relpath}, "repath defined ".($self->{relpath} || '<undef>'));
+    # TT relpath
+    ok($self->{ttrelpath}, "TT relpath defined ".($self->{ttrelpath} || '<undef>'));
     
     # testspath
     $self->{testspath} = abs_path($self->{testspath});
@@ -252,8 +252,8 @@ sub regexptest
         my $regexptest = Test::Quattor::TextRender::RegexpTest->new(
             regexp      => "$self->{regexpspath}/$regexp",
             config      => $cfg,
-            relpath     => $self->{relpath},
-            includepath => $self->{includepath},
+            ttrelpath     => $self->{ttrelpath},
+            ttincludepath => $self->{ttincludepath},
         )->test();
     }
 

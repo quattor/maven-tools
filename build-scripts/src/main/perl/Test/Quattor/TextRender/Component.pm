@@ -92,20 +92,21 @@ sub _initialize
     # by the pom.xml (tt file under src/main/resources/data.tt for component
     # mycomp is put in target/share/templates/quattor/mycomp/data.tt)
     $self->{ttpath}      = "$targetpath/share/templates/quattor";
-    $self->{relpath}     = $self->{component};
-    $self->{includepath} = $self->{ttpath};
+    $self->{ttrelpath}     = $self->{component};
+    $self->{ttincludepath} = $self->{ttpath};
 
     if (!exists($self->{pannamespace})) {
 
         # the component has a rolled-out pan-namespace
         $self->{panunroll}     = 0;
         $self->{pannamespace}  = "components/$self->{component}";
-        $self->{panpath}       = "$targetpath/pan/$self->{pannamespace}";
         $self->{namespacepath} = "$targetpath/pan";
+        $self->{panpath}       = "$self->{namespacepath}/$self->{pannamespace}";
     }
 
-    ok($self->{pannamespace}, "Pannamespace set " .  ($self->{pannamespace} || "<undef>"));
-    ok(-d $self->{panpath},   "Panpath directory " . ($self->{panpath} || "<undef>"));
+    ok($self->{pannamespace}, "Pannamespace set " . ($self->{pannamespace} || "<undef>"))
+        ;
+    ok(-d $self->{panpath}, "Panpath directory " . ($self->{panpath} || "<undef>"));
 
     $self->{testspath} = $self->{basepath};
 

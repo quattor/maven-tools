@@ -45,11 +45,11 @@ The regexptest file.
 
 The configuration instance to retreive the values from.
 
-=item includepath
+=item ttincludepath
 
 The includepath for CAF::TextRender.
 
-=item relpath
+=item ttrelpath
 
 The relpath for CAF::TextRender.
 
@@ -67,16 +67,16 @@ sub render
 
     my $srv = $self->{config}->getElement($self->{flags}->{renderpath})->getTree();
 
-    ok($self->{includepath}, "includepath specified " . ($self->{includepath} || '<undef>'));
-    ok($self->{relpath}, "relpath specified " . ($self->{relpath} || '<undef>'));
+    ok($self->{ttincludepath}, "ttincludepath specified " . ($self->{ttincludepath} || '<undef>'));
+    ok($self->{ttrelpath}, "ttrelpath specified " . ($self->{ttrelpath} || '<undef>'));
 
     # TODO how to keep this in sync with what metaconfig does? esp the options
     $self->{trd} = CAF::TextRender->new(
         $srv->{module},
         $srv->{contents},
         eol         => 0,
-        relpath     => $self->{relpath},
-        includepath => $self->{includepath},
+        relpath     => $self->{ttrelpath},
+        includepath => $self->{ttincludepath},
         log         => $self,
     );
 

@@ -314,10 +314,10 @@ sub make_namespace
             my $src;
             if ($pan =~ m/^\//) {
                 $src = $pan;
-                $self->verbose("Absolute pan source $src");
+                $self->verbose("Absolute pan source $src dest $dest");
             } else {
                 $src = "$self->{basepath}/$pan";
-                $self->verbose("Pan source $src from relative $pan");
+                $self->verbose("Pan source $src from relative $pan dest $dest");
             }
             copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
         } else {

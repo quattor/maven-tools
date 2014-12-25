@@ -2,7 +2,7 @@ object template simple;
 
 include 'components/mycomp/schema';
 
-# relpath is mycomp
+# TT relpath is mycomp
 # use /metaconfig as default for Test::Quattor::RegexpTest
 "/metaconfig/module" = "main";
 
