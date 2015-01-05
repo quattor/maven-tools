@@ -493,10 +493,6 @@ sub test
 
     $self->info("BEGIN test for $self->{description}");
 
-    # render the text
-    my $rp = $self->{flags}->{renderpath};
-    ok($self->{config}->elementExists($rp), "Renderpath $rp found");
-
     $self->preprocess;
 
     ok(defined($self->{text}), "Text to test defined");
