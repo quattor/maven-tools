@@ -7,10 +7,13 @@ sure that they aren't executed here.
 
 Use the following command options:
 
+```bash
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' '-P!module-test' <goal> [goal...]
+```
 
 To perform a release, do the following:
 
+```bash
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
       -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
       clean release:prepare
@@ -18,6 +21,7 @@ $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
 $ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
       -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
       release:perform
+```
 
 The backslashes are important to avoid shell expansion of the history: unfortunately it
 requires using bash and doesn't work with csh/tcsh. 
@@ -28,7 +32,9 @@ don't make sense in this context). This allows to run unit tests in other module
 
 To run unit tests in build-scripts only, without building other modules, use:
 
+```bash
 $ mvn -pl build-scripts test
+```
 
 When modifying maven build tools, it is possible to test a version snapshot without
 making a release. To do this, use the 'install' goal that will put the snapshot
@@ -53,7 +59,9 @@ each configuration module), as part of the '<parent>' information.
 To update the version used for a given component, check out its repository and
 in the top-level directory, execute the following command:
 
+```bash
 mvn versions:update-parent
+```
 
 For Quattor configuration modules, this will update the build tools version used
 by all configuration modules in the repository, when run in the top-level directory.
