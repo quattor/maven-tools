@@ -1,5 +1,5 @@
-
-BUILD INFO:
+BUILD INFO
+----------
 
 To build this project, three profiles must be explicitly deactivated.
 These are associated with the standard build pom, but we need to make
@@ -41,3 +41,21 @@ your SourceForge password as well as the GPG key password.
 
 You will probably also need to use the -Dusername=XXX property if your
 account username is not the same as on SourceForge.
+
+
+UPDATING BUILD TOOLS VERSION USED BY OTHER COMPONENTS
+-----------------------------------------------------
+
+The version of the build tools used by other Quattor components is defined in the
+pom.xml of the component (for Quattor configuration modules, in the pom.xml of
+each configuration module), as part of the '<parent>' information.
+
+To update the version used for a given component, check out its repository and
+in the top-level directory, execute the following command:
+
+mvn versions:update-parent
+
+For Quattor configuration modules, this will update the build tools version used
+by all configuration modules in the repository, when run in the top-level directory.
+
+
