@@ -56,8 +56,9 @@ The version of the build tools used by other Quattor components is defined in th
 pom.xml of the component (for Quattor configuration modules, in the pom.xml of
 each configuration module), as part of the '<parent>' information.
 
-To update the version used for a given component, check out its repository and
-in the top-level directory, execute the following command:
+To update the version used for a given component to the last release available, 
+check out its repository and in the top-level directory, execute the following 
+command:
 
 ```bash
 mvn versions:update-parent
