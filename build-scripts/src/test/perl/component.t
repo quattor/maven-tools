@@ -7,6 +7,8 @@ use NCM::Component;
 
 use EDG::WP4::CCM::Element qw(escape unescape);
 
+# Only to be used in this unittest
+Test::Quattor::Component::_disable_warn_deprecate_escape();
 
 my $test_comp = Test::Quattor::Component->new();
 my $ncm_comp = NCM::Component->new();
