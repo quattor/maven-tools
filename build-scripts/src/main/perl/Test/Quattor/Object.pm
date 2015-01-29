@@ -206,7 +206,10 @@ sub gather_pan
         }
     };
 
-    find($wanted, $panpath);
+    find({
+        wanted => $wanted,
+        preprocess => sub { return sort { $a cmp $b } @_ },
+    }, $panpath);
 
     return \%pans, \@invalid_pans;
 }

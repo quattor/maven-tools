@@ -220,7 +220,10 @@ sub gather_tt
         }
     };
 
-    find($wanted, $self->{ttpath});
+    find( { 
+        wanted => $wanted,
+        preprocess => sub { return sort { $a cmp $b } @_ },
+    },  $self->{ttpath});
 
     $cache->{tts}         = \@tts;
     $cache->{invalid_tts} = \@invalid_tts;
