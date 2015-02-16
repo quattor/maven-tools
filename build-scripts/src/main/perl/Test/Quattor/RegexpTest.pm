@@ -147,7 +147,7 @@ Following flags are supported
 
 =over
 
-=item regul expression flags:
+=item regular expression flags:
 
 =over
 
@@ -233,20 +233,20 @@ sub parse_flags
         if ($line =~ m/^\s*#+\s*(.*)\s*$/) {
             $self->verbose("flag commented: $1");
         } elsif ($line =~
-            m/^\s*(multiline|casesensitive|ordered|negate|quote|singleline|extended)(?:\s*=\s*(0|1))?\s*$/
+                 m/^\s*(multiline|casesensitive|ordered|negate|quote|singleline|extended)(?:\s*=\s*(0|1))?\s*$/
             )
         {
             $self->{flags}->{$1} = defined($2) ? $2 : 1;
-        } elsif ($line =~
-            m/^\s*(?:no(?<s>multiline)(?<t>))|(?:(?<s>case)in(?<t>sensitive))|(?:un(?<s>ordered)(?<t>))\s*$/
-            )
-        {
-            # yeah, not so pretty...
-            $self->{flags}->{"$+{s}$+{t}"} = 0;
+        } elsif ($line =~ m/^\s*no(multiline)\s*$/) {
+            $self->{flags}->{"$1"} = 0;
+        } elsif ($line =~ m/^\s*un(ordered)\s*$/) {
+            $self->{flags}->{"$1"} = 0;
+        } elsif ($line =~ m/^\s*(case)in(sensitive)\s*$/) {
+            $self->{flags}->{"$1$2"} = 0;
         } elsif ($line =~ m/^\s*(metaconfigservice|renderpath)\s*=\s*(\S+)\s*$/) {
             $self->{flags}->{$1} = $2;
-        } elsif ($line =~ m/^\s*(?<r>\/)?(?<path>\/\S*)\s*$/) {
-            $self->{flags}->{$+{r} ? 'renderpath' : 'metaconfigservice'} = $+{path};
+        } elsif ($line =~ m/^\s*(\/)?(\/\S*)\s*$/) {
+            $self->{flags}->{defined($1) ? 'renderpath' : 'metaconfigservice'} = $2;
         } else {
             $self->notok("Unallowed flag $line");
         }
