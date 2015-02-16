@@ -338,7 +338,7 @@ sub parse_tests
 
     foreach my $line (split("\n", $blocktxt)) {
         next if ($line =~ m/^\s*$/);
-        if ($line =~ m/^\s*#{3}+\s*(.*)\s*$/) {
+        if ($line =~ m/^\s*#{3}\s*(.*)\s*$/) {
             $self->verbose("regexptest test commented: $1");
             next;
         }
@@ -349,9 +349,9 @@ sub parse_tests
         $test->{count} = 0 if $self->{flags}->{negate};
 
         # parse any special options
-        if ($line =~ m/^(.*)\s#{3}+\s(?:(?:COUNT\s(?<count>\d+)))\s*$/) {
-            if (exists($+{count})) {
-                $test->{count} = $+{count};
+        if ($line =~ m/^(.*)\s#{3}\s(?:(?:COUNT\s(\d+)))\s*$/) {
+            if (defined($2)) {
+                $test->{count} = $2;
             }
 
             # redefine line
