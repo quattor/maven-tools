@@ -38,9 +38,9 @@ my @pans_s = sort keys %$pans;
 my $copies = $dt->make_namespace($dt->{panpath}, $dt->{pannamespace});
 is(scalar @$copies, scalar @pans_s, "All files copied");
 
-$dt->{panunroll} = 0;
+$dt->{panunfold} = 0;
 $copies = $dt->make_namespace($dt->{panpath}, $dt->{pannamespace});
 my @copies_s = sort @$copies;
-is_deeply(\@copies_s, \@pans_s, "copies identical made to original with panunroll=0 (.i.e. no copies made)");
+is_deeply(\@copies_s, \@pans_s, "copies identical made to original with panunfold=0 (.i.e. no copies made)");
 
 done_testing();

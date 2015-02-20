@@ -88,7 +88,7 @@ sub _initialize
         $self->{basepath} = "$srcpath/resources";
     }
 
-    # TT files are unrolled in the targetpath wrt the expected relpath
+    # TT files are unfolded in the targetpath wrt the expected relpath
     # by the pom.xml (tt file under src/main/resources/data.tt for component
     # mycomp is put in target/share/templates/quattor/mycomp/data.tt)
     $self->{ttpath}      = "$targetpath/share/templates/quattor";
@@ -96,9 +96,8 @@ sub _initialize
     $self->{ttincludepath} = $self->{ttpath};
 
     if (!exists($self->{pannamespace})) {
-
-        # the component has a rolled-out pan-namespace
-        $self->{panunroll}     = 0;
+        # the component has a unfolded pan-namespace
+        $self->{panunfold}     = 0;
         $self->{pannamespace}  = "components/$self->{component}";
         $self->{namespacepath} = "$targetpath/pan";
         $self->{panpath}       = "$self->{namespacepath}/$self->{pannamespace}";

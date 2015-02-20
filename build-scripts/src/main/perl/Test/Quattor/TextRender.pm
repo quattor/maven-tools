@@ -76,10 +76,12 @@ relative to the current working directory.
 
 If no value is set, a random directory will be used.
 
-=item panunroll
+=item panunfold
 
-Boolean to force or disable the "unrolling" of the pan templates
+Boolean to force or disable the "unfolding" of the pan templates
 in the namespacepath with correct pannamespace. Default is true.
+
+The C<make_namespace> method  takes care of the actual unfolding (if any).
 
 =item expect
 
@@ -165,10 +167,10 @@ sub _sanitize
     }
     ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
 
-    if (! defined($self->{panunroll})) {
-        $self->{panunroll} = 1;
+    if (! defined($self->{panunfold})) {
+        $self->{panunfold} = 1;
     }
-    ok(defined($self->{panunroll}), "panunroll $self->{panunroll}");
+    ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
 
 }
 
@@ -293,6 +295,11 @@ Directory structure is build up starting from the instance C<namespacepath> valu
 
 Returns an arrayreference with the copy locations.
 
+If the C<panunfold> attribute is true, a copy of the pan templates is placed 
+in the expected subdirectory under the C<namespacepath>.
+If C<panunfold> attribute is false, the pan templates are assumed to be in the 
+correct location, and nothing is done.
+
 =cut
 
 sub make_namespace
@@ -303,8 +310,8 @@ sub make_namespace
 
     my @copies;
     while (my ($pan, $value) = each %$pans) {
-        my $dest = $pan;
-        if ($self->{panunroll}) {
+        my $dest;
+        if ($self->{panunfold}) {
 
             # pan is relative wrt basepath; copy it to $destination/
             $dest = "$self->{namespacepath}/$value->{expected}";
@@ -324,7 +331,8 @@ sub make_namespace
             }
             copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
         } else {
-            $self->verbose("No unroll of pantemplate $dest.");
+            $dest = $pan;
+            $self->verbose("No unfold of pantemplate $dest.");
         }
         push(@copies, $dest);
     }
