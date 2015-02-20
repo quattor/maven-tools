@@ -74,6 +74,7 @@ sub unescape
 {
     my ($self, $str) = @_;
 
+    # Only disable the waning during the unittest of this method.
     warn "Called unescape through the component. This will be removed soon. ",
          "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element."
          if $warn_deprecate_escape;
@@ -86,6 +87,7 @@ sub escape
 {
     my ($self, $str) = @_;
 
+    # Only disable the waning during the unittest of this method.
     warn "Called escape() through the component. This will be removed soon. ",
         "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element."
         if $warn_deprecate_escape;
@@ -96,6 +98,9 @@ sub escape
 
 # A private method only here to disable the deprecation warnings  
 # of NCM::Component::escape and NCM::Component::unescape 
+# to allow unittesting these methods (it is the only case where the warnings
+# are not required).
+# Do NOT disable the warning anywhere else!
 sub _disable_warn_deprecate_escape 
 {
     $warn_deprecate_escape=0;
