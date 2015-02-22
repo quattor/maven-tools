@@ -6,8 +6,8 @@ use Test::Quattor::TextRender;
 
 use Test::Quattor::TextRender::Suite;
 
-# only use it like this for this particula unittest
-use Test::Quattor::TextRender::Metaconfig;
+# only use it like this for this particular unittest
+use Test::Quattor::TextRender::Base;
 
 use Test::Quattor::Panc qw(set_panc_includepath);
 
@@ -34,13 +34,14 @@ $tr->make_namespace($tr->{panpath}, $tr->{pannamespace});
 diag("Start actual Suite tests");
 
 my $st = Test::Quattor::TextRender::Suite->new(
-    includepath => $base,
+    ttrelpath => 'metaconfig',
+    ttincludepath => $base,
     testspath => "$base/metaconfig/testservice/1.0/tests",
     );
 
 # get_template_library_core should never be used like this
 set_panc_includepath($tr->{namespacepath}, 
-    Test::Quattor::TextRender::Metaconfig::get_template_library_core($st));
+    Test::Quattor::TextRender::Base::get_template_library_core($st));
 
 isa_ok($st, "Test::Quattor::TextRender::Suite", 
        "Returns Test::Quattor::TextRender::Suite instance for service");
@@ -51,6 +52,15 @@ is_deeply($regexps, {
             'simple' => ['simple'],
             'nopan' => ['nopan'],
             }, "Found regexps");
+
+# test filter
+$st->{filter} = qr{base};
+$regexps = $st->gather_regexp();
+is_deeply($regexps, {
+            'config' => ['config/base'],
+            }, "Found regexps with filter");
+
+$st->{filter} = undef;
 
 my $objs = $st->gather_profile();
 is_deeply($objs, {

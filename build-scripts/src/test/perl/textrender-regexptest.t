@@ -26,7 +26,8 @@ my $cfg = prepare_profile_cache("$testpath/profiles/nopan.pan");
 my $tr = Test::Quattor::TextRender::RegexpTest->new(
     config => $cfg,
     regexp => "$testpath/regexps/nopan",
-    includepath => $basepath, # metaconfig is default relpath
+    ttrelpath => 'metaconfig',
+    ttincludepath => $basepath, 
 );
 
 # parse

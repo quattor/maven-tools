@@ -31,8 +31,8 @@ $st->{expect}->{invalidtt} = [
     'testservice/pan/notarealtt.tt',
     ];
 $st->{expect}->{invalidpan} = [
-    'testservice/pan/invalid_namespace.pan', 
     'testservice/pan/invalid_name.pan', 
+    'testservice/pan/invalid_namespace.pan', 
     'testservice/pan/invalid_type.pan',
     ];
 

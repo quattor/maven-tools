@@ -1,0 +1,7 @@
+Simple yaml test
+---
+/test/nottfile
+---
+^---$
+^data: default$
+^extra: more$

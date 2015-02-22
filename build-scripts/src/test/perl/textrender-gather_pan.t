@@ -34,8 +34,13 @@ is_deeply($pans, {'metaconfig/testservice/pan/schema.pan' => { type => 'declarat
 
 is(scalar @$ipans, 3, "Found 3 invalid pan templates for panpath");
 
+my @pans_s = sort keys %$pans;
 my $copies = $dt->make_namespace($dt->{panpath}, $dt->{pannamespace});
-is(scalar @$copies, scalar keys %$pans, "All files copied");
+is(scalar @$copies, scalar @pans_s, "All files copied");
 
+$dt->{panunfold} = 0;
+$copies = $dt->make_namespace($dt->{panpath}, $dt->{pannamespace});
+my @copies_s = sort @$copies;
+is_deeply(\@copies_s, \@pans_s, "copies identical made to original with panunfold=0 (.i.e. no copies made)");
 
 done_testing();

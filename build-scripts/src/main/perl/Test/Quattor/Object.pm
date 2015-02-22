@@ -81,6 +81,24 @@ sub debug
     return $self->verbose(@args);
 }
 
+
+=pod
+
+=head2 warn
+
+warn-type logger, calls diag
+Arguments are converted in message, prefixed with 'WARN'.
+
+=cut
+
+sub warn
+{
+    my ($self, @args) = @_;
+    my $msg = join('', @args);
+    diag("WARN: $msg");
+    return $msg;
+}
+
 =pod
 
 =head2 error
@@ -188,7 +206,10 @@ sub gather_pan
         }
     };
 
-    find($wanted, $panpath);
+    find({
+        wanted => $wanted,
+        preprocess => sub { return sort { $a cmp $b } @_ },
+    }, $panpath);
 
     return \%pans, \@invalid_pans;
 }

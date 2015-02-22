@@ -6,6 +6,7 @@ package Test::Quattor::Panc;
 use base 'Exporter';
 
 use Test::More;
+use Readonly;
 
 use Cwd;
 use Carp qw(carp croak);
@@ -14,6 +15,8 @@ use File::Path qw(mkpath);
 our @EXPORT = qw(panc 
                  set_panc_options reset_panc_options get_panc_options
                  set_panc_includepath get_panc_includepath);
+
+Readonly my $PANC_MINIMAL => '10.2';
 
 =pod
 
@@ -141,10 +144,12 @@ sub panc
     $profile .= ".pan" if ($profile !~ m/\.pan$/ );
     push(@panccmd, $profile);
 
-    note("Pan compiler called with: ".join(" ", @panccmd));
-    system(@panccmd) == 0
-        or croak("Unable to compile profile $profile");
-
+    my $pancmsg = "Pan compiler called with: ".join(" ", @panccmd);
+    if(system(@panccmd)) {
+        croak("Unable to compile profile $profile. Minimal panc version is $PANC_MINIMAL. $pancmsg");
+    } else {
+        note($pancmsg);
+    }
     chdir($currentdir);
 };
 

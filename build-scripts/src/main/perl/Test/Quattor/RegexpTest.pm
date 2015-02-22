@@ -105,7 +105,7 @@ sub parse
     my @blocks = split($BLOCK_SEPARATOR, join("", <REG>));
     close REG;
 
-    is(scalar @blocks, $EXPECTED_BLOCKS, "Expected number of blocks");
+    is(scalar @blocks, $EXPECTED_BLOCKS, "Expected number of blocks in regexptest $self->{regexp}");
 
     $self->parse_description($blocks[0]);
 
@@ -147,7 +147,7 @@ Following flags are supported
 
 =over
 
-=item regul expression flags:
+=item regular expression flags:
 
 =over
 
@@ -233,20 +233,20 @@ sub parse_flags
         if ($line =~ m/^\s*#+\s*(.*)\s*$/) {
             $self->verbose("flag commented: $1");
         } elsif ($line =~
-            m/^\s*(multiline|casesensitive|ordered|negate|quote|singleline|extended)(?:\s*=\s*(0|1))?\s*$/
+                 m/^\s*(multiline|casesensitive|ordered|negate|quote|singleline|extended)(?:\s*=\s*(0|1))?\s*$/
             )
         {
             $self->{flags}->{$1} = defined($2) ? $2 : 1;
-        } elsif ($line =~
-            m/^\s*(?:no(?<s>multiline)(?<t>))|(?:(?<s>case)in(?<t>sensitive))|(?:un(?<s>ordered)(?<t>))\s*$/
-            )
-        {
-            # yeah, not so pretty...
-            $self->{flags}->{"$+{s}$+{t}"} = 0;
+        } elsif ($line =~ m/^\s*no(multiline)\s*$/) {
+            $self->{flags}->{"$1"} = 0;
+        } elsif ($line =~ m/^\s*un(ordered)\s*$/) {
+            $self->{flags}->{"$1"} = 0;
+        } elsif ($line =~ m/^\s*(case)in(sensitive)\s*$/) {
+            $self->{flags}->{"$1$2"} = 0;
         } elsif ($line =~ m/^\s*(metaconfigservice|renderpath)\s*=\s*(\S+)\s*$/) {
             $self->{flags}->{$1} = $2;
-        } elsif ($line =~ m/^\s*(?<r>\/)?(?<path>\/\S*)\s*$/) {
-            $self->{flags}->{$+{r} ? 'renderpath' : 'metaconfigservice'} = $+{path};
+        } elsif ($line =~ m/^\s*(\/)?(\/\S*)\s*$/) {
+            $self->{flags}->{defined($1) ? 'renderpath' : 'metaconfigservice'} = $2;
         } else {
             $self->notok("Unallowed flag $line");
         }
@@ -338,7 +338,7 @@ sub parse_tests
 
     foreach my $line (split("\n", $blocktxt)) {
         next if ($line =~ m/^\s*$/);
-        if ($line =~ m/^\s*#{3}+\s*(.*)\s*$/) {
+        if ($line =~ m/^\s*#{3}\s*(.*)\s*$/) {
             $self->verbose("regexptest test commented: $1");
             next;
         }
@@ -349,13 +349,18 @@ sub parse_tests
         $test->{count} = 0 if $self->{flags}->{negate};
 
         # parse any special options
-        if ($line =~ m/^(.*)\s#{3}+\s(?:(?:COUNT\s(?<count>\d+)))\s*$/) {
-            if (exists($+{count})) {
-                $test->{count} = $+{count};
+        if ($line =~ m/^(.*)\s#{3}\s(?:(?:COUNT\s(\d+)))\s*$/) {
+            if (defined($2)) {
+                $test->{count} = $2;
             }
 
             # redefine line
             $line = $1;
+        }
+        
+        if ($line =~ m/\s+$/) {
+            # No auto-chomp, but help figuring out why something doesn't match
+            $self->verbose("Trailing whitespace found on line $line.");
         }
 
         # make regexp
@@ -421,8 +426,10 @@ sub postprocess
         my $match = $self->{matches}->[$idx];
         my $msg   = "for test idx $idx (pattern $test->{reg})";
 
+        my $test_ordered = $self->{flags}->{ordered};
+
         if(! defined($match->{count})) {
-            $self->notok("Match count is missing/undefined. Something went wrong before.");
+            $self->notok("Match count is missing/undefined $msg. Something went wrong before.");
             next;
         }
 
@@ -430,6 +437,10 @@ sub postprocess
         if (exists($test->{count})) {
             is($test->{count}, $match->{count},
                 "Number of matches as expected (test $test->{count} match $match->{count}) $msg");
+            if ($test->{count} == 0) {
+                $self->verbose("No ordering test since no match is expected $msg");
+                $test_ordered = 0;
+            }
         } else {
 
             # there should be at least one match
@@ -439,7 +450,7 @@ sub postprocess
 
         # In ordered mode, we check that there is a match after the match of the previous test
         #   This allows multiple matches (or even repeated tests).
-        if ($self->{flags}->{ordered}) {
+        if ($test_ordered) {
             my $orderok = 0;    # order not ok by default
             my ($before, $after) = (-1, -1);
             foreach my $midx (0 .. $match->{count} - 1) {
@@ -478,11 +489,9 @@ sub test
 
     $self->parse;
 
-    $self->info("BEGIN test for $self->{description}");
+    ok($self->{description}, "Description: $self->{description}");
 
-    # render the text
-    my $rp = $self->{flags}->{renderpath};
-    ok($self->{config}->elementExists($rp), "Renderpath $rp found");
+    $self->info("BEGIN test for $self->{description}");
 
     $self->preprocess;
 

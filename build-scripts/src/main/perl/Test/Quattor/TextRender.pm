@@ -76,6 +76,13 @@ relative to the current working directory.
 
 If no value is set, a random directory will be used.
 
+=item panunfold
+
+Boolean to force or disable the "unfolding" of the pan templates
+in the namespacepath with correct pannamespace. Default is true.
+
+The C<make_namespace> method  takes care of the actual unfolding (if any).
+
 =item expect
 
 Expect is a hash reference to bypass some built-in tests 
@@ -160,6 +167,11 @@ sub _sanitize
     }
     ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
 
+    if (! defined($self->{panunfold})) {
+        $self->{panunfold} = 1;
+    }
+    ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
+
 }
 
 =pod 
@@ -210,7 +222,10 @@ sub gather_tt
         }
     };
 
-    find($wanted, $self->{ttpath});
+    find( { 
+        wanted => $wanted,
+        preprocess => sub { return sort { $a cmp $b } @_ },
+    },  $self->{ttpath});
 
     $cache->{tts}         = \@tts;
     $cache->{invalid_tts} = \@invalid_tts;
@@ -233,7 +248,7 @@ sub test_gather_tt
     my ($tts, $invalid_tts) = $self->gather_tt();
 
     my $ntts = scalar @$tts;
-    ok($tts, "found $ntts TT files in ttpath $self->{ttpath}");
+    ok($ntts, "found $ntts TT files in ttpath $self->{ttpath}");
     $self->verbose("found $ntts TT files: ", join(", ", @$tts));
 
     # Fail test and log any invalid TTs
@@ -280,6 +295,11 @@ Directory structure is build up starting from the instance C<namespacepath> valu
 
 Returns an arrayreference with the copy locations.
 
+If the C<panunfold> attribute is true, a copy of the pan templates is placed 
+in the expected subdirectory under the C<namespacepath>.
+If C<panunfold> attribute is false, the pan templates are assumed to be in the 
+correct location, and nothing is done.
+
 =cut
 
 sub make_namespace
@@ -290,16 +310,30 @@ sub make_namespace
 
     my @copies;
     while (my ($pan, $value) = each %$pans) {
+        my $dest;
+        if ($self->{panunfold}) {
 
-        # pan is relative wrt basepath; copy it to $destination/
-        my $dest    = "$self->{namespacepath}/$value->{expected}";
-        my $destdir = dirname($dest);
-        if (!-d $destdir) {
-            mkpath($destdir)
-                or croak "make_namespace Unable to create directory $destdir $!";
+            # pan is relative wrt basepath; copy it to $destination/
+            $dest = "$self->{namespacepath}/$value->{expected}";
+            my $destdir = dirname($dest);
+            if (!-d $destdir) {
+                mkpath($destdir)
+                    or croak "make_namespace Unable to create directory $destdir $!";
+            }
+
+            my $src;
+            if ($pan =~ m/^\//) {
+                $src = $pan;
+                $self->verbose("Absolute pan source $src dest $dest");
+            } else {
+                $src = "$self->{basepath}/$pan";
+                $self->verbose("Pan source $src from relative $pan dest $dest");
+            }
+            copy($src, $dest) or die "make_namespace: Copy $src to $dest failed: $!";
+        } else {
+            $dest = $pan;
+            $self->verbose("No unfold of pantemplate $dest.");
         }
-
-        copy("$self->{basepath}/$pan", $dest) or die "make_namespace: Copy failed: $!";
         push(@copies, $dest);
     }
 
