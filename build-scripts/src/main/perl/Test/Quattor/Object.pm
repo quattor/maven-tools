@@ -78,7 +78,15 @@ verbose logger, ignores debug level
 sub debug
 {
     my ($self, $level, @args) = @_;
-    return $self->verbose(@args);
+    my $msg = join('', @args);
+
+    if (! $level =~/^[12345]$/ ) {
+        ok(0, "debug logging with unsupported level $level message $msg");
+    }
+
+    my $msg = join('', @args);
+    note("DEBUG: $level $msg");
+    return $msg;
 }
 
 
