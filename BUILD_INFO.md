@@ -23,8 +23,7 @@ $ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
       release:perform
 ```
 
-The backslashes are important to avoid shell expansion of the history: unfortunately it
-requires using bash and doesn't work with csh/tcsh. 
+The backslashes are important to avoid shell expansion of the history.
 
 '-P!module-test' disable unit tests in build-profile even if PERL5LIB is defined
 (build-profile delivers a parent pom for other Quattor projects: unit tests
