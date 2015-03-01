@@ -8,18 +8,18 @@ sure that they aren't executed here.
 Use the following command options:
 
 ```bash
-$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' '-P!module-test' <goal> [goal...]
+$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test <goal> [goal...]
 ```
 
 To perform a release, do the following:
 
 ```bash
-$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
+$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" \
       clean release:prepare
 
-$ mvn '-P!cfg-module-dist' '-P!cfg-module-rpm' \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm '-P!module-test'" \
+$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
+      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" \
       release:perform
 ```
 
