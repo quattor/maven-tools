@@ -8,8 +8,14 @@ sure that they aren't executed here.
 Use the following command options:
 
 ```bash
-$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test <goal> [goal...]
+$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test <phase>
 ```
+
+Note that the three main phases that really make sense for the build tools are
+`package`, `integration-test` and `install`. In particular the phase `test` is 
+generally expected to fail in `build-profile` if you have not run `install` before 
+as there is a chicken-and-egg issue: `build-profile` component requires the other
+components built as part of this command. Use `integration-test` rather than `test`.
 
 To perform a release, do the following:
 
@@ -66,4 +72,28 @@ mvn versions:update-parent
 For Quattor configuration modules, this will update the build tools version used
 by all configuration modules in the repository, when run in the top-level directory.
 
+
+UNDERSTANDING Maven
+-------------------
+
+Maven is a powerful and extensible build tool. The build process is driven by file
+`pom.xml` that can look complex... One important concept behind Maven is the
+*build lifecyle* that is an ordered list of phase, namely:
+
+ * validate: validate the project is correct and all necessary information is available
+ * compile: compile the source code of the project
+ * test: test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed
+ * package: take the compiled code and package it in its distributable format, such as a JAR.
+ * integration-test: process and deploy the package if necessary into an environment where integration tests can be run
+ * verify: run any checks to verify the package is valid and meets quality criteria
+ * install: install the package into the local repository, for use as a dependency in other projects locally
+
+Specifying one of these phases imply execution of all the previous ones. There is an additional phase, `clean`, that
+can be used with any other phase. It must be specified before any other phase and will remove all the files that could
+have been produced by a previous Maven run.
+
+Before doing any modifications in the `pom.xml`
+files, particularly in this repository, be sure to understand Maven basics.
+Fortunately, there is a lot of documentation available on the web about Maven. A good
+starting point is http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html.
 
