@@ -227,7 +227,11 @@ sub gather_profile
     while (my ($pan, $value) = each %$pans) {
         my $name = basename($pan);
         $name =~ s/\.pan$//;
-        $objs{$name} = $pan if ($value->{type} eq 'object');
+        if ($value->{type} eq 'object') {
+            if ((! $self->{filter}) || $name =~ m/$self->{filter}/) {
+                $objs{$name} = $pan;
+            }
+        }
     }
 
     return \%objs;
