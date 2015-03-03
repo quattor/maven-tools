@@ -241,10 +241,11 @@ foreach my $method (qw(run execute trun)) {
                         ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
                     }
                     if ($self->{OPTIONS}->{stderr}) {
+                        my $tmp_stderr = $desired_err{$cmd};
                         if (ref($self->{OPTIONS}->{stderr})) {
-                            ${$self->{OPTIONS}->{stderr}} = $desired_err{$cmd};
+                            ${$self->{OPTIONS}->{stderr}} = $tmp_stderr;
                         } else {
-                            ${$self->{OPTIONS}->{stdout}} .= $desired_err{$cmd};
+                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if $tmp_stderr;
                         }
                     }
                     return 1;
