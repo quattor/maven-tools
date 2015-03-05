@@ -7,7 +7,12 @@ use Cwd;
 
 use EDG::WP4::CCM::Element qw(escape);
 
-use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile set_profile_cache_options);
+use Test::Quattor::ProfileCache qw(prepare_profile_cache 
+    get_config_for_profile set_profile_cache_options 
+    $TARGET_PAN_RELPATH);
+use Test::Quattor::Panc qw(get_panc_includepath);
+use Cwd;
+
 
 # Can't have NoAction here, since no CAF mocking happens
 # and otherwise nothing would be written
@@ -58,9 +63,19 @@ is_deeply($abscfg->getElement("/")->getTree(),
             {test => "data"}, 
             "getTree of root element returns correct hashref for abs profile");
 
+
+# there should be a target/pan dir and should be in includepath
+is($TARGET_PAN_RELPATH, 'target/pan', 'TARGET_PAN_RELPATH is exported');
+my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
+ok(-d $dest, "$TARGET_PAN_RELPATH directory exists");
+my $includedir = get_panc_includepath();
+ok(grep {$_ eq $dest} @$includedir, "the $TARGET_PAN_RELPATH directory is in panc includepath");
+ok(grep {$_ eq '.'} @$includedir, "the '.' directory is in panc includepath");
+
 my $abscfg2 = get_config_for_profile($profile);
 is_deeply($abscfg, $abscfg2, 
           "get_config_for_profile fecthes same configuration object as returned by prepare_profile_cache for abs profile");
+
 
 
 done_testing();
