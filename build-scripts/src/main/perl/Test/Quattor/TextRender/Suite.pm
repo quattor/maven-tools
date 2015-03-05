@@ -285,7 +285,7 @@ sub test
     is_deeply([sort keys %$regexps], [sort keys %$profiles], "All regexps have matching profile");
 
     my $incdirs = get_panc_includepath();
-    push(@$incdirs, $self->{profilespath});
+    push(@$incdirs, $self->{profilespath}) if (! (grep { $_ eq $self->{profilespath}} @$incdirs));
     set_panc_includepath(@$incdirs);
 
     set_profile_cache_options(resources => $self->{profilespath});

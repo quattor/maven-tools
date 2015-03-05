@@ -14,6 +14,8 @@ use Test::More;
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
+use Test::Quattor::ProfileCache qw($TARGET_PAN_RELPATH);
+
 use base qw(Test::Quattor::TextRender::Base);
 
 =pod
@@ -96,7 +98,7 @@ sub _initialize
     $self->{pannamespace} = "metaconfig/$self->{service}";
 
     if (!$self->{namespacepath}) {
-        my $dest = getcwd() . "/target/pan";
+        my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
         if (!-d $dest) {
             mkpath($dest)
         }
