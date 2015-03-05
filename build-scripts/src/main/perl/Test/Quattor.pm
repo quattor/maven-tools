@@ -65,6 +65,14 @@ use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile)
 
 =over
 
+=item * QUATTOR_TEST_LOG_DEBUGLEVEL
+
+If the environment variable QUATTOR_TEST_LOG_DEBUGLEVEL is set, the unittests
+will run with this debuglevel (0-5). Otherwise the default loglevel is 'verbose'.
+
+To actually see the verbose or debug output, you need to run prove with verbose flag
+(e.g. by passing C<-Dprove.args=-v> or by setting C<-v> in the C<<~/.proverc>>).
+
 =item * C<$log_cmd>
 
 A boolean to enable logging of each command that is run via CAF::Process.
@@ -184,7 +192,16 @@ our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  command_history_reset command_history_ok set_service_variant
                  set_caf_file_close_diff);
 
-$main::this_app = CAF::Application->new('a', "--verbose", @ARGV);
+my @logopts = qw(--verbose);
+my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
+if (defined($debuglevel)) {
+  if ($debuglevel !~ m/^[0-5]$/) {
+    $debuglevel = 0;
+  }
+  push(@logopts, '--debug', $debuglevel);
+}
+$main::this_app = CAF::Application->new('a', @logopts, @ARGV);
+$main::this_app->verbose("Log options ", join(" ", @logopts));
 
 # Modules that will have some methods mocked. These must be globals,
 # or the test script and component will see the original, unmocked
