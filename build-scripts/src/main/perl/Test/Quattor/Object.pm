@@ -35,9 +35,9 @@ sub _initialize
 
 =pod
 
-=head2 info    
+=head2 info
 
-info-type logger, calls diag. 
+info-type logger, calls diag.
 Arguments are converted in message, prefixed with 'INFO'.
 
 =cut
@@ -132,17 +132,17 @@ sub notok
     ok(0, $msg);
 }
 
-=pod 
+=pod
 
 =head2 gather_pan
 
 Walk the C<panpath> and gather all pan templates.
 
-A pan template is a text file with an C<.pan> extension; 
-they are considered 'invalid' when the C<pannamespace> is not 
+A pan template is a text file with an C<.pan> extension;
+they are considered 'invalid' when the C<pannamespace> is not
 correct.
 
-Returns a reference to hash with key path 
+Returns a reference to hash with key path
 (relative to C<relpath>) and value hashreference
 with 'type' of pan templates and 'expected' relative filepath;
 and an arrayreference to the invalid pan templates.
@@ -212,6 +212,60 @@ sub gather_pan
     }, $panpath);
 
     return \%pans, \@invalid_pans;
+}
+
+=pod
+
+=head2 get_template_library_core
+
+Return path to C<template-library-core> to allow "include 'pan/types';"
+and friends being used in the templates (in particular the schema).
+
+By default, the C<template-library-core> is expected to be in the
+parent or parent of parent directory as the current working directory.
+
+One can also specify the location via the C<QUATTOR_TEST_TEMPLATE_LIBRARY_CORE>
+environment variable.
+
+When C<notok_on_missing> is true (or undefined), C<notok> is called (i.e. test fails).
+
+=cut
+
+sub get_template_library_core
+{
+    # only for logging
+    my ($self, $notok_on_missing) = @_;
+
+    $notok_on_missing = 1 if (! defined($notok_on_missing));
+
+    my $tlc = $ENV{QUATTOR_TEST_TEMPLATE_LIBRARY_CORE};
+    if ($tlc && -d $tlc) {
+        $self->verbose(
+            "template-library-core path $tlc set via QUATTOR_TEST_TEMPLATE_LIBRARY_CORE");
+    } else {
+
+        # TODO: better guess?
+        my $d = "../template-library-core";
+        if (-d $d) {
+            $tlc = $d;
+        } elsif (-d "../$d") {
+            $tlc = "../$d";
+        } else {
+            $self->error("no more guesses for template-library-core path");
+        }
+    }
+    if ($tlc) {
+        $tlc = abs_path($tlc);
+        $self->verbose("template-library-core path found $tlc");
+    } else {
+        my $msg = "No template-library-core path found (set QUATTOR_TEST_TEMPLATE_LIBRARY_CORE?)";
+        if($notok_on_missing) {
+            $self->notok($msg);
+        } else {
+            $self->info($msg);
+        }
+    }
+    return $tlc;
 }
 
 1;
