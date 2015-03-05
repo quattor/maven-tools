@@ -14,8 +14,6 @@ use Test::More;
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
-use Test::Quattor::Object qw(make_target_pan_path);
-
 use base qw(Test::Quattor::TextRender::Base);
 
 =pod
@@ -98,7 +96,7 @@ sub _initialize
     $self->{pannamespace} = "metaconfig/$self->{service}";
 
     if (!$self->{namespacepath}) {
-        $self->{namespacepath} = make_target_pan_path();
+        $self->{namespacepath} = $self->make_target_pan_path();
     }
 
     # Fix TextRender relpath and includepath

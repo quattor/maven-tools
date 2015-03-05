@@ -24,7 +24,7 @@ use Readonly;
 # to-be-distributed pan templates 
 Readonly our $TARGET_PAN_RELPATH => 'target/pan';
 
-our @EXPORT = qw($TARGET_PAN_RELPATH make_target_pan_path);
+our @EXPORT = qw($TARGET_PAN_RELPATH);
 
 sub new
 {
@@ -250,9 +250,15 @@ sub get_template_library_core
     $notok_on_missing = 1 if (! defined($notok_on_missing));
 
     my $tlc = $ENV{QUATTOR_TEST_TEMPLATE_LIBRARY_CORE};
-    if ($tlc && -d $tlc) {
-        $self->verbose(
-            "template-library-core path $tlc set via QUATTOR_TEST_TEMPLATE_LIBRARY_CORE");
+    if ($tlc) {
+        my $msg = "template-library-core path $tlc set via QUATTOR_TEST_TEMPLATE_LIBRARY_CORE";
+        if (-d $tlc) {
+            $self->verbose($msg);
+        } else {
+            # Log it
+            $self->info("$msg, but it is not a directory.");
+            $tlc = undef;
+        }
     } else {
 
         # TODO: better guess?
@@ -262,7 +268,10 @@ sub get_template_library_core
         } elsif (-d "../$d") {
             $tlc = "../$d";
         } else {
-            $self->error("no more guesses for template-library-core path");
+            $self->error("no more guesses for template-library-core path: tlc ",
+                         $tlc ? $tlc : "");
+            # Force it undef
+            $tlc = undef;
         }
     }
     if ($tlc) {
@@ -290,6 +299,8 @@ absolute pathname.
 
 sub make_target_pan_path
 {
+    my $self = shift;
+
     # Always add the TARGET_PAN_RELPATH to the includepath of the compilation
     my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
     if (!-d $dest) {

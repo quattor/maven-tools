@@ -18,8 +18,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
-use Test::Quattor::Object qw(make_target_pan_path);
-
+use Test::Quattor::Object;
 use Test::Quattor::Panc qw(panc set_panc_includepath get_panc_includepath);
 
 use EDG::WP4::CCM::Configuration;
@@ -46,6 +45,11 @@ EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
                  set_profile_cache_options);
+
+
+# A Test::Quattor::Object instance, can be used as logger.
+my $object = Test::Quattor::Object->new();
+
 
 =pod
 
@@ -170,11 +174,18 @@ sub prepare_profile_cache
     print $fh "1\n";
     $fh->close();
 
-    my $dest = make_target_pan_path();
+    my $dest = $object->make_target_pan_path();
     my $incdirs = get_panc_includepath();
     # Always add the current dir
-    push(@$incdirs, '.') if (! (grep { $_ eq '.'} @$incdirs));
-    push(@$incdirs, $dest) if (! (grep { $_ eq $dest} @$incdirs));
+    push(@$incdirs, '.') if (! (grep { $_ eq '.' } @$incdirs));
+    push(@$incdirs, $dest) if (! (grep { $_ eq $dest } @$incdirs));
+
+    # no failed test on missing template library core
+    # to avoid issues with auto-detect, set the QUATTOR_TEST_TEMPLATE_LIBRARY_CORE 
+    # to non-existinig dir. (This is not supposed to cause any issues though)
+    my $tlc = $object->get_template_library_core(0);
+    push(@$incdirs, $tlc) if ($tlc && ! (grep { $_ eq $tlc } @$incdirs));
+
     set_panc_includepath(@$incdirs);
 
     # Compile profiles
