@@ -8,12 +8,23 @@ use warnings;
 
 package Test::Quattor::Object;
 
+use base 'Exporter';
+
 our @ISA;
 use Test::More;
 
 use File::Basename;
 use File::Find;
-use Cwd 'abs_path';
+use Cwd qw(abs_path getcwd);
+use File::Path qw(mkpath);
+
+use Readonly;
+
+# The target pan directory used by maven to stage the 
+# to-be-distributed pan templates 
+Readonly our $TARGET_PAN_RELPATH => 'target/pan';
+
+our @EXPORT = qw($TARGET_PAN_RELPATH make_target_pan_path);
 
 sub new
 {
@@ -266,6 +277,26 @@ sub get_template_library_core
         }
     }
     return $tlc;
+}
+
+=pod
+
+=head2 make_target_pan_path
+
+Create if needed the "target/pan" path in the current directory, and returns the 
+absolute pathname.
+
+=cut
+
+sub make_target_pan_path
+{
+    # Always add the TARGET_PAN_RELPATH to the includepath of the compilation
+    my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
+    if (!-d $dest) {
+        mkpath($dest)
+    }
+
+    return $dest;
 }
 
 1;

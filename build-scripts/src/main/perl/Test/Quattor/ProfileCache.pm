@@ -1,3 +1,8 @@
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
+
 use strict;
 use warnings;
 
@@ -13,6 +18,8 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
+use Test::Quattor::Object qw(make_target_pan_path);
+
 use Test::Quattor::Panc qw(panc set_panc_includepath get_panc_includepath);
 
 use EDG::WP4::CCM::Configuration;
@@ -21,10 +28,6 @@ use EDG::WP4::CCM::Fetch;
 use EDG::WP4::CCM::Element qw(escape unescape);
 
 use Readonly;
-
-# The target pan directory used by maven to stage the 
-# to-be-distributed pan templates 
-Readonly our $TARGET_PAN_RELPATH => 'target/pan';
 
 Readonly::Hash my %DEFAULT_PROFILE_CACHE_DIRS => {
     resources => "src/test/resources",
@@ -42,7 +45,7 @@ retrieve_retries 1
 EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
-                 set_profile_cache_options $TARGET_PAN_RELPATH);
+                 set_profile_cache_options);
 
 =pod
 
@@ -167,11 +170,7 @@ sub prepare_profile_cache
     print $fh "1\n";
     $fh->close();
 
-    # Always add the TARGET_PAN_RELPATH to the includepath of the compilation
-    my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
-    if (!-d $dest) {
-        mkpath($dest)
-    }
+    my $dest = make_target_pan_path();
     my $incdirs = get_panc_includepath();
     # Always add the current dir
     push(@$incdirs, '.') if (! (grep { $_ eq '.'} @$incdirs));

@@ -8,10 +8,10 @@ use Cwd;
 use EDG::WP4::CCM::Element qw(escape);
 
 use Test::Quattor::ProfileCache qw(prepare_profile_cache 
-    get_config_for_profile set_profile_cache_options 
-    $TARGET_PAN_RELPATH);
+    get_config_for_profile set_profile_cache_options);
+use Test::Quattor::Object qw($TARGET_PAN_RELPATH);
 use Test::Quattor::Panc qw(get_panc_includepath);
-use Cwd;
+use Cwd qw(getcwd);
 
 
 # Can't have NoAction here, since no CAF mocking happens
@@ -72,6 +72,7 @@ my $includedir = get_panc_includepath();
 ok(grep {$_ eq $dest} @$includedir, "the $TARGET_PAN_RELPATH directory is in panc includepath");
 ok(grep {$_ eq '.'} @$includedir, "the '.' directory is in panc includepath");
 
+# Test get_config_for_profile
 my $abscfg2 = get_config_for_profile($profile);
 is_deeply($abscfg, $abscfg2, 
           "get_config_for_profile fecthes same configuration object as returned by prepare_profile_cache for abs profile");
