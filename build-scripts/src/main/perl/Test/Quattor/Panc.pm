@@ -128,12 +128,17 @@ sub get_panc_includepath
 Compile the pan C<profile> (file 'C<profile>.pan' in C<resourcesdir>)
 and create the profile in C<outputdir>.
 
+If C<croak_on_error> is true (or undef), the method croaks on compilation failure.
+If false, it will return the exitcode.
+
 =cut
 
 sub panc
 {
 
-    my ($profile, $resourcesdir, $outputdir) = @_;
+    my ($profile, $resourcesdir, $outputdir, $croak_on_error) = @_;
+
+    $croak_on_error = 1 if (! defined($croak_on_error));
 
     if( ! -d $outputdir) {
         mkpath($outputdir)
@@ -167,15 +172,22 @@ sub panc
     } else {
         $proc->execute();
     };
+    chdir($currentdir);
 
-    my $pancmsg = "Pan compiler called with: $proc from directory ".getcwd();
+    my $pancmsg = "Pan compiler called with: $proc from directory $resourcesdir";
     if($?) {
-        my $msg = "Unable to compile profile $profile. Minimal panc version is $PANC_MINIMAL";
-        croak("$msg. $pancmsg with output\n$output");
+        my $msg = "Unable to compile profile $profile. Minimal panc version is $PANC_MINIMAL. ";
+        $msg .= "$pancmsg with output\n$output";
+        if($croak_on_error) {
+            croak($msg);
+        } else {
+            diag($msg);
+        }
     } else {
         note($pancmsg);
     }
-    chdir($currentdir);
+
+    return $?;
 };
 
 
