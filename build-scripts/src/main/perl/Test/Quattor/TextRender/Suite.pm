@@ -227,7 +227,11 @@ sub gather_profile
     while (my ($pan, $value) = each %$pans) {
         my $name = basename($pan);
         $name =~ s/\.pan$//;
-        $objs{$name} = $pan if ($value->{type} eq 'object');
+        if ($value->{type} eq 'object') {
+            if ((! $self->{filter}) || $name =~ m/$self->{filter}/) {
+                $objs{$name} = $pan;
+            }
+        }
     }
 
     return \%objs;
@@ -281,7 +285,7 @@ sub test
     is_deeply([sort keys %$regexps], [sort keys %$profiles], "All regexps have matching profile");
 
     my $incdirs = get_panc_includepath();
-    push(@$incdirs, $self->{profilespath});
+    push(@$incdirs, $self->{profilespath}) if (! (grep { $_ eq $self->{profilespath}} @$incdirs));
     set_panc_includepath(@$incdirs);
 
     set_profile_cache_options(resources => $self->{profilespath});

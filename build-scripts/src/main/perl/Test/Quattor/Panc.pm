@@ -11,6 +11,7 @@ use Readonly;
 use Cwd;
 use Carp qw(carp croak);
 use File::Path qw(mkpath);
+use Cwd qw(getcwd);
 
 our @EXPORT = qw(panc 
                  set_panc_options reset_panc_options get_panc_options
@@ -144,7 +145,7 @@ sub panc
     $profile .= ".pan" if ($profile !~ m/\.pan$/ );
     push(@panccmd, $profile);
 
-    my $pancmsg = "Pan compiler called with: ".join(" ", @panccmd);
+    my $pancmsg = "Pan compiler called with: ".join(" ", @panccmd)." from directory ".getcwd();
     if(system(@panccmd)) {
         croak("Unable to compile profile $profile. Minimal panc version is $PANC_MINIMAL. $pancmsg");
     } else {
