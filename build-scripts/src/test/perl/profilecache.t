@@ -38,9 +38,9 @@ is($TARGET_PAN_RELPATH, 'target/pan', 'TARGET_PAN_RELPATH is exported');
 my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
 ok(-d $dest, "$TARGET_PAN_RELPATH directory exists");
 my $includedir = get_panc_includepath();
-ok(grep {$_ eq $dest} @$includedir, "the $TARGET_PAN_RELPATH directory is in panc includepath");
-ok(grep {$_ eq '.'} @$includedir, "the '.' directory is in panc includepath");
-ok(grep {$_ eq $tmp_tlc_dir} @$includedir, "the QUATTOR_TEST_TEMPLATE_LIBRARY_CORE directory is in panc includepath");
+ok((grep {$_ eq $dest} @$includedir), "the $TARGET_PAN_RELPATH directory is in panc includepath");
+ok((grep {$_ eq '.'} @$includedir), "the '.' directory is in panc includepath");
+ok((grep {$_ eq $tmp_tlc_dir} @$includedir), "the QUATTOR_TEST_TEMPLATE_LIBRARY_CORE directory is in panc includepath");
 
 my $cfg2 = get_config_for_profile('profilecache');
 is_deeply($cfg, $cfg2, 
