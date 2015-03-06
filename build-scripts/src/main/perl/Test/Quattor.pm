@@ -309,6 +309,12 @@ sub new_filewriter_open
     $files_contents{$fn} = $f;
 
     $files_contents{*$f->{filename}} = $f;
+
+    *$f->{_mocked} = {
+                     iostring => $iostring,
+                     filewriter => $filewriter,
+                    };
+
     return $f;
 }
 
@@ -357,6 +363,9 @@ sub new_fileeditor_open
 
     my $f = CAF::FileWriter::new(@_);
     $f->set_contents($desired_file_contents{*$f->{filename}});
+
+    *$f->{_mocked}->{fileeditor} = $fileeditor;
+
     return $f;
 }
 
