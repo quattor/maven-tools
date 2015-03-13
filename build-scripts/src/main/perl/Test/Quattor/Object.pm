@@ -1,5 +1,5 @@
 # ${license-info}
-# ${developer-info
+# ${developer-info}
 # ${author-info}
 # ${build-info}
 
@@ -8,12 +8,23 @@ use warnings;
 
 package Test::Quattor::Object;
 
+use base 'Exporter';
+
 our @ISA;
 use Test::More;
 
 use File::Basename;
 use File::Find;
-use Cwd 'abs_path';
+use Cwd qw(abs_path getcwd);
+use File::Path qw(mkpath);
+
+use Readonly;
+
+# The target pan directory used by maven to stage the 
+# to-be-distributed pan templates 
+Readonly our $TARGET_PAN_RELPATH => 'target/pan';
+
+our @EXPORT = qw($TARGET_PAN_RELPATH);
 
 sub new
 {
@@ -35,9 +46,9 @@ sub _initialize
 
 =pod
 
-=head2 info    
+=head2 info
 
-info-type logger, calls diag. 
+info-type logger, calls diag.
 Arguments are converted in message, prefixed with 'INFO'.
 
 =cut
@@ -132,17 +143,17 @@ sub notok
     ok(0, $msg);
 }
 
-=pod 
+=pod
 
 =head2 gather_pan
 
 Walk the C<panpath> and gather all pan templates.
 
-A pan template is a text file with an C<.pan> extension; 
-they are considered 'invalid' when the C<pannamespace> is not 
+A pan template is a text file with an C<.pan> extension;
+they are considered 'invalid' when the C<pannamespace> is not
 correct.
 
-Returns a reference to hash with key path 
+Returns a reference to hash with key path
 (relative to C<relpath>) and value hashreference
 with 'type' of pan templates and 'expected' relative filepath;
 and an arrayreference to the invalid pan templates.
@@ -212,6 +223,91 @@ sub gather_pan
     }, $panpath);
 
     return \%pans, \@invalid_pans;
+}
+
+=pod
+
+=head2 get_template_library_core
+
+Return path to C<template-library-core> to allow "include 'pan/types';"
+and friends being used in the templates (in particular the schema).
+
+By default, the C<template-library-core> is expected to be in the
+parent or parent of parent directory as the current working directory.
+
+One can also specify the location via the C<QUATTOR_TEST_TEMPLATE_LIBRARY_CORE>
+environment variable.
+
+When C<notok_on_missing> is true (or undefined), C<notok> is called (i.e. test fails).
+
+=cut
+
+sub get_template_library_core
+{
+    # only for logging
+    my ($self, $notok_on_missing) = @_;
+
+    $notok_on_missing = 1 if (! defined($notok_on_missing));
+
+    my $tlc = $ENV{QUATTOR_TEST_TEMPLATE_LIBRARY_CORE};
+    if ($tlc) {
+        my $msg = "template-library-core path $tlc set via QUATTOR_TEST_TEMPLATE_LIBRARY_CORE";
+        if (-d $tlc) {
+            $self->verbose($msg);
+        } else {
+            # Log it
+            $self->info("$msg, but it is not a directory.");
+            $tlc = undef;
+        }
+    } else {
+
+        # TODO: better guess?
+        my $d = "../template-library-core";
+        if (-d $d) {
+            $tlc = $d;
+        } elsif (-d "../$d") {
+            $tlc = "../$d";
+        } else {
+            $self->error("no more guesses for template-library-core path: tlc ",
+                         $tlc ? $tlc : "");
+            # Force it undef
+            $tlc = undef;
+        }
+    }
+    if ($tlc) {
+        $tlc = abs_path($tlc);
+        $self->verbose("template-library-core path found $tlc");
+    } else {
+        my $msg = "No template-library-core path found (set QUATTOR_TEST_TEMPLATE_LIBRARY_CORE?)";
+        if($notok_on_missing) {
+            $self->notok($msg);
+        } else {
+            $self->info($msg);
+        }
+    }
+    return $tlc;
+}
+
+=pod
+
+=head2 make_target_pan_path
+
+Create if needed the "target/pan" path in the current directory, and returns the 
+absolute pathname.
+
+=cut
+
+sub make_target_pan_path
+{
+    my $self = shift;
+
+    # Always add the TARGET_PAN_RELPATH to the includepath of the compilation
+    my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
+    if (!-d $dest) {
+        mkpath($dest)
+    }
+
+    return $dest;
 }
 
 1;

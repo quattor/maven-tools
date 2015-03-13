@@ -1,5 +1,5 @@
 # ${license-info}
-# ${developer-info
+# ${developer-info}
 # ${author-info}
 # ${build-info}
 
@@ -13,8 +13,6 @@ use File::Basename;
 use Test::More;
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
-
-use Test::Quattor::ProfileCache qw($TARGET_PAN_RELPATH);
 
 use base qw(Test::Quattor::TextRender::Base);
 
@@ -98,11 +96,7 @@ sub _initialize
     $self->{pannamespace} = "metaconfig/$self->{service}";
 
     if (!$self->{namespacepath}) {
-        my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
-        if (!-d $dest) {
-            mkpath($dest)
-        }
-        $self->{namespacepath} = $dest;
+        $self->{namespacepath} = $self->make_target_pan_path();
     }
 
     # Fix TextRender relpath and includepath

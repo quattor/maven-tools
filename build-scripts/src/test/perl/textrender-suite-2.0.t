@@ -7,7 +7,7 @@ use Test::Quattor::TextRender;
 use Test::Quattor::TextRender::Suite;
 
 # only use it like this for this particular unittest
-use Test::Quattor::TextRender::Base;
+use Test::Quattor::Object;
 
 use Test::Quattor::Panc qw(set_panc_includepath);
 
@@ -40,7 +40,7 @@ my $st = Test::Quattor::TextRender::Suite->new(
     );
 
 set_panc_includepath($tr->{namespacepath}, 
-    Test::Quattor::TextRender::Base::get_template_library_core($st));
+    Test::Quattor::Object::get_template_library_core($st));
 
 $st->test();
 

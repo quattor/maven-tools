@@ -1,3 +1,8 @@
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
+
 use strict;
 use warnings;
 
@@ -13,6 +18,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
+use Test::Quattor::Object;
 use Test::Quattor::Panc qw(panc set_panc_includepath get_panc_includepath);
 
 use EDG::WP4::CCM::Configuration;
@@ -21,10 +27,6 @@ use EDG::WP4::CCM::Fetch;
 use EDG::WP4::CCM::Element qw(escape unescape);
 
 use Readonly;
-
-# The target pan directory used by maven to stage the 
-# to-be-distributed pan templates 
-Readonly our $TARGET_PAN_RELPATH => 'target/pan';
 
 Readonly::Hash my %DEFAULT_PROFILE_CACHE_DIRS => {
     resources => "src/test/resources",
@@ -42,13 +44,19 @@ retrieve_retries 1
 EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
-                 set_profile_cache_options $TARGET_PAN_RELPATH);
+                 set_profile_cache_options
+                 prepare_profile_cache_panc_includedirs);
+
+
+# A Test::Quattor::Object instance, can be used as logger.
+my $object = Test::Quattor::Object->new();
+
 
 =pod
 
 =head1 DESCRIPTION
 
-Module to setup a profile cache 
+Module to setup a profile cache
 
 =cut
 
@@ -67,7 +75,7 @@ Will be used by C<get_profile_cache_dirs>
 
 =item cache
 
-=item resources 
+=item resources
 
 =item profiles
 
@@ -94,7 +102,7 @@ the profile cache: 'cache', 'resources' and 'profiles'.
 The values are generated from the defaults or C<profilecacheoptions>
 (to be set via C<set_profile_cache_options>).
 
-Relative paths are assumed to be relative wrt current directory; 
+Relative paths are assumed to be relative wrt current directory;
 absolute paths are used for the returned values.
 
 =cut
@@ -112,7 +120,7 @@ sub get_profile_cache_dirs
         $dir = "$currentdir/$dir" if ($dir !~ m/^\//);
         $dirs{$type} = $dir;
     }
-    
+
     return \%dirs;
 }
 
@@ -120,17 +128,40 @@ sub get_profile_cache_dirs
 sub profile_cache_name
 {
     my ($profile) = @_;
-    
+
     my $dirs = get_profile_cache_dirs();
     my $cachename = $profile;
-    $cachename =~ s/\.pan$//; 
+    $cachename =~ s/\.pan$//;
     $cachename =~ s/^$dirs->{resources}\/+//;
     $cachename = escape($cachename);
-    
+
     note("Converted profile $profile in cache name $cachename") if ($profile ne $cachename);
 
     return $cachename;
-    
+
+}
+
+=pod
+
+=head2 prepare_profile_cache_panc_includedirs
+
+=cut
+
+sub prepare_profile_cache_panc_includedirs
+{
+    my $dest = $object->make_target_pan_path();
+    my $incdirs = get_panc_includepath();
+    # Always add the current dir
+    push(@$incdirs, '.') if (! (grep { $_ eq '.' } @$incdirs));
+    push(@$incdirs, $dest) if (! (grep { $_ eq $dest } @$incdirs));
+
+    # no failed test on missing template library core
+    # to avoid issues with auto-detect, set the QUATTOR_TEST_TEMPLATE_LIBRARY_CORE
+    # to non-existinig dir. (This is not supposed to cause any issues though)
+    my $tlc = $object->get_template_library_core(0);
+    push(@$incdirs, $tlc) if ($tlc && ! (grep { $_ eq $tlc } @$incdirs));
+
+    set_panc_includepath(@$incdirs);
 }
 
 =pod
@@ -143,11 +174,15 @@ wherever the CCM configuration tells us.
 
 Returns the configuration object for this profile.
 
+The C<croak_on_error> argument is passed to the C<Test::Quattor::Panc::panc> method.
+If this boolean is 0 (and not undef), C<prepare_profile_cache>
+will return the C<panc> exitcode upon C<panc> failure.
+
 =cut
 
 sub prepare_profile_cache
 {
-    my ($profile) = @_;
+    my ($profile, $croak_on_error) = @_;
 
     my $dirs = get_profile_cache_dirs();
 
@@ -167,21 +202,14 @@ sub prepare_profile_cache
     print $fh "1\n";
     $fh->close();
 
-    # Always add the TARGET_PAN_RELPATH to the includepath of the compilation
-    my $dest = getcwd() . "/$TARGET_PAN_RELPATH";
-    if (!-d $dest) {
-        mkpath($dest)
-    }
-    my $incdirs = get_panc_includepath();
-    # Always add the current dir
-    push(@$incdirs, '.') if (! (grep { $_ eq '.'} @$incdirs));
-    push(@$incdirs, $dest) if (! (grep { $_ eq $dest} @$incdirs));
-    set_panc_includepath(@$incdirs);
+    prepare_profile_cache_panc_includedirs();
 
     # Compile profiles
-    panc($profile, $dirs->{resources}, $dirs->{profiles});
+    my $ec = panc($profile, $dirs->{resources}, $dirs->{profiles}, $croak_on_error);
+    # on failure, there's nothing to do any further.
+    return $ec if($ec);
 
-    # Support non-existing ccm.cfg 
+    # Support non-existing ccm.cfg
     # (also prevents having to ship same file over and over again)
     my $ccmconfig = "$dirs->{resources}/ccm.cfg";
     if( ! -f $ccmconfig) {
@@ -208,7 +236,7 @@ sub prepare_profile_cache
 
     my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
     $configs{$cachename} = $cm->getUnlockedConfiguration();
-    
+
     return $configs{$cachename};
 }
 
