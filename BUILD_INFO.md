@@ -53,6 +53,13 @@ command:
 mvn versions:update-parent
 ```
 
+After you have checked that everything is ok, commit the modified pom files and
+remove the backup files created with:
+
+```bash
+git clean -f
+```
+
 For Quattor configuration modules, this will update the build tools version used
 by all configuration modules in the repository, when run in the top-level directory.
 
