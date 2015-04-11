@@ -30,13 +30,13 @@ Readonly my $DEFAULT_NAMESPACE_DIRECTORY => "target/textrender/namespace";
 
 =head1 NAME
 
-Test::Quattor::TextRender - Class for unittesting 
+Test::Quattor::TextRender - Class for unittesting
 the TextRender templates.
 
 =head1 DESCRIPTION
 
-This class should be used whenever to unittest templates 
-that can be processed via TextRender. (For testing ncm-metaconfig 
+This class should be used whenever to unittest templates
+that can be processed via TextRender. (For testing ncm-metaconfig
 templates looked at the derived Test::Quattor::TextRender::Metaconfig
 class).
 
@@ -56,22 +56,23 @@ Basepath that points to the templates.
 
 =item ttpath
 
-Path to the TT files.  
-If the path is not absolute, search from basepath.  
+Path to the TT files.
+If the path is not absolute, search from basepath.
 
 =item panpath
 
-Path to the (mandatory) pan templates.  
-If the path is not absolute, search from basepath.  
+Path to the (mandatory) pan templates.
+If the path is not absolute, search from basepath.
 
 =item pannamespace
 
-Namespace for the (mandatory) pan templates.  
+Namespace for the (mandatory) pan templates. (Use empty
+string for no namespace).
 
 =item namespacepath
 
 Destination directory to create a copy of the pan templates
-in correct namespaced directory. Relative paths are assumed 
+in correct namespaced directory. Relative paths are assumed
 relative to the current working directory.
 
 If no value is set, a random directory will be used.
@@ -85,12 +86,12 @@ The C<make_namespace> method  takes care of the actual unfolding (if any).
 
 =item expect
 
-Expect is a hash reference to bypass some built-in tests 
-in the test methods. 
+Expect is a hash reference to bypass some built-in tests
+in the test methods.
 
-Use with care, better to fix the actual problem. 
-(No attempt is made to make this any userfriendly; 
-main reason of existence is to unittest 
+Use with care, better to fix the actual problem.
+(No attempt is made to make this any userfriendly;
+main reason of existence is to unittest
 these test modules).
 
 =item invalidtt
@@ -147,10 +148,11 @@ sub _sanitize
         $self->notok("Init without panpath");
     }
 
-    ok($self->{pannamespace}, "Using init pannamespace $self->{pannamespace}");
+    ok(defined($self->{pannamespace}),
+       "Using init pannamespace $self->{pannamespace}");
 
     my $currentdir = getcwd();
-    if ($self->{namespacepath}) {
+    if (defined($self->{namespacepath})) {
         if ($self->{namespacepath} !~ m/^\//) {
             $self->verbose("Relative namespacepath $self->{namespacepath} found");
             $self->{namespacepath} = "$currentdir/$self->{namespacepath}";
@@ -174,17 +176,17 @@ sub _sanitize
 
 }
 
-=pod 
+=pod
 
 =head2 gather_tt
 
 Walk the C<ttpath> and gather all TT files
-A TT file is a text file with an C<.tt> extension; 
-they are considered 'invalid' when they are 
-in a 'test' or 'pan' directory or 
+A TT file is a text file with an C<.tt> extension;
+they are considered 'invalid' when they are
+in a 'test' or 'pan' directory or
 when they fail syntax validation.
 
-Returns an arrayreference with path 
+Returns an arrayreference with path
 (relative to the basepath) of TT and invalid TT files.
 
 =cut
@@ -222,7 +224,7 @@ sub gather_tt
         }
     };
 
-    find( { 
+    find( {
         wanted => $wanted,
         preprocess => sub { return sort { $a cmp $b } @_ },
     },  $self->{ttpath});
@@ -264,7 +266,7 @@ sub test_gather_tt
 
 =head2 gather_pan
 
-Same as Test::Quattor::Object C<gather_pan>, but with <relpath> set 
+Same as Test::Quattor::Object C<gather_pan>, but with <relpath> set
 to the instance 'basepath'. (With C<panpath> and C<pannamespace> as arguments)
 
 =cut
@@ -295,9 +297,9 @@ Directory structure is build up starting from the instance C<namespacepath> valu
 
 Returns an arrayreference with the copy locations.
 
-If the C<panunfold> attribute is true, a copy of the pan templates is placed 
+If the C<panunfold> attribute is true, a copy of the pan templates is placed
 in the expected subdirectory under the C<namespacepath>.
-If C<panunfold> attribute is false, the pan templates are assumed to be in the 
+If C<panunfold> attribute is false, the pan templates are assumed to be in the
 correct location, and nothing is done.
 
 =cut
@@ -347,7 +349,7 @@ sub make_namespace
 
 Run tests based on gather_pan results; returns nothing.
 
-(C<panpath> and C<pannamespace> can be passed as arguments to 
+(C<panpath> and C<pannamespace> can be passed as arguments to
 override the instance values).
 
 =cut
