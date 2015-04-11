@@ -21,7 +21,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
-our @EXPORT = qw(panc
+our @EXPORT = qw(panc panc_annotations
                  set_panc_options reset_panc_options get_panc_options
                  set_panc_includepath get_panc_includepath);
 
@@ -140,12 +140,14 @@ sub panc
 
     $croak_on_error = 1 if (! defined($croak_on_error));
 
+    my $currentdir = getcwd();
+    $outputdir = "$currentdir/$outputdir" if ($outputdir !~ m/^\//);
+
     if( ! -d $outputdir) {
         mkpath($outputdir)
             or croak("Couldn't create output directory $outputdir");
     }
 
-    my $currentdir = getcwd();
     chdir($resourcesdir) or croak("Couldn't enter resources directory $resourcesdir");
 
     my @panccmd = qw(panc --formats json --output-dir);
@@ -158,12 +160,60 @@ sub panc
     $profile .= ".pan" if ($profile !~ m/\.pan$/ );
     push(@panccmd, $profile);
 
+    my $pancmsg = "Pan compiler called from directory $resourcesdir";
+    return process(\@panccmd, $pancmsg, $croak_on_error, $currentdir);
+}
+
+=pod
+
+=head2 panc_annotations
+
+Generate the pan annotations from C<basedir> in C<outputdir> for C<profiles>.
+
+=cut
+
+sub panc_annotations
+{
+
+    my ($basedir, $outputdir, $profiles) = @_;
+
+    if( ! -d $outputdir) {
+        mkpath($outputdir)
+            or croak("Couldn't create output directory $outputdir");
+    }
+
+    my $panccmd = ["panc-annotations",
+                   "--base-dir", $basedir,
+                   "--output-dir", $outputdir,
+                  ];
+    push(@$panccmd, @$profiles);
+
+    my $pancmsg = "Pan annotations called";
+    return process($panccmd, $pancmsg);
+}
+
+=pod
+
+=head2 process
+
+Sort-of private method to use C<CAF::Process> bypassing the mocking of C<CAF::Process>.
+
+Arrayhash C<$cmd> for the command, C<$message> for a message to print,
+C<$croak_on_error> for croak_on_errror, and optional C<srcdir> to return to.
+
+=cut
+
+sub process
+{
+
+    my ($cmd, $message, $croak_on_error, $srcdir) = @_;
+
     my $output;
     # Test::MockModule keeps the currently mocked modules in a local hash,
     # and will return a previously existing one.
     my $mock = Test::MockModule->new('CAF::Process');
 
-    my $proc = CAF::Process->new(\@panccmd, stdout => \$output, stderr => 'stdout');
+    my $proc = CAF::Process->new($cmd, stdout => \$output, stderr => 'stdout');
 
     # avoid possible mocking, call original method if needed
     if($mock->is_mocked("execute")) {
@@ -172,19 +222,19 @@ sub panc
     } else {
         $proc->execute();
     };
-    chdir($currentdir);
 
-    my $pancmsg = "Pan compiler called with: $proc from directory $resourcesdir";
+    chdir($srcdir) if defined($srcdir);
+
     if($?) {
-        my $msg = "Unable to compile profile $profile. Minimal panc version is $PANC_MINIMAL. ";
-        $msg .= "$pancmsg with output\n$output";
+        my $msg = "Process failed. Minimal panc version is $PANC_MINIMAL. ";
+        $msg .= "$message (proc $proc) with output\n$output";
         if($croak_on_error) {
             croak($msg);
         } else {
             diag($msg);
         }
     } else {
-        note($pancmsg);
+        note("$message (proc $proc)");
     }
 
     return $?;
