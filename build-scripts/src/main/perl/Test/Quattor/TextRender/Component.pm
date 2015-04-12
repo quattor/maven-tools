@@ -114,8 +114,8 @@ sub _initialize
     $self->{panunfold} = 0 if ! defined($self->{panunfold});
 
     # pannamespace can be empty string
-    ok(defined($self->{pannamespace}),
-       "Pannamespace set " . ($self->{pannamespace} || "<undef>"));
+    ok(defined($self->{pannamespace}), "Pannamespace set " .
+       ($self->{pannamespace} ? $self->{pannamespace} : "<undef>"));
 
     ok(-d $self->{panpath},
        "Panpath directory " . ($self->{panpath} || "<undef>"));

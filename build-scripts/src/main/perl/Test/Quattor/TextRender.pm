@@ -118,6 +118,27 @@ sub _initialize
     $self->_sanitize();
 }
 
+# _verify_relpath
+sub _verify_relpath
+{
+    my ($self, $key, $prefix) = @_;
+
+    if ($self->{$key} !~ m/^\//) {
+        $self->verbose("Relative $key ".$self->{$key}." found; prefix $prefix");
+        $self->{$key} = "$prefix/".$self->{$key};
+    }
+    $self->verbose("Checking $key ".$self->{$key}." with abs_path");
+    my $abspath = abs_path($self->{$key});
+    if(defined($abspath) && -d $abspath) {
+        $self->verbose("Found abspath $abspath for $key");
+    } else {
+        $self->notok("$key ".$self->{$key}." returns invalid abs_path ".($abspath || "<undef>"));
+        $abspath = "/not/valid/$key"; # avoid undef issues
+    }
+    $self->{$key} = $abspath;
+}
+
+
 # sanity checks, validates some internals, return nothing
 sub _sanitize
 {
@@ -127,23 +148,13 @@ sub _sanitize
     ok(-d $self->{basepath}, "basepath $self->{basepath} exists");
 
     if ($self->{ttpath}) {
-        if ($self->{ttpath} !~ m/^\//) {
-            $self->verbose("Relative ttpath $self->{ttpath} found");
-            $self->{ttpath} = "$self->{basepath}/$self->{ttpath}";
-        }
-        $self->{ttpath} = abs_path($self->{ttpath});
-        ok(-d $self->{ttpath}, "ttpath $self->{ttpath} exists");
+        $self->_verify_relpath('ttpath', $self->{basepath});
     } else {
         $self->notok("Init without ttpath");
     }
 
     if ($self->{panpath}) {
-        if ($self->{panpath} !~ m/^\//) {
-            $self->verbose("Relative panpath $self->{panpath} found");
-            $self->{panpath} = "$self->{basepath}/$self->{panpath}";
-        }
-        $self->{panpath} = abs_path($self->{panpath});
-        ok(-d $self->{panpath}, "Init panpath $self->{panpath} exists");
+        $self->_verify_relpath('panpath', $self->{basepath});
     } else {
         $self->notok("Init without panpath");
     }
@@ -153,11 +164,7 @@ sub _sanitize
 
     my $currentdir = getcwd();
     if (defined($self->{namespacepath})) {
-        if ($self->{namespacepath} !~ m/^\//) {
-            $self->verbose("Relative namespacepath $self->{namespacepath} found");
-            $self->{namespacepath} = "$currentdir/$self->{namespacepath}";
-        }
-        $self->{namespacepath} = abs_path($self->{namespacepath});
+        $self->_verify_relpath('namespacepath', $currentdir);
     } else {
         my $dest = "$currentdir/$DEFAULT_NAMESPACE_DIRECTORY";
         if (!-d $dest) {
