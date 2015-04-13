@@ -105,6 +105,9 @@ sub _initialize
 
     $self->{testspath} = "$self->{basepath}/$self->{service}";
 
+    # Force skippan disabled.
+    $self->{skippan} = 0;
+
     $self->SUPER::_initialize();
 
 }

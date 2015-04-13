@@ -51,11 +51,15 @@ sub test
         $self->info("TT gather and verification test disabled");
     };
 
-    $self->test_gather_pan();
+    if($self->{skippan}) {
+        $self->verbose("Skippan enabled");
+    } else {
+        $self->test_gather_pan();
 
-    # Set panc include dirs
-    $self->make_namespace($self->{panpath}, $self->{pannamespace});
-    set_panc_includepath($self->{namespacepath}, $self->get_template_library_core());
+        # Set panc include dirs
+        $self->make_namespace($self->{panpath}, $self->{pannamespace});
+        set_panc_includepath($self->{namespacepath}, $self->get_template_library_core());
+    }
 
     my $testspath = $self->{testspath};
     $testspath .= "/$self->{version}" if (exists($self->{version}));

@@ -153,33 +153,37 @@ sub _sanitize
         $self->notok("Init without ttpath");
     }
 
-    if ($self->{panpath}) {
-        $self->_verify_relpath('panpath', $self->{basepath});
+    if($self->{skippan}) {
+        $self->verbose("Skippan enabled");
     } else {
-        $self->notok("Init without panpath");
-    }
-
-    ok(defined($self->{pannamespace}),
-       "Using init pannamespace $self->{pannamespace}");
-
-    my $currentdir = getcwd();
-    if (defined($self->{namespacepath})) {
-        $self->_verify_relpath('namespacepath', $currentdir);
-    } else {
-        my $dest = "$currentdir/$DEFAULT_NAMESPACE_DIRECTORY";
-        if (!-d $dest) {
-            mkpath($dest)
-                or croak "Init Unable to create parent namespacepath directory $dest $!";
+        if ($self->{panpath}) {
+            $self->_verify_relpath('panpath', $self->{basepath});
+        } else {
+            $self->notok("Init without panpath");
         }
 
-        $self->{namespacepath} = tempdir(DIR => $dest);
-    }
-    ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
+        ok(defined($self->{pannamespace}),
+           "Using init pannamespace $self->{pannamespace}");
 
-    if (! defined($self->{panunfold})) {
-        $self->{panunfold} = 1;
+        my $currentdir = getcwd();
+        if (defined($self->{namespacepath})) {
+            $self->_verify_relpath('namespacepath', $currentdir);
+        } else {
+            my $dest = "$currentdir/$DEFAULT_NAMESPACE_DIRECTORY";
+            if (!-d $dest) {
+                mkpath($dest)
+                    or croak "Init Unable to create parent namespacepath directory $dest $!";
+            }
+
+            $self->{namespacepath} = tempdir(DIR => $dest);
+        }
+        ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
+
+        if (! defined($self->{panunfold})) {
+            $self->{panunfold} = 1;
+        }
+        ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
     }
-    ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
 
 }
 
@@ -364,6 +368,11 @@ override the instance values).
 sub test_gather_pan
 {
     my ($self, $panpath, $pannamespace) = @_;
+
+    if($self->{skippan}) {
+        $self->verbose("Skippan enabled");
+        return;
+    }
 
     $panpath      = $self->{panpath}      if !defined($panpath);
     $pannamespace = $self->{pannamespace} if !defined($pannamespace);
