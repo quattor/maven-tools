@@ -1,7 +1,4 @@
-object template simple;
-
-# Make sure it's different from the other simple.pan files in same test
-"/unique" = 1;
+object template simple2;
 
 # TT relpath is mycomp
 # use /metaconfig as default for Test::Quattor::RegexpTest
