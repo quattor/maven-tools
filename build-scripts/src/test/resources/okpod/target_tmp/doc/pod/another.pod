@@ -1,0 +1,5 @@
+=pod
+
+Another valid pod files
+
+=cut
