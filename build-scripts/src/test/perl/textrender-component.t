@@ -9,7 +9,7 @@ use Cwd qw(getcwd);
 
 =head1 DESCRIPTION
 
-Test the component unittest. This is NOT an example to use 
+Test the component unittest. This is NOT an example to use
 the Test::Quattor::TextRender::Component test().
 
 =cut
@@ -21,12 +21,12 @@ use File::Copy::Recursive qw(rcopy);
 my $basepath = getcwd()."/src/test/resources/components/ncm-mycomp";
 my $target = getcwd()."/target";
 # whole pan dir
-rcopy("$basepath/pan",  "$target/pan") or 
+rcopy("$basepath/pan",  "$target/pan") or
     die "copy $basepath/pan to $target: $!";
-# TT files    
-rcopy("$basepath/resources/main.tt",  "$target/share/templates/quattor/mycomp/") or 
+# TT files
+rcopy("$basepath/resources/main.tt",  "$target/share/templates/quattor/mycomp/") or
     die "copy $basepath/resources/main.tt to $target/share/templates/quattor/mycomp: $!";
-rcopy("$basepath/resources/extra.tt",  "$target/share/templates/quattor/mycomp/") or 
+rcopy("$basepath/resources/extra.tt",  "$target/share/templates/quattor/mycomp/") or
     die "copy $basepath/resources/extra.tt to $target/share/templates/quattor/mycomp: $!";
 
 
@@ -38,8 +38,24 @@ my $st = Test::Quattor::TextRender::Component->new(
 
 isa_ok($st, "Test::Quattor::TextRender::Component",
        "Returns Test::Quattor::TextRender::Component instance for service");
-
 # the actual method to test
 $st->test();
+
+# Test the skippan on a directory that has no pan files
+# tests would fail if skippan isn't set to true
+$basepath = getcwd()."/src/test/resources/notacomponent";
+rcopy("$basepath/resources/main.tt",  "$target/share/templates/quattor/notacomponent/") or
+    die "copy $basepath/resources/main.tt to $target/share/templates/quattor/notacomponent: $!";
+$st = Test::Quattor::TextRender::Component->new(
+    component => "notacomponent",
+    skippan => 1,
+    # exception here to set the basepath. Default should be ok for actual usage
+    basepath => "$basepath/resources",
+    );
+isa_ok($st, "Test::Quattor::TextRender::Component",
+       "Returns Test::Quattor::TextRender::Component instance for service");
+# the actual method to test
+$st->test();
+
 
 done_testing();

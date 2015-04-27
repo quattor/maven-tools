@@ -30,13 +30,13 @@ Readonly my $DEFAULT_NAMESPACE_DIRECTORY => "target/textrender/namespace";
 
 =head1 NAME
 
-Test::Quattor::TextRender - Class for unittesting 
+Test::Quattor::TextRender - Class for unittesting
 the TextRender templates.
 
 =head1 DESCRIPTION
 
-This class should be used whenever to unittest templates 
-that can be processed via TextRender. (For testing ncm-metaconfig 
+This class should be used whenever to unittest templates
+that can be processed via TextRender. (For testing ncm-metaconfig
 templates looked at the derived Test::Quattor::TextRender::Metaconfig
 class).
 
@@ -56,22 +56,23 @@ Basepath that points to the templates.
 
 =item ttpath
 
-Path to the TT files.  
-If the path is not absolute, search from basepath.  
+Path to the TT files.
+If the path is not absolute, search from basepath.
 
 =item panpath
 
-Path to the (mandatory) pan templates.  
-If the path is not absolute, search from basepath.  
+Path to the (mandatory) pan templates.
+If the path is not absolute, search from basepath.
 
 =item pannamespace
 
-Namespace for the (mandatory) pan templates.  
+Namespace for the (mandatory) pan templates. (Use empty
+string for no namespace).
 
 =item namespacepath
 
 Destination directory to create a copy of the pan templates
-in correct namespaced directory. Relative paths are assumed 
+in correct namespaced directory. Relative paths are assumed
 relative to the current working directory.
 
 If no value is set, a random directory will be used.
@@ -85,12 +86,12 @@ The C<make_namespace> method  takes care of the actual unfolding (if any).
 
 =item expect
 
-Expect is a hash reference to bypass some built-in tests 
-in the test methods. 
+Expect is a hash reference to bypass some built-in tests
+in the test methods.
 
-Use with care, better to fix the actual problem. 
-(No attempt is made to make this any userfriendly; 
-main reason of existence is to unittest 
+Use with care, better to fix the actual problem.
+(No attempt is made to make this any userfriendly;
+main reason of existence is to unittest
 these test modules).
 
 =item invalidtt
@@ -117,6 +118,27 @@ sub _initialize
     $self->_sanitize();
 }
 
+# _verify_relpath
+sub _verify_relpath
+{
+    my ($self, $key, $prefix) = @_;
+
+    if ($self->{$key} !~ m/^\//) {
+        $self->verbose("Relative $key ".$self->{$key}." found; prefix $prefix");
+        $self->{$key} = "$prefix/".$self->{$key};
+    }
+    $self->verbose("Checking $key ".$self->{$key}." with abs_path");
+    my $abspath = abs_path($self->{$key});
+    if(defined($abspath) && -d $abspath) {
+        $self->verbose("Found abspath $abspath for $key");
+    } else {
+        $self->notok("$key ".$self->{$key}." returns invalid abs_path ".($abspath || "<undef>"));
+        $abspath = "/not/valid/$key"; # avoid undef issues
+    }
+    $self->{$key} = $abspath;
+}
+
+
 # sanity checks, validates some internals, return nothing
 sub _sanitize
 {
@@ -126,65 +148,56 @@ sub _sanitize
     ok(-d $self->{basepath}, "basepath $self->{basepath} exists");
 
     if ($self->{ttpath}) {
-        if ($self->{ttpath} !~ m/^\//) {
-            $self->verbose("Relative ttpath $self->{ttpath} found");
-            $self->{ttpath} = "$self->{basepath}/$self->{ttpath}";
-        }
-        $self->{ttpath} = abs_path($self->{ttpath});
-        ok(-d $self->{ttpath}, "ttpath $self->{ttpath} exists");
+        $self->_verify_relpath('ttpath', $self->{basepath});
     } else {
         $self->notok("Init without ttpath");
     }
 
-    if ($self->{panpath}) {
-        if ($self->{panpath} !~ m/^\//) {
-            $self->verbose("Relative panpath $self->{panpath} found");
-            $self->{panpath} = "$self->{basepath}/$self->{panpath}";
-        }
-        $self->{panpath} = abs_path($self->{panpath});
-        ok(-d $self->{panpath}, "Init panpath $self->{panpath} exists");
+    if($self->{skippan}) {
+        $self->verbose("Skippan enabled");
     } else {
-        $self->notok("Init without panpath");
-    }
-
-    ok($self->{pannamespace}, "Using init pannamespace $self->{pannamespace}");
-
-    my $currentdir = getcwd();
-    if ($self->{namespacepath}) {
-        if ($self->{namespacepath} !~ m/^\//) {
-            $self->verbose("Relative namespacepath $self->{namespacepath} found");
-            $self->{namespacepath} = "$currentdir/$self->{namespacepath}";
-        }
-        $self->{namespacepath} = abs_path($self->{namespacepath});
-    } else {
-        my $dest = "$currentdir/$DEFAULT_NAMESPACE_DIRECTORY";
-        if (!-d $dest) {
-            mkpath($dest)
-                or croak "Init Unable to create parent namespacepath directory $dest $!";
+        if ($self->{panpath}) {
+            $self->_verify_relpath('panpath', $self->{basepath});
+        } else {
+            $self->notok("Init without panpath");
         }
 
-        $self->{namespacepath} = tempdir(DIR => $dest);
-    }
-    ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
+        ok(defined($self->{pannamespace}),
+           "Using init pannamespace $self->{pannamespace}");
 
-    if (! defined($self->{panunfold})) {
-        $self->{panunfold} = 1;
+        my $currentdir = getcwd();
+        if (defined($self->{namespacepath})) {
+            $self->_verify_relpath('namespacepath', $currentdir);
+        } else {
+            my $dest = "$currentdir/$DEFAULT_NAMESPACE_DIRECTORY";
+            if (!-d $dest) {
+                mkpath($dest)
+                    or croak "Init Unable to create parent namespacepath directory $dest $!";
+            }
+
+            $self->{namespacepath} = tempdir(DIR => $dest);
+        }
+        ok(-d $self->{namespacepath}, "Init namespacepath $self->{namespacepath} exists");
+
+        if (! defined($self->{panunfold})) {
+            $self->{panunfold} = 1;
+        }
+        ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
     }
-    ok(defined($self->{panunfold}), "panunfold $self->{panunfold}");
 
 }
 
-=pod 
+=pod
 
 =head2 gather_tt
 
 Walk the C<ttpath> and gather all TT files
-A TT file is a text file with an C<.tt> extension; 
-they are considered 'invalid' when they are 
-in a 'test' or 'pan' directory or 
+A TT file is a text file with an C<.tt> extension;
+they are considered 'invalid' when they are
+in a 'test' or 'pan' directory or
 when they fail syntax validation.
 
-Returns an arrayreference with path 
+Returns an arrayreference with path
 (relative to the basepath) of TT and invalid TT files.
 
 =cut
@@ -222,7 +235,7 @@ sub gather_tt
         }
     };
 
-    find( { 
+    find( {
         wanted => $wanted,
         preprocess => sub { return sort { $a cmp $b } @_ },
     },  $self->{ttpath});
@@ -264,7 +277,7 @@ sub test_gather_tt
 
 =head2 gather_pan
 
-Same as Test::Quattor::Object C<gather_pan>, but with <relpath> set 
+Same as Test::Quattor::Object C<gather_pan>, but with <relpath> set
 to the instance 'basepath'. (With C<panpath> and C<pannamespace> as arguments)
 
 =cut
@@ -295,9 +308,9 @@ Directory structure is build up starting from the instance C<namespacepath> valu
 
 Returns an arrayreference with the copy locations.
 
-If the C<panunfold> attribute is true, a copy of the pan templates is placed 
+If the C<panunfold> attribute is true, a copy of the pan templates is placed
 in the expected subdirectory under the C<namespacepath>.
-If C<panunfold> attribute is false, the pan templates are assumed to be in the 
+If C<panunfold> attribute is false, the pan templates are assumed to be in the
 correct location, and nothing is done.
 
 =cut
@@ -347,7 +360,7 @@ sub make_namespace
 
 Run tests based on gather_pan results; returns nothing.
 
-(C<panpath> and C<pannamespace> can be passed as arguments to 
+(C<panpath> and C<pannamespace> can be passed as arguments to
 override the instance values).
 
 =cut
@@ -355,6 +368,11 @@ override the instance values).
 sub test_gather_pan
 {
     my ($self, $panpath, $pannamespace) = @_;
+
+    if($self->{skippan}) {
+        $self->verbose("Skippan enabled");
+        return;
+    }
 
     $panpath      = $self->{panpath}      if !defined($panpath);
     $pannamespace = $self->{pannamespace} if !defined($pannamespace);
