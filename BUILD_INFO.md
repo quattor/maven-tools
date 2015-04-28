@@ -133,7 +133,7 @@ your key to be present on http://pgp.mit.edu:11371. Also, as for any `gpg` comma
 you need to have a running `gpg-agent`. It also requires that you have the appropriate Maven configuration 
 in `~/.m2/settings.xml` (see below).
 
-It is not possible `--batch-mode` to use at the moment because you need to enter your GPG key password during the release process.
+It is not possible to use `--batch-mode` at the moment because you need to enter your GPG key password during the release process.
 
 If the userid used to push the package is incorrect, you will probably need to use the `-Dusername=XXX` property.
 
