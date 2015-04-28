@@ -69,7 +69,7 @@ UNDERSTANDING Maven
 
 Maven is a powerful and extensible build tool. The build process is driven by file
 `pom.xml` that can look complex... One important concept behind Maven is the
-*build lifecyle* that is an ordered list of phase, namely:
+*build life-cycle* that is an ordered list of phase, namely:
 
  * validate: validate the project is correct and all necessary information is available
  * compile: compile the source code of the project
@@ -127,7 +127,7 @@ until completion. At each run, Maven will guess what has already been done and d
 part.
 
 *Note: deploying a release requires to have GPG keys: create them if necessary before producing a release 
-and publish your public key on one GPG key server (they are all synchronized, see 
+and publish your public key on one GPG key server (they are all synchronised, see 
 http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key) and wait for
 your key to be present on http://pgp.mit.edu:11371. Also, as for any `gpg` command,
 you need to have a running `gpg-agent`. It also requires that you have the appropriate Maven configuration 
@@ -163,15 +163,15 @@ $ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
 You cannot use --batch-mode at the moment because you need to enter your GPG key password.
 If the userid used to push the package is incorrect, you will probably need to use the -Dusername=XXX property.
 
-After `release:perfom` successful exection, the new release is in a staging area on Sonatype nexus server
+After `release:perform` successful execution, the new release is in a staging area on Sonatype nexus server
 (https://oss.sonatype.org). Before the release can be used, you must log in to the nexus server, close the staging
 area and ask for the staging area being released. Select `Staging Repositories` in the left side menu (appearing
 after you logged in) and search for [org.quattor.maven](https://oss.sonatype.org/#nexus-search;quick~org.quattor.maven).
 Select the appropriate repository (you may have several if you did several attempts from different machines) and close it.
 When the operation is successful (click on `Refresh`), click on the `Release` button. Once successfully released, you 
 must wait a couple of hours before the release appear on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.quattor.maven).
-If something wrong happened during `release:perfom` which pushes the release to the staging area, it is sometimes necessary
-to drop the staging directory after closing it to be able to run again `release:perfom` (particularly if it complains
+If something wrong happened during `release:perform` which pushes the release to the staging area, it is sometimes necessary
+to drop the staging directory after closing it to be able to run again `release:perform` (particularly if it complains
 that the packages are already present in the repository). A good documentation of the staging process can be found
 at http://books.sonatype.com/nexus-book/reference/staging-repositories.html and detailed information on using
 Maven to deploy releases at Sonatype is available at http://central.sonatype.org/pages/apache-maven.html.
@@ -198,14 +198,14 @@ starts with `[maven-release-plugin]`:
   ```bash
   $ mvn release:clean
   # For each commit added by Maven, in reverse order
-  $ git revert commit_id -m 'prepare release canceled'
+  $ git revert commit_id -m 'prepare release cancelled'
   $ git push -n upstream (or whatever your upstream remote is): checks that it will do what is expected!
   $ git push upstream  (never use -f)
   Connect to GitHub and delete the new tag if it has been created
   ```
 
-**Note: after a first execution of `release:perfom` which pushed things to Sonatype Central Repository, it is
-recommened not to attempt to revert a failed release. In case the problems with the release in progress cannot
+**Note: after a first execution of `release:perform` which pushed things to Sonatype Central Repository, it is
+not recommended to attempt to revert a failed release. In case the problems with the release in progress cannot
 be fixed, forget about it and just start a new release.**
 
 Maven recommended configuration
