@@ -126,74 +126,73 @@ In case of an error during of the goals above, they can be run again as many tim
 until completion. At each run, Maven will guess what has already been done and do only the other
 part.
 
-*Note: deploying a release requires to have GPG keys: create them if necessary before producing a release 
+*Note:* deploying a release requires to have GPG keys: create them if necessary before producing a release 
 and publish your public key on one GPG key server (they are all synchronised, see 
 http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key) and wait for
 your key to be present on http://pgp.mit.edu:11371. Also, as for any `gpg` command,
 you need to have a running `gpg-agent`. It also requires that you have the appropriate Maven configuration 
-in `~/.m2/settings.xml` (see below).* 
+in `~/.m2/settings.xml` (see below).
 
-To start a `gpg-agent`, use the following command
+It is not possible `--batch-mode` to use at the moment because you need to enter your GPG key password during the release process.
 
-```bash
-eval `gpg-agent --daemon`
-```
-
-Before starting doing the release, also ensure that you have the environment variable
-QUATTOR_TEST_TEMPLATE_LIBRARY_CORE defined to a directory (absolute path) containing
-an up-to-date version of `template-library-core` repository (required by tests).
+If the userid used to push the package is incorrect, you will probably need to use the `-Dusername=XXX` property.
 
 *Before deploying a release, in particular if you are not familiar with the process,
-this is a good practice to deploy a snapshot. This is done with the `deploy` phase: before running
+it is a good practice to deploy a snapshot. This is done with the `deploy` phase: before running
 the `deploy` phase, check that the artifact version in the pom file is ending with `-SNAPSHOT`. It
 allows to check that the basic configuration, in particular to interact with Sonatype, is correct.*
 
-To perform a release, execute the following Maven commands:
+### Build release and push to nexus
 
-```bash
-$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" \
-      clean release:prepare
+1. Start a `gpg-agent`, using the following command ``eval `gpg-agent --daemon` ``
 
-$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm \
-      -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" \
-      release:perform
-```
+1. Before starting doing the release, also ensure that you have the environment variable
+`QUATTOR_TEST_TEMPLATE_LIBRARY_CORE` defined to a directory (absolute path) containing
+an up-to-date version of `template-library-core` repository (required by tests).
 
-You cannot use --batch-mode at the moment because you need to enter your GPG key password.
-If the userid used to push the package is incorrect, you will probably need to use the -Dusername=XXX property.
+  For example:
+  1. `git clone https://github.com/quattor/template-library-core.git /tmp/template-library-core-master`
+  2. `export QUATTOR_TEST_TEMPLATE_LIBRARY_CORE=/tmp/template-library-core-master` 
 
-After `release:perform` successful execution, the new release is in a staging area on Sonatype nexus server
+1. Prepare the release:
+
+  `$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" clean release:prepare`
+
+1. Perform the release:
+
+  `$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" release:perform`
+
+### Promoting from staging to release
+
+1. After successfully executing `release:perform`, the new release will be in a staging area on Sonatype nexus server
 (https://oss.sonatype.org). Before the release can be used, you must log in to the nexus server, close the staging
-area and ask for the staging area being released. Select `Staging Repositories` in the left side menu (appearing
+area and ask for the staging area being released.
+
+1. Select `Staging Repositories` in the left side menu (appearing
 after you logged in) and search for [org.quattor.maven](https://oss.sonatype.org/#nexus-search;quick~org.quattor.maven).
-Select the appropriate repository (you may have several if you did several attempts from different machines) and close it.
-When the operation is successful (click on `Refresh`), click on the `Release` button. Once successfully released, you 
-must wait a couple of hours before the release appear on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.quattor.maven).
-If something wrong happened during `release:perform` which pushes the release to the staging area, it is sometimes necessary
-to drop the staging directory after closing it to be able to run again `release:perform` (particularly if it complains
-that the packages are already present in the repository). A good documentation of the staging process can be found
-at http://books.sonatype.com/nexus-book/reference/staging-repositories.html and detailed information on using
-Maven to deploy releases at Sonatype is available at http://central.sonatype.org/pages/apache-maven.html.
 
-After the release being available on http://search.maven.org, if Maven complains that it cannot find the new release,
-add option `-U` to Maven. The exeuction of Maven may still result in an error but the local repository should be
-updated and next execution of Maven should work...
+1. Select the appropriate repository (you may have several if you did several attempts from different machines) and close it.
 
-If you really want to cancel the release process after doing `release:prepare` but before doing `release:perform`
-(it is preferable to fix the problem and rerun `release:prepare`), you need to issue
-the appropriate commands depending on whether `release:prepare` added some commits to the upstream branch whose commit message
-starts with `[maven-release-plugin]`:
+1. When the operation is successful (click on `Refresh`), click on the `Release` button. Once successfully released, you may have to wait a couple of hours before the release appears on the [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.quattor.maven).
 
-* No commit added (`release:prepare` failed):
+### Additional notes
+
+* If something went wrong during `release:perform` (which pushes the release to the staging area), it is sometimes necessary to drop the staging directory after closing it to be able to run `release:perform` again (particularly if it complains that the packages are already present in the repository).
+ * A good documentation of the staging process can be found at http://books.sonatype.com/nexus-book/reference/staging-repositories.html
+ * Detailed information on using Maven to deploy releases at Sonatype is available at http://central.sonatype.org/pages/apache-maven.html.
+
+* If when the release becomes available on http://search.maven.org Maven complains that it cannot find the new release, add the `-U` option to the Maven command line. The execution of Maven may still result in an error but the local repository should be updated allowing the next execution of Maven to work.
+
+* If you really want to cancel the release process after doing `release:prepare` but before doing `release:perform` (it is preferable to fix the problem and rerun `release:prepare`), you need to issue the appropriate commands depending on whether `release:prepare` added some commits to the upstream branch whose commit message starts with `[maven-release-plugin]`:
+
+  * No commit added (`release:prepare` failed):
 
   ```bash
   $ mvn release:clean
   $ git reset --hard
   ```
 
-* Commits added (2 commits if `release:prepare` succeeds):
-
+  * Commits added (2 commits if `release:prepare` succeeds):
 
   ```bash
   $ mvn release:clean
@@ -204,11 +203,9 @@ starts with `[maven-release-plugin]`:
   Connect to GitHub and delete the new tag if it has been created
   ```
 
-**Note: after a first execution of `release:perform` which pushed things to Sonatype Central Repository, it is
-not recommended to attempt to revert a failed release. In case the problems with the release in progress cannot
-be fixed, forget about it and just start a new release.**
+  * **Note: after a first execution of `release:perform` which pushed things to Sonatype Central Repository, it is not recommended that you attempt to revert a failed release. If the problems with the release in progress cannot be fixed, simply start a new release.**
 
-Maven recommended configuration
+Recommended Maven configuration
 -------------------------------
 
 Below is a typical Maven configuration file (`~/.m2/settings.xml`) to be able to manage the build tools.
