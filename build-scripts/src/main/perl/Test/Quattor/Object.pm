@@ -95,7 +95,6 @@ sub debug
         ok(0, "debug logging with unsupported level $level message $msg");
     }
 
-    my $msg = join('', @args);
     note("DEBUG: $level $msg");
     return $msg;
 }
