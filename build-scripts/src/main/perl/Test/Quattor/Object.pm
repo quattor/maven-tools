@@ -20,11 +20,14 @@ use File::Path qw(mkpath);
 
 use Readonly;
 
-# The target pan directory used by maven to stage the 
-# to-be-distributed pan templates 
+# The target pan directory used by maven to stage the
+# to-be-distributed pan templates
 Readonly our $TARGET_PAN_RELPATH => 'target/pan';
 
 our @EXPORT = qw($TARGET_PAN_RELPATH);
+
+# Keep track of all logged messages
+my $loghist = {};
 
 sub new
 {
@@ -46,6 +49,53 @@ sub _initialize
 
 =pod
 
+=head2 add_loghist
+
+Add a log C<message> for C<type> to the log history.
+
+=cut
+
+sub loghist_add
+{
+    my ($self, $type, $message) = @_;
+
+    $self->{LOGCOUNT}->{$type}++;
+    $self->{LOGLATEST}->{$type} = $message;
+    push(@{$loghist->{$type}}, $message);
+}
+
+=pod
+
+=head2 reset_loghist
+
+Reset the log history.
+
+=cut
+
+sub loghist_reset
+{
+    my ($self) = @_;
+    $self->{LOGCOUNT} = {};
+    $self->{LOGLATEST} = {};
+    $loghist = {};
+}
+
+=pod
+
+=head2 loghist_get
+
+Return the array of log messages for C<type>.
+
+=cut
+
+sub loghist_get
+{
+    my($self, $type) = @_;
+    return defined($loghist->{$type}) ? @{$loghist->{$type}} : undef;
+}
+
+=pod
+
 =head2 info
 
 info-type logger, calls diag.
@@ -57,6 +107,7 @@ sub info
 {
     my ($self, @args) = @_;
     my $msg = join('', @args);
+    $self->loghist_add('INFO', $msg);
     diag("INFO $msg");
     return $msg;
 }
@@ -74,6 +125,7 @@ sub verbose
 {
     my ($self, @args) = @_;
     my $msg = join('', @args);
+    $self->loghist_add('VERBOSE', $msg);
     note("VERBOSE $msg");
     return $msg;
 }
@@ -95,6 +147,7 @@ sub debug
         ok(0, "debug logging with unsupported level $level message $msg");
     }
 
+    $self->loghist_add('DEBUG', "$level $msg");
     note("DEBUG: $level $msg");
     return $msg;
 }
@@ -113,6 +166,7 @@ sub warn
 {
     my ($self, @args) = @_;
     my $msg = join('', @args);
+    $self->loghist_add('WARN', $msg);
     diag("WARN: $msg");
     return $msg;
 }
@@ -130,6 +184,7 @@ sub error
 {
     my ($self, @args) = @_;
     my $msg = join('', @args);
+    $self->loghist_add('ERROR', $msg);
     diag("ERROR: $msg");
     return $msg;
 }
@@ -299,7 +354,7 @@ sub get_template_library_core
 
 =head2 make_target_pan_path
 
-Create if needed the "target/pan" path in the current directory, and returns the 
+Create if needed the "target/pan" path in the current directory, and returns the
 absolute pathname.
 
 =cut
