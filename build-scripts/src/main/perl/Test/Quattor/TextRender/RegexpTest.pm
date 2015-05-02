@@ -90,13 +90,20 @@ sub render
     ok($self->{ttrelpath}, "ttrelpath specified " . ($self->{ttrelpath} || '<undef>'));
 
     # TODO how to keep this in sync with what metaconfig does? esp the options
-    $self->{trd} = EDG::WP4::CCM::TextRender->new(
-        $module,
-        $self->{config}->getElement($contentspath),
+    my $opts = {
         eol         => 0,
         relpath     => $self->{ttrelpath},
         includepath => $self->{ttincludepath},
         log         => $self,
+    };
+    if(defined($self->{flags}->{element})) {
+        $opts->{element} = $self->{flags}->{element};
+    }
+
+    $self->{trd} = EDG::WP4::CCM::TextRender->new(
+        $module,
+        $self->{config}->getElement($contentspath),
+        %$opts
     );
 
     $self->{text} = $self->{trd}->get_text;

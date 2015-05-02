@@ -8,7 +8,7 @@ use Cwd;
 use EDG::WP4::CCM::Element qw(escape);
 
 use Test::Quattor::ProfileCache qw(prepare_profile_cache
-    get_config_for_profile set_profile_cache_options 
+    get_config_for_profile set_profile_cache_options
     set_json_typed get_json_typed);
 use Test::Quattor::Object qw($TARGET_PAN_RELPATH);
 use Test::Quattor::Panc qw(get_panc_includepath);

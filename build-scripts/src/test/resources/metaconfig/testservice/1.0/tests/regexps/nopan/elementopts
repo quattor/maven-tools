@@ -1,4 +1,4 @@
-Nopan override
+Element opts
 ---
 //metaconfig2
 casesensitive
@@ -6,8 +6,9 @@ ordered
 singleline=0
 rendermodule=testservice/1.0/override
 contentspath=/override/contents
+element=YESNO,doublequote
 ---
 ^override$
-^default_override$
-^EXTRA more_override$
-^boolean 1$
+^"default_override"$
+^EXTRA "more_override"$
+^boolean YES$

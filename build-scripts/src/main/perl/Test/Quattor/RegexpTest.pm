@@ -219,6 +219,10 @@ metaconfigservice/renderpath value).
 Specify the path to use for contents. (Precedes
 metaconfigservice/renderpath value).
 
+=item element
+
+Comma separated list of predefined element convert options for CCM::TextRender.
+
 =back
 
 =item Default settings
@@ -257,6 +261,10 @@ sub parse_flags
             $self->{flags}->{$1} = $2;
         } elsif ($line =~ m/^\s*(\/)?(\/\S*)\s*$/) {
             $self->{flags}->{defined($1) ? 'renderpath' : 'metaconfigservice'} = $2;
+        } elsif ($line =~ m/^\s*element=(\S+)\s*$/) {
+            foreach my $opt (split (',', $1)) {
+                $self->{flags}->{element}->{$opt} = 1;
+            }
         } else {
             $self->notok("Unallowed flag $line");
         }

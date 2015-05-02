@@ -264,7 +264,7 @@ sub get_config_for_profile
 
 =head2 C<set_json_typed>
 
-Set the json_typed config attribute to C<value>. 
+Set the json_typed config attribute to C<value>.
 If value is undefined, C<json_typed> is set to true.
 
 Returns the value set.

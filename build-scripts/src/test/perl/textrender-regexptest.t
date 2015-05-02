@@ -22,6 +22,16 @@ default_override
 EXTRA more_override
 
 
+boolean 1
+EOF
+
+Readonly my $EXPECTED_RENDERTEXT_OVERRIDE_OPTS => <<EOF;
+override
+"default_override"
+EXTRA "more_override"
+
+
+boolean YES
 EOF
 
 
@@ -114,5 +124,33 @@ is($tro->{text}, $EXPECTED_RENDERTEXT_OVERRIDE, "override text rendered correctl
 $tro->match();
 $tro->postprocess;
 
+#
+# override with element opts
+#
+my $troo = Test::Quattor::TextRender::RegexpTest->new(
+    config => $cfg,
+    regexp => "$testpath/regexps/nopan/elementopts",
+    ttrelpath => 'metaconfig',
+    ttincludepath => $basepath, 
+);
+$troo->parse();
+is_deeply($troo->{flags}, {
+    casesensitive =>1,
+    ordered => 1,
+    singleline => 0,
+    multiline => 1,
+    renderpath => "/metaconfig2",
+    rendermodule => "testservice/1.0/override",
+    contentspath => "/override/contents",
+    element => {'YESNO' => 1, doublequote => 1}
+    }, "Flags found from block and defaults");
+
+$troo->render;
+isa_ok($troo->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved"); 
+ok(! exists($troo->{trd}->{fail}), "No failure (fail: ".($troo->{trd}->{fail} || "").")");
+is($troo->{trd}->{module}, 'testservice/1.0/override', "Correct override module set");
+is($troo->{text}, $EXPECTED_RENDERTEXT_OVERRIDE_OPTS, "override text with element opts rendered correctly");
+$troo->match();
+$troo->postprocess;
 
 done_testing();

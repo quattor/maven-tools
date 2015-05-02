@@ -11,3 +11,4 @@ prefix "/metaconfig2/contents";
 prefix "/override/contents";
 "data" = "default_override";
 "extra" = "more_override";
+"boolean" = true;
