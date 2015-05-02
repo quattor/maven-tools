@@ -12,7 +12,7 @@ use Test::More;
 
 use base qw(Test::Quattor::RegexpTest);
 
-use CAF::TextRender;
+use EDG::WP4::CCM::TextRender;
 
 =pod
 
@@ -47,11 +47,11 @@ The configuration instance to retreive the values from.
 
 =item ttincludepath
 
-The includepath for CAF::TextRender.
+The includepath for CCM::TextRender.
 
 =item ttrelpath
 
-The relpath for CAF::TextRender.
+The relpath for CCM::TextRender.
 
 =back
 
@@ -60,7 +60,7 @@ The relpath for CAF::TextRender.
 =cut
 
 # Render the text using config and flags-renderpath
-# Store the CAF::TextRender instance and the get_text result in attributes
+# Store the CCM::TextRender instance and the get_text result in attributes
 sub render
 {
     my ($self) = @_;
@@ -71,7 +71,7 @@ sub render
     ok($self->{ttrelpath}, "ttrelpath specified " . ($self->{ttrelpath} || '<undef>'));
 
     # TODO how to keep this in sync with what metaconfig does? esp the options
-    $self->{trd} = CAF::TextRender->new(
+    $self->{trd} = EDG::WP4::CCM::TextRender->new(
         $srv->{module},
         $srv->{contents},
         eol         => 0,
