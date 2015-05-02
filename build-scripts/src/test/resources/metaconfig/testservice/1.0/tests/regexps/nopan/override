@@ -1,0 +1,12 @@
+Nopan override
+---
+//metaconfig2
+casesensitive
+ordered
+singleline=0
+rendermodule=testservice/1.0/override
+contentspath=/override/contents
+---
+^override$
+^default_override$
+^EXTRA more_override$

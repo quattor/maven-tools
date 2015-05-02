@@ -4,23 +4,23 @@ use Test::More;
 use Cwd;
 
 use Test::Quattor::TextRender::Base qw(mock $TARGET_TT_DIR);
-use CAF::TextRender;
+use EDG::WP4::CCM::TextRender;
 
 is($TARGET_TT_DIR, "target/share/templates/quattor",
    "Expected relative TT stage dir");
 
 my $mockinstance = mock();
-my $trd = CAF::TextRender->new("whatever", {});
-isa_ok($trd, "CAF::TextRender", "TextRender instance");
+my $trd = EDG::WP4::CCM::TextRender->new("whatever", {});
+isa_ok($trd, "EDG::WP4::CCM::TextRender", "TextRender instance");
 is($trd->{includepath},
    getcwd()."/$TARGET_TT_DIR",
-   "Mocked CAF::TextRender has expected includepath");
+   "EDG::WP4::CCM::TextRedner with mocked CAF::TextRender has expected includepath");
 
 $mockinstance->unmock_all();
-$trd = CAF::TextRender->new("whatever", {});
-isa_ok($trd, "CAF::TextRender", "TextRender instance");
+$trd = EDG::WP4::CCM::TextRender->new("whatever", {});
+isa_ok($trd, "EDG::WP4::CCM::TextRender", "TextRender instance");
 is($trd->{includepath},
    "/usr/share/templates/quattor",
-   "Unmocked mocked CAF::TextRender has default includepath");
+   "EDG::WP4::CCM with unmocked mocked CAF::TextRender has default includepath");
 
 done_testing();

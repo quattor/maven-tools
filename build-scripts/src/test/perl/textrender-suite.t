@@ -50,7 +50,7 @@ my $regexps = $st->gather_regexp();
 is_deeply($regexps, {
             'config' => ['config/base', 'config/value'],
             'simple' => ['simple'],
-            'nopan' => ['nopan'],
+            'nopan' => ['nopan/nopan', 'nopan/override'],
             }, "Found regexps");
 
 # test filter

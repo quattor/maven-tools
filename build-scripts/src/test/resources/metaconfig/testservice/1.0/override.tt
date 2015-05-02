@@ -1,0 +1,2 @@
+override
+[% INCLUDE 'metaconfig/testservice/1.0/main.tt' %]
