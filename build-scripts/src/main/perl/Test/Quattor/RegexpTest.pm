@@ -151,13 +151,13 @@ Following flags are supported
 
 =over
 
-=item multiline 
+=item multiline
 
 (no)multiline / multiline=1/0
 
 =item singleline
 
-singleline / singleline=1/0 
+singleline / singleline=1/0
 
 (This flag can coexist with multiline)
 
@@ -179,13 +179,13 @@ case(in)sensistive / casesensitive = 0/1
 
 (un)ordered / ordered=0/1
 
-=back 
+=back
 
 =item negate
 
 negate / negate = 0/1
 
-Negate all regexps, none of the regexps can match 
+Negate all regexps, none of the regexps can match
 (is an alias for C<COUNT 0> on every regtest;
  overwritten when COUNT is set for individual regexp)
 
@@ -194,7 +194,7 @@ Negate all regexps, none of the regexps can match
 quote / quote = 0/1
 
 Whole tests block is 1 regular expression. With C<quote> flag set,
-C<multiline> flag is logged and ignored; C<ordered> flag is 
+C<multiline> flag is logged and ignored; C<ordered> flag is
 meaningless (and silently ignored).
 
 =item location of module and contents settings:
@@ -208,6 +208,16 @@ Also any flag starting with C</> is interpreted as C<metaconfigservice>
 =item renderpath=/some/path
 
 Also any flag starting with C<//> is interpreted as C<renderpath>
+
+=item rendermodule
+
+Specify the value of the module to use. (Precedes
+metaconfigservice/renderpath value).
+
+=item contentspath
+
+Specify the path to use for contents. (Precedes
+metaconfigservice/renderpath value).
 
 =back
 
@@ -243,7 +253,7 @@ sub parse_flags
             $self->{flags}->{"$1"} = 0;
         } elsif ($line =~ m/^\s*(case)in(sensitive)\s*$/) {
             $self->{flags}->{"$1$2"} = 0;
-        } elsif ($line =~ m/^\s*(metaconfigservice|renderpath)\s*=\s*(\S+)\s*$/) {
+        } elsif ($line =~ m/^\s*(metaconfigservice|renderpath|contentspath|rendermodule)\s*=\s*(\S+)\s*$/) {
             $self->{flags}->{$1} = $2;
         } elsif ($line =~ m/^\s*(\/)?(\/\S*)\s*$/) {
             $self->{flags}->{defined($1) ? 'renderpath' : 'metaconfigservice'} = $2;
@@ -290,26 +300,26 @@ sub make_re_flags
 
 Parse the tests block and set C<tests> attribute
 
-If the C<quote> flag is set, the whole tests block is 
-seen as one big regular expression, and rendered text 
+If the C<quote> flag is set, the whole tests block is
+seen as one big regular expression, and rendered text
 has to be an exact match, incl EOF newline etc.
 
-Without the C<quote> flag set, the tests are parsed line by line, 
+Without the C<quote> flag set, the tests are parsed line by line,
 and seen as one regexp per line.
 
 Lines starting with C<\s*#{3} > (trailing space!) are comments.
 
-Lines ending with C<\s#{3}> are interpreted as having options set. 
-Supported options 
+Lines ending with C<\s#{3}> are interpreted as having options set.
+Supported options
 
 =over
 
 =item COUNT
 
-C<COUNT \d+> is the exact number of matches 
+C<COUNT \d+> is the exact number of matches
 (use C<COUNT 0 >to make sure a line doesn't match).
 
-This is a global count, e.g. in ordered mode the count 
+This is a global count, e.g. in ordered mode the count
 itself is not number of matches since previous test match.
 
 =back
@@ -357,7 +367,7 @@ sub parse_tests
             # redefine line
             $line = $1;
         }
-        
+
         if ($line =~ m/\s+$/) {
             # No auto-chomp, but help figuring out why something doesn't match
             $self->verbose("Trailing whitespace found on line $line.");
@@ -393,7 +403,7 @@ sub match
         $self->error("No text to match defined");
         return;
     }
-    
+
     foreach my $test (@{$self->{tests}}) {
 
         # always make all matches for the whole text
