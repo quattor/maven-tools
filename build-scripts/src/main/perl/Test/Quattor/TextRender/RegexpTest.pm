@@ -65,15 +65,34 @@ sub render
 {
     my ($self) = @_;
 
-    my $srv = $self->{config}->getElement($self->{flags}->{renderpath})->getTree();
+    my $renderpath = $self->{flags}->{renderpath};
+    my ($module, $contentspath);
+
+    if ($self->{flags}->{rendermodule}) {
+        $module = $self->{flags}->{rendermodule};
+    } else {
+        my $modulepath = "$renderpath/module";
+        ok($self->{config}->elementExists($modulepath), "modulepath $modulepath elementExists");
+
+        $module = $self->{config}->getElement($modulepath)->getValue()
+    }
+    ok($module, "rendermodule specified". ($module || "<undef>"));
+
+    if ($self->{flags}->{contentspath}) {
+        $contentspath = $self->{flags}->{contentspath};
+    } else {
+        $contentspath = "$renderpath/contents";
+    }
+    ok($contentspath, "contentspath specified". ($contentspath || "<undef>"));
+    ok($self->{config}->elementExists($contentspath), "contentspath elementExists");
 
     ok($self->{ttincludepath}, "ttincludepath specified " . ($self->{ttincludepath} || '<undef>'));
     ok($self->{ttrelpath}, "ttrelpath specified " . ($self->{ttrelpath} || '<undef>'));
 
     # TODO how to keep this in sync with what metaconfig does? esp the options
     $self->{trd} = EDG::WP4::CCM::TextRender->new(
-        $srv->{module},
-        $srv->{contents},
+        $module,
+        $self->{config}->getElement($contentspath),
         eol         => 0,
         relpath     => $self->{ttrelpath},
         includepath => $self->{ttincludepath},
