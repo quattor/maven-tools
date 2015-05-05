@@ -25,6 +25,7 @@ use EDG::WP4::CCM::Configuration;
 use EDG::WP4::CCM::CacheManager;
 use EDG::WP4::CCM::Fetch;
 use EDG::WP4::CCM::Element qw(escape unescape);
+use EDG::WP4::CCM::CCfg;
 
 use Readonly;
 
@@ -45,7 +46,9 @@ EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
                  set_profile_cache_options
-                 prepare_profile_cache_panc_includedirs);
+                 prepare_profile_cache_panc_includedirs
+                 set_json_typed get_json_typed
+                );
 
 
 # A Test::Quattor::Object instance, can be used as logger.
@@ -256,5 +259,36 @@ sub get_config_for_profile
 
     return $configs{profile_cache_name($profile)};
 }
+
+=pod
+
+=head2 C<set_json_typed>
+
+Set the json_typed config attribute to C<value>.
+If value is undefined, C<json_typed> is set to true.
+
+Returns the value set.
+
+=cut
+
+sub set_json_typed
+{
+    my $value = shift;
+    $value = 1 if(! defined($value));
+    return EDG::WP4::CCM::CCfg::_setCfgValue('json_typed', $value ? 1 : 0);
+}
+
+=pod
+
+=head2 C<get_json_typed>
+
+Return the C<json_typed> value.
+
+=cut
+
+sub get_json_typed
+{
+    return EDG::WP4::CCM::CCfg::getCfgValue('json_typed')
+};
 
 1;

@@ -20,7 +20,7 @@ my $testpath = "$basepath/metaconfig/testservice/1.0/tests";
 
 
 my $tr = Test::Quattor::RegexpTest->new(
-    regexp => "$testpath/regexps/nopan",
+    regexp => "$testpath/regexps/nopan/nopan",
     text => $EXPECTED_RENDERTEXT,
 );
 

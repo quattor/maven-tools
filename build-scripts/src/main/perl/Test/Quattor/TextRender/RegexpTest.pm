@@ -12,7 +12,7 @@ use Test::More;
 
 use base qw(Test::Quattor::RegexpTest);
 
-use CAF::TextRender;
+use EDG::WP4::CCM::TextRender;
 
 =pod
 
@@ -47,11 +47,11 @@ The configuration instance to retreive the values from.
 
 =item ttincludepath
 
-The includepath for CAF::TextRender.
+The includepath for CCM::TextRender.
 
 =item ttrelpath
 
-The relpath for CAF::TextRender.
+The relpath for CCM::TextRender.
 
 =back
 
@@ -60,24 +60,50 @@ The relpath for CAF::TextRender.
 =cut
 
 # Render the text using config and flags-renderpath
-# Store the CAF::TextRender instance and the get_text result in attributes
+# Store the CCM::TextRender instance and the get_text result in attributes
 sub render
 {
     my ($self) = @_;
 
-    my $srv = $self->{config}->getElement($self->{flags}->{renderpath})->getTree();
+    my $renderpath = $self->{flags}->{renderpath};
+    my ($module, $contentspath);
+
+    if ($self->{flags}->{rendermodule}) {
+        $module = $self->{flags}->{rendermodule};
+    } else {
+        my $modulepath = "$renderpath/module";
+        ok($self->{config}->elementExists($modulepath), "modulepath $modulepath elementExists");
+
+        $module = $self->{config}->getElement($modulepath)->getValue()
+    }
+    ok($module, "rendermodule specified". ($module || "<undef>"));
+
+    if ($self->{flags}->{contentspath}) {
+        $contentspath = $self->{flags}->{contentspath};
+    } else {
+        $contentspath = "$renderpath/contents";
+    }
+    ok($contentspath, "contentspath specified". ($contentspath || "<undef>"));
+    ok($self->{config}->elementExists($contentspath), "contentspath elementExists");
 
     ok($self->{ttincludepath}, "ttincludepath specified " . ($self->{ttincludepath} || '<undef>'));
     ok($self->{ttrelpath}, "ttrelpath specified " . ($self->{ttrelpath} || '<undef>'));
 
     # TODO how to keep this in sync with what metaconfig does? esp the options
-    $self->{trd} = CAF::TextRender->new(
-        $srv->{module},
-        $srv->{contents},
+    my $opts = {
         eol         => 0,
         relpath     => $self->{ttrelpath},
         includepath => $self->{ttincludepath},
         log         => $self,
+    };
+    if(defined($self->{flags}->{element})) {
+        $opts->{element} = $self->{flags}->{element};
+    }
+
+    $self->{trd} = EDG::WP4::CCM::TextRender->new(
+        $module,
+        $self->{config}->getElement($contentspath),
+        %$opts
     );
 
     $self->{text} = $self->{trd}->get_text;

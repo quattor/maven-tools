@@ -137,4 +137,21 @@ is(
     "Check flags metaconfigservice alias"
 );
 
+
+$tr->{flags} = {};
+$tr->parse_flags('contentspath=/my/path/to/contents');
+is(
+    $tr->{flags}->{contentspath},
+    '/my/path/to/contents',
+    "Check flags contentspath"
+);
+
+$tr->{flags} = {};
+$tr->parse_flags('rendermodule=mymodule');
+is(
+    $tr->{flags}->{rendermodule},
+    'mymodule',
+    "Check flags rendermodule"
+);
+
 done_testing();
