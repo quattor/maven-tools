@@ -11,6 +11,7 @@ package Test::Quattor::Doc;
 use base qw(Test::Quattor::Object Exporter);
 use Test::More;
 use Test::Pod;
+use Pod::Simple 3.28;
 use File::Path qw(mkpath);
 use Test::Quattor::Panc qw(panc_annotations);
 
