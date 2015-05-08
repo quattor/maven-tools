@@ -20,6 +20,13 @@ use File::Path qw(mkpath);
 
 use Readonly;
 
+# Old Test::More on EL5
+if(! defined &note) {
+    no warnings 'redefine';
+    sub note { diag(@_) }
+};
+
+
 # The target pan directory used by maven to stage the
 # to-be-distributed pan templates
 Readonly our $TARGET_PAN_RELPATH => 'target/pan';
