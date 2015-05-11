@@ -15,6 +15,7 @@ use Readonly;
 
 use CAF::Process;
 use Test::MockModule;
+use Test::Quattor::Object;
 
 use Cwd;
 use Carp qw(carp croak);
@@ -26,6 +27,10 @@ our @EXPORT = qw(panc panc_annotations
                  set_panc_includepath get_panc_includepath);
 
 Readonly my $PANC_MINIMAL => '10.2';
+
+
+# A Test::Quattor::Object instance, can be used as logger.
+my $object = Test::Quattor::Object->new();
 
 =pod
 
@@ -231,10 +236,10 @@ sub process
         if($croak_on_error) {
             croak($msg);
         } else {
-            diag($msg);
+            $object->info($msg);
         }
     } else {
-        note("$message (proc $proc)");
+        $object->debug("$message (proc $proc)");
     }
 
     return $?;

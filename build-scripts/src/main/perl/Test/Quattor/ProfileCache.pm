@@ -138,7 +138,7 @@ sub profile_cache_name
     $cachename =~ s/^$dirs->{resources}\/+//;
     $cachename = escape($cachename);
 
-    note("Converted profile $profile in cache name $cachename") if ($profile ne $cachename);
+    $object->debug("Converted profile $profile in cache name $cachename") if ($profile ne $cachename);
 
     return $cachename;
 
