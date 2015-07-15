@@ -48,7 +48,7 @@ isa_ok($st, "Test::Quattor::TextRender::Suite",
 
 my $regexps = $st->gather_regexp();
 is_deeply($regexps, {
-            'config' => ['config/base', 'config/value'],
+            'config' => ['config/base', 'config/quote', 'config/value'],
             'simple' => ['simple'],
             'nopan' => ['nopan/elementopts', 'nopan/nopan', 'nopan/override'],
             }, "Found regexps");
