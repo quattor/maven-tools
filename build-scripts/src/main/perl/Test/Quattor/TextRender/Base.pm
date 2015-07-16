@@ -22,7 +22,7 @@ use Readonly;
 
 Readonly our $TARGET_TT_DIR => "target/share/templates/quattor";
 
-our @EXPORT = qw(mock);
+our @EXPORT = qw(mock_textrender);
 our @EXPORT_OK = qw($TARGET_TT_DIR);
 
 =pod
@@ -78,7 +78,7 @@ sub test
 
 =pod
 
-=head2 mock
+=head2 mock_textrender
 
 An exported function that mocks C<CAF::TextRender>
 to test usage of TT files during regular component use
@@ -95,7 +95,7 @@ staged during testing via maven (use exported C<$TARGET_TT_DIR>).
 To be used as
 
     use Test::Quattor::TextRender::Base;
-    mock();
+    mock_textrender();
 
 It returns the mock instance. (This is for convenience, you shouldn't
 need this (except maybe to C<unmock_all>?). C<Test::MockModule>
@@ -104,7 +104,7 @@ instance.)
 
 =cut
 
-sub mock
+sub mock_textrender
 {
     my $includepath = shift;
 
