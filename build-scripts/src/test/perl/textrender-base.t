@@ -3,18 +3,18 @@ use warnings;
 use Test::More;
 use Cwd;
 
-use Test::Quattor::TextRender::Base qw(mock $TARGET_TT_DIR);
+use Test::Quattor::TextRender::Base qw(mock_textrender $TARGET_TT_DIR);
 use EDG::WP4::CCM::TextRender;
 
 is($TARGET_TT_DIR, "target/share/templates/quattor",
    "Expected relative TT stage dir");
 
-my $mockinstance = mock();
+my $mockinstance = mock_textrender();
 my $trd = EDG::WP4::CCM::TextRender->new("whatever", {});
 isa_ok($trd, "EDG::WP4::CCM::TextRender", "TextRender instance");
 is($trd->{includepath},
    getcwd()."/$TARGET_TT_DIR",
-   "EDG::WP4::CCM::TextRedner with mocked CAF::TextRender has expected includepath");
+   "EDG::WP4::CCM::TextRender with mocked CAF::TextRender has expected includepath");
 
 $mockinstance->unmock_all();
 $trd = EDG::WP4::CCM::TextRender->new("whatever", {});
