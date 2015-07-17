@@ -17,7 +17,7 @@ use EDG::WP4::CCM::Element qw(escape);
 use Readonly;
 
 # Blocks are separated using this separator
-Readonly my $BLOCK_SEPARATOR => qr{^-{3}$}m;
+Readonly my $BLOCK_SEPARATOR => qr{^-{3}\n}m;
 
 # Number of expected blocks
 Readonly my $EXPECTED_BLOCKS => 3;

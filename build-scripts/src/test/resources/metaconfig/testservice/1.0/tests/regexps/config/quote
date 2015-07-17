@@ -1,0 +1,8 @@
+Simple test with quote
+---
+/test/file
+quote=1
+---
+default
+EXTRA more
+
