@@ -25,7 +25,7 @@ isa_ok($dt, "Test::Quattor::Object", "Returns Test::Quattor::Object instance");
 
 is($dt->{x}, 'x', "Set attribute x");
 
-my @methods = qw(info verbose debug warn error notok gather_pan);
+my @methods = qw(info verbose report debug warn error notok gather_pan);
 foreach my $method (@methods) {
     ok($dt->can($method), "Object instance has $method method");
 }
@@ -62,6 +62,7 @@ ok(!defined($dt->loghist_get('FAKE1')), "loghist reset");
 
 $dt->debug(2, "message1");
 $dt->verbose("message1");
+$dt->report("message1");
 $dt->info("message1");
 $dt->warn("message1");
 $dt->error("message1");
@@ -69,6 +70,7 @@ $dt->error("message1");
 is_deeply($dt->{LOGCOUNT}, {
     'DEBUG', 1,
     'VERBOSE', 1,
+    'REPORT', 1,
     'INFO', 1,
     'WARN', 1,
     'ERROR', 1,
@@ -77,6 +79,7 @@ is_deeply($dt->{LOGCOUNT}, {
 is_deeply($dt->{LOGLATEST}, {
     'DEBUG', '2 message1',
     'VERBOSE', 'message1',
+    'REPORT', 'message1',
     'INFO', 'message1',
     'WARN', 'message1',
     'ERROR', 'message1',
