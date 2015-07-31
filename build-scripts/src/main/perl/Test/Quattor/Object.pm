@@ -139,6 +139,24 @@ sub verbose
 
 =pod
 
+=head2 report
+
+report-type logger, calls note
+Arguments are converted in message, prefixed with 'REPORT'.
+
+=cut
+
+sub report
+{
+    my ($self, @args) = @_;
+    my $msg = join('', @args);
+    $self->loghist_add('REPORT', $msg);
+    note("REPORT $msg");
+    return $msg;
+}
+
+=pod
+
 =head2 debug
 
 verbose logger, ignores debug level
