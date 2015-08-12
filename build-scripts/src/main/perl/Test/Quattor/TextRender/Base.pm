@@ -108,7 +108,7 @@ sub mock_textrender
 {
     my $includepath = shift;
 
-    $includepath = getcwd()."/$TARGET_TT_DIR" if (! $includepath);
+    $includepath = [getcwd()."/$TARGET_TT_DIR"] if (! $includepath);
 
     my $mock = Test::MockModule->new('CAF::TextRender');
     $mock->mock('new', sub {
