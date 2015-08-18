@@ -166,8 +166,8 @@
                       <directory>src/main/perl</directory>
                       <filtering>true</filtering>
                       <includes>
-                        <include>*.pod</include>
-                        <include>**/*.pod</include>
+                        <include>*.pm</include>
+                        <include>**/*.pm</include>
                       </includes>
                     </resource>
                   </resources>

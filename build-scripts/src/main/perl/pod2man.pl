@@ -52,7 +52,6 @@ sub extract_module_name {
 sub extract_pod_name {
     my ($name) = @_;
 
-    $name =~ s!\.pm!\.pod!gx;
     $name =~ s!/lib/perl/!/doc/pod/!x;
 
     return $name;
