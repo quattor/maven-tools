@@ -186,8 +186,8 @@
                 </goals>
                 <configuration>
                   <tasks name="Rename">
-                    <move filtering="true" todir="${project.build.directory}/doc/pod/CAF">
-                      <fileset dir="${project.build.directory}/doc/pod/CAF" />
+                    <move filtering="true" todir="${project.build.directory}/doc/pod/NCM/Component">
+                      <fileset dir="${project.build.directory}/doc/pod/NCM/Component" />
                       <mapper>
                         <globmapper from="*.pm" to="*.pod" />
                       </mapper>
