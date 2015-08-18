@@ -176,6 +176,29 @@
             </executions>
           </plugin>
           <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>rename-pod-sources</id>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <tasks name="Rename">
+                    <move filtering="true" todir="${project.build.directory}/doc/pod/CAF">
+                      <fileset dir="${project.build.directory}/doc/pod/CAF" />
+                      <mapper>
+                        <globmapper from="*.pm" to="*.pod" />
+                      </mapper>
+                    </move>
+                    <echo>Renaming pm to pod</echo>
+                  </tasks>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <groupId>org.quattor.pan</groupId>
             <artifactId>panc-maven-plugin</artifactId>
             <version>10.2</version>
