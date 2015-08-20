@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ sub extract_module_name {
     my ($name) = @_;
 
     if ($name =~ m{([^/]+)\.pod\z$}) {
-	return $1;
+        return $1;
     }
 
     my $pkg_name = undef;
@@ -52,8 +52,14 @@ sub extract_module_name {
 sub extract_pod_name {
     my ($name) = @_;
 
+    my $orig = $name;
+
     $name =~ s!\.pm!\.pod!gx;
     $name =~ s!/lib/perl/!/doc/pod/!x;
+
+    # again, look for pod file. if it finds it, use it.
+    # if the pod file can't be found, try the original one.
+    $name = $orig if (! -f $name);
 
     return $name;
 }
@@ -77,7 +83,7 @@ sub create_man_page {
     # module is not installed by default on current RHEL releases.  Delete
     # existing file before compression.
     if (-e $gzfile) {
-	unlink $gzfile;
+        unlink $gzfile;
     }
     `gzip $ofile`;
 
@@ -102,8 +108,11 @@ sub is_perl_file {
 
     return 0 if (! -f $file);
 
-    if ($file =~ /^.*\.p(?:[ml]|od)\z/sx) {
-	return 1;
+    if ($file =~ /^(.*)\.p([ml]|od)\z/sx) {
+        # if .pod exists of this file, ignore this one (the pod will be used)
+        return 0 if ($2 ne 'od' && -f "$1.pod");
+
+        return 1;
     }
 
     # If we don't know the file name, it may still be a Perl
