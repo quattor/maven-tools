@@ -22,6 +22,35 @@
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
     <unittest />
+    <!-- perl module headers. 
+         Usage: at the beginning of the module put: 
+         #${PMpre} Some::Namespace::packagename${PMpost}
+
+         The space after the ${PMpre} is mandatory, due to maven space eating properties
+             TODO: http://stackoverflow.com/questions/7389995/how-do-i-preserve-whitespace-in-a-maven-plugin-configuration
+         TODO: Should add up to 20 lines of text for fixed offset? -> move to the QuattorBuild.java
+    -->
+    <PMpre>${line.separator}
+${license-info}
+${developer-info}
+${author-info}
+
+package
+    </PMpre>
+    <!-- version numbers should be boring: http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
+         always use 'use version;' and a version instance for pre 5.10 support
+         you can now refer to these modules with vstrings: 'use X::Y::Z v1.2.3;'
+    -->
+    <PMpost>;
+
+use strict;
+use warnings;
+
+use version;
+our $VERSION = version->new("v${no-snapshot-version}");
+${line.separator}
+    </PMpost>
+
   </properties>
   <dependencies>
     <dependency>
