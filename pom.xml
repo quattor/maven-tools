@@ -214,12 +214,6 @@
 	  <version>2.1.4</version>
 	</plugin>
 
-	<plugin>
-          <groupId>org.quattor.maven</groupId>
-          <artifactId>maven-quattor-build-plugin</artifactId>
-	  <version>1.11-SNAPSHOT</version>
-	</plugin>
-
       </plugins>
     </pluginManagement>
   </build>
