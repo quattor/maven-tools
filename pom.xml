@@ -26,6 +26,10 @@
     <version>7</version>
   </parent>
 
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
+
   <modules>
     <module>assemblies</module>
     <module>build-profile</module>
