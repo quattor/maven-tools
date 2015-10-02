@@ -108,6 +108,28 @@ must be updated manually in the pom file if a new version exists and you want to
 *Note: it is important to define the version to use for dependencies and plugins present in the configuration. Maven raises a
 warning if this is not the case. When this is not done in the parent pom, if any defined, it has to be done in the child pom.*
 
+Updating the Maven plugins used
+-------------------------------
+
+To build the build tools and the various Quattor components, we rely on many Maven plugins whose version is fixed in 
+the main pom.xml file (the one in the top directory of the build tools). This is to ensure than when an old release is
+rebuilt, this is done with the same version of the Maven plugins as the one originally used.
+
+It remains important to update regurlarly the version used for every plugin. To help identifying the most recent of
+a plugin compatible with the Maven version used, use the following command (for the build tools, use the same 
+Maven options as those used for building them, see above):
+
+```
+mvn versions:display-plugin-updates
+```
+
+Based on the information displayed, update the main pom.xml files (look for the `plugins` section). Normally,
+there is no reason to define the plugin version in the pom.xml file of a particular Quattor component. Nevertheless
+it is always good to check if you suspect something is not working as expected.
+
+Normally, this is enough to run this command for the build tools as all plugins should be declared here. But this is
+possible to run it for any Quattor component: this may help to diagnose problems with specific components explicitly 
+defining the version of a plugin.
 
 Producing a new release of the build tools
 ------------------------------------------
