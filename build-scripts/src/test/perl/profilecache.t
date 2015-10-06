@@ -9,13 +9,21 @@ use EDG::WP4::CCM::Element qw(escape);
 
 use Test::Quattor::ProfileCache qw(prepare_profile_cache
     get_config_for_profile set_profile_cache_options
-    set_json_typed get_json_typed);
+    get_profile_cache_dirs set_json_typed get_json_typed 
+    %DEFAULT_PROFILE_CACHE_DIRS);
 use Test::Quattor::Object qw($TARGET_PAN_RELPATH);
 use Test::Quattor::Panc qw(get_panc_includepath);
 use Cwd qw(getcwd);
 use File::Temp qw(tempdir);
 use File::Path qw(mkpath);
 
+is_deeply(\%DEFAULT_PROFILE_CACHE_DIRS,
+          {
+              resources => "src/test/resources",
+              profiles => "target/test/profiles",
+              cache => "target/test/cache",
+          }, "Expected DEFAULT_PROFILE_CACHE_DIRS");
+          
 # Can't have NoAction here, since no CAF mocking happens
 # and otherwise nothing would be written
 
@@ -84,7 +92,7 @@ is_deeply($cfg, $cfg2,
 
 # verify defaults; they shouldn't "just" change
 my $currentdir = getcwd();
-my $dirs = Test::Quattor::ProfileCache::get_profile_cache_dirs();
+my $dirs = get_profile_cache_dirs();
 is_deeply($dirs, {
     resources => "$currentdir/src/test/resources",
     profiles => "$currentdir/target/test/profiles",
@@ -95,7 +103,7 @@ set_profile_cache_options(
     resources => 'src/test/resources/myresources',
     cache => 'target/test/cache/mycache',
 );
-$dirs = Test::Quattor::ProfileCache::get_profile_cache_dirs();
+$dirs = get_profile_cache_dirs();
 is($dirs->{resources}, "$currentdir/src/test/resources/myresources",
     "Set and retrieved custom profile_cache resources dir");
 is($dirs->{cache}, "$currentdir/target/test/cache/mycache",
@@ -103,14 +111,14 @@ is($dirs->{cache}, "$currentdir/target/test/cache/mycache",
 
 $ccmcfg = Test::Quattor::ProfileCache::get_ccm_config_default();
 like($ccmcfg, qr{^cache_root .*/cache/mycache$}m,
-   "get_ccm_config_default returned expected config with custom cache_root");
+     "get_ccm_config_default returned expected config with custom cache_root");
 
 
 # test rename
 is(Test::Quattor::ProfileCache::profile_cache_name("test"), "test",
-    "Profilecache name preserves original behaviour");
+   "Profilecache name preserves original behaviour");
 is(Test::Quattor::ProfileCache::profile_cache_name("$dirs->{resources}/subtree/test.pan"), escape("subtree/test"),
-    "Profilecache name handles absolute paths");
+   "Profilecache name handles absolute paths");
 
 
 # test absolute path

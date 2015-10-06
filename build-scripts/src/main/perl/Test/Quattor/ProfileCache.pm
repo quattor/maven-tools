@@ -29,7 +29,7 @@ use EDG::WP4::CCM::CCfg;
 
 use Readonly;
 
-Readonly::Hash my %DEFAULT_PROFILE_CACHE_DIRS => {
+Readonly::Hash our %DEFAULT_PROFILE_CACHE_DIRS => {
     resources => "src/test/resources",
     profiles => "target/test/profiles",
     cache => "target/test/cache",
@@ -45,11 +45,11 @@ retrieve_retries 1
 EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
-                 set_profile_cache_options
+                 set_profile_cache_options get_profile_cache_dirs
                  prepare_profile_cache_panc_includedirs
                  set_json_typed get_json_typed
                 );
-
+our @EXPORT_OK = qw(%DEFAULT_PROFILE_CACHE_DIRS);
 
 # A Test::Quattor::Object instance, can be used as logger.
 my $object = Test::Quattor::Object->new();

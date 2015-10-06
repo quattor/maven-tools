@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Quattor::ProfileCache;
 use Test::Quattor::TextRender::Component;
 use Cwd qw(getcwd);
 
@@ -40,6 +41,11 @@ isa_ok($st, "Test::Quattor::TextRender::Component",
        "Returns Test::Quattor::TextRender::Component instance for service");
 # the actual method to test
 $st->test();
+
+my $dirs = get_profile_cache_dirs();
+like($dirs->{cache},
+     qr{/target/test/cache/components/mycomp$},
+     "cache root set to pannamespace");
 
 # Test the skippan on a directory that has no pan files
 # tests would fail if skippan isn't set to true
