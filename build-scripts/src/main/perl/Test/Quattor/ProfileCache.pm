@@ -35,11 +35,11 @@ Readonly::Hash my %DEFAULT_PROFILE_CACHE_DIRS => {
     cache => "target/test/cache",
 };
 
-Readonly my $CCM_CONFIG_DEFAULT_DATA => <<"EOF";
+Readonly my $CCM_CONFIG_DEFAULT_TEMPLATE => <<"EOF";
 debug 0
 get_timeout 1
 profile http://www.quattor.org
-cache_root $DEFAULT_PROFILE_CACHE_DIRS{cache}
+cache_root __CACHE_ROOT__
 retrieve_wait 0
 retrieve_retries 1
 EOF
@@ -125,6 +125,17 @@ sub get_profile_cache_dirs
     }
 
     return \%dirs;
+}
+
+# get default ccm.cfg contents
+sub get_ccm_config_default
+{
+    my $txt = "$CCM_CONFIG_DEFAULT_TEMPLATE";
+
+    my $dirs = get_profile_cache_dirs();
+    $txt =~ s/__CACHE_ROOT__/$dirs->{cache}/g;
+
+    return $txt;
 }
 
 # convert e.g. absolute paths to usable name
@@ -221,7 +232,7 @@ sub prepare_profile_cache
         $ccmconfig = "$dirs->{cache}/ccm.cfg";
         if (! -f $ccmconfig) {
             my $fh = CAF::FileWriter->new($ccmconfig);
-            print $fh $CCM_CONFIG_DEFAULT_DATA;
+            print $fh get_ccm_config_default();
             $fh->close();
         }
     }

@@ -36,6 +36,21 @@ my $tmp_tlc_dir = tempdir(DIR => $target);
 
 $ENV{QUATTOR_TEST_TEMPLATE_LIBRARY_CORE} = $tmp_tlc_dir;
 
+# Test default ccm.cfg
+my $ccm_default = <<"EOF";
+debug 0
+get_timeout 1
+profile http://www.quattor.org
+cache_root $target/test/cache
+retrieve_wait 0
+retrieve_retries 1
+EOF
+
+my $ccmcfg = Test::Quattor::ProfileCache::get_ccm_config_default();
+is($ccmcfg, $ccm_default,
+   "get_ccm_config_default returned expected config with default value for cache_root");
+
+
 my $cfg = prepare_profile_cache('profilecache');
 
 isa_ok($cfg, "EDG::WP4::CCM::Configuration",
@@ -76,10 +91,20 @@ is_deeply($dirs, {
     cache => "$currentdir/target/test/cache",
     }, "Default profile_cache directories");
 
-set_profile_cache_options(resources => 'src/test/resources/myresources');
+set_profile_cache_options(
+    resources => 'src/test/resources/myresources',
+    cache => 'target/test/cache/mycache',
+);
 $dirs = Test::Quattor::ProfileCache::get_profile_cache_dirs();
 is($dirs->{resources}, "$currentdir/src/test/resources/myresources",
     "Set and retrieved custom profile_cache resources dir");
+is($dirs->{cache}, "$currentdir/target/test/cache/mycache",
+    "Set and retrieved custom profile_cache cache dir");
+
+$ccmcfg = Test::Quattor::ProfileCache::get_ccm_config_default();
+like($ccmcfg, qr{^cache_root .*/cache/mycache$}m,
+   "get_ccm_config_default returned expected config with custom cache_root");
+
 
 # test rename
 is(Test::Quattor::ProfileCache::profile_cache_name("test"), "test",
