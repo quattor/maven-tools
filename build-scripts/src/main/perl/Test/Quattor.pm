@@ -565,17 +565,23 @@ Solaris and SMF variant.
 
 =back
 
-It defaults to C<linux_sysv>.
+C<Test::Quattor> defaults to C<linux_sysv>.
+
+All other arguments are additional non-standard actions
+that can be used e.g. when testing subclassed C<CAF::Service>.
 
 =cut
 
 sub set_service_variant
 {
-    my $variant = shift;
+    my ($variant, @extraservices) = @_;
+
+    my @services = qw(create_process start stop restart reload);
+    push(@services, @extraservices) if @extraservices;
 
     # More methods will be added as we agree on them in the
     # CAF::Service API.
-    foreach my $method (qw(start stop restart create_process)) {
+    foreach my $method (@services) {
         no strict 'refs';
         if (CAF::Service->can("${method}_$variant")) {
             *{"CAF::Service::$method"} =
