@@ -56,7 +56,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
-use CAF::Service qw(FLAVOURS);
+use CAF::Service qw(@FLAVOURS);
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
 
 =pod
@@ -571,7 +571,7 @@ sub set_service_variant
 {
     my ($variant) = @_;
 
-    if (grep {$_ eq $variant} FLAVOURS) {
+    if (grep {$_ eq $variant} @FLAVOURS) {
         *CAF::Service::os_flavour = sub { return $variant; };
     } else {
         die "set_service_variant unsupported variant $variant";
