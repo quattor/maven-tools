@@ -613,7 +613,7 @@ sub force_service_variant
         }
     }
 
-    # not for the faint of heart
+    # Blindly assume that the namespace is usable.
     foreach my $method (@extraservices) {
         no strict 'refs';
         *{"$subclass::$method"} = *{"$subclass::${method}_$variant"};
