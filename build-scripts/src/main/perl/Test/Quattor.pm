@@ -1,5 +1,3 @@
-# -*- mode: cperl -*-
-
 =pod
 
 =head1 SYNOPSIS
@@ -58,7 +56,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Test::MockModule;
 use Test::More;
-use CAF::Service;
+use CAF::Service qw(@FLAVOURS);
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
 
 =pod
@@ -173,11 +171,11 @@ my @command_history = ();
 
 =item * C<caf_file_close_diff>
 
-A boolean to mimick the regular (i.e. when no C<NoAction> is set) behaviour of a 
-C<CAF::FileWriter> or C<CAF::FileEditor> C<close> (it returns wheter or not the 
+A boolean to mimic the regular (i.e. when no C<NoAction> is set) behaviour of a
+C<CAF::FileWriter> or C<CAF::FileEditor> C<close> (it returns whether or not the
 file changed). With C<NoAction> set, this check is skipped and C<undef> is returned.
 
-With this boolean set to true, contents difference is reported ( but not any chanegs 
+With this boolean set to true, contents difference is reported ( but not any changes
 due to e.g. file permissions or anything else checked with C<LC::Check::file)>.
 
 Defaults to false (to keep regular C<NoAction> behaviour).
@@ -332,14 +330,14 @@ sub new_filewriter_close
     if ($self->noAction()) {
         $self->cancel();
     }
-    
+
     $desired_file_contents{*$self->{filename}} =  $new_content if $save;
     $ret = $old_close->(@_);
 
     if ($caf_file_close_diff && $save) {
         $ret = (! defined($current_content)) || $current_content ne $new_content;
     }
-    
+
     return $ret;
 }
 
@@ -565,17 +563,47 @@ Solaris and SMF variant.
 
 =back
 
-It defaults to C<linux_sysv>.
+C<Test::Quattor> defaults to C<linux_sysv>.
 
 =cut
 
 sub set_service_variant
 {
-    my $variant = shift;
+    my ($variant) = @_;
+
+    if (grep {$_ eq $variant} @FLAVOURS) {
+        *CAF::Service::os_flavour = sub { return $variant; };
+    } else {
+        die "set_service_variant unsupported variant $variant";
+    }
+}
+
+set_service_variant("linux_sysv");
+
+=item C<force_service_variant>
+
+Force the variant by bypassing C<CAF::Service> C<AUTOLOAD> magic
+and defining the methods
+via glob assignments in the namespace.
+
+The first argument is the C<$variant> to use.
+
+When testing subclassed C<CAF::Service>,
+the second (optional) argument is the subclass, followed by
+all other arguments as additional non-standard actions.
+
+=cut
+
+sub force_service_variant
+{
+    my ($variant, $subclass, @extraservices) = @_;
+
+    my @services = qw(create_process start stop restart reload);
 
     # More methods will be added as we agree on them in the
     # CAF::Service API.
-    foreach my $method (qw(start stop restart create_process)) {
+    foreach my $method (@services) {
+        next if grep {$_ eq $method} @extraservices;
         no strict 'refs';
         if (CAF::Service->can("${method}_$variant")) {
             *{"CAF::Service::$method"} =
@@ -584,9 +612,14 @@ sub set_service_variant
             croak "Unsupported variant $variant";
         }
     }
+
+    # Blindly assume that the namespace is usable.
+    foreach my $method (@extraservices) {
+        no strict 'refs';
+        *{"$subclass::$method"} = *{"$subclass::${method}_$variant"};
+    }
 }
 
-set_service_variant("linux_sysv");
 
 =pod
 
