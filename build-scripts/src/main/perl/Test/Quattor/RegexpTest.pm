@@ -291,12 +291,12 @@ sub make_re_flags
     my ($self, @ignore) = @_;
 
     my @reflags;
-    while (my ($flag, $reflag) = each %FLAGS_REGEXP_MAP) {
+    foreach my $flag (sort keys %FLAGS_REGEXP_MAP) {
         my $val = $self->{flags}->{$flag};
         next if (!defined($val));
         next if (grep {$flag eq $_} @ignore);
         $val = $val ? 0 : 1 if ($flag eq 'casesensitive');
-        push(@reflags, $reflag) if $val;
+        push(@reflags, $FLAGS_REGEXP_MAP{$flag}) if $val;
     }
 
     return join("", sort @reflags);

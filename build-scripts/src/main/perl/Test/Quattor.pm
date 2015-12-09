@@ -533,7 +533,19 @@ sub command_history_ok
     foreach my $cmd (@$commands) {
         # start iterating from lastidx+1
         my ( $index )= grep { $command_history[$_] =~ /$cmd/  } ($lastidx+1)..$#command_history;
-        return 0 if !defined($index) or $index <= $lastidx;
+        my $msg = "command_history_ok command pattern '$cmd'";
+        if (!defined($index)) {
+            diag "$msg no match; return false" if $log_cmd;
+            return 0;
+        } else {
+            $msg .= " index $index (full command $command_history[$index])";
+            if ($index <= $lastidx) {
+                diag "$msg <= lastindex $lastidx; return false" if $log_cmd;
+                return 0;
+            } else {
+                diag "$msg; continue" if $log_cmd;
+            }
+        };
         $lastidx = $index;
     };
     # in principle, when you get here, all is ok.

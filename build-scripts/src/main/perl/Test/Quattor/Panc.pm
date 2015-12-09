@@ -157,9 +157,10 @@ sub panc
 
     my @panccmd = qw(panc --formats json --output-dir);
     push(@panccmd, $outputdir);
-    while (my ($option,$value) = each %pancoptions) {
+    foreach my $option (sort keys %pancoptions) {
         push(@panccmd, "--$option");
         # support options like --debug with no value
+        my $value = $pancoptions{$option};
         push(@panccmd, $value) if (defined($value));
     }
     $profile .= ".pan" if ($profile !~ m/\.pan$/ );
