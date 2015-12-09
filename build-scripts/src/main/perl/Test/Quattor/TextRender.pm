@@ -322,11 +322,11 @@ sub make_namespace
     my ($pans, $ipans) = $self->gather_pan($panpath, $pannamespace);
 
     my @copies;
-    while (my ($pan, $value) = each %$pans) {
+    foreach my $pan (sort keys %$pans) {
         my $dest;
         if ($self->{panunfold}) {
-
             # pan is relative wrt basepath; copy it to $destination/
+            my $value = $pans->{$pan};
             $dest = "$self->{namespacepath}/$value->{expected}";
             my $destdir = dirname($dest);
             if (!-d $destdir) {
@@ -397,7 +397,8 @@ sub test_gather_pan
     is($pans->{$schema}->{type}, "declaration", "Found schema $schema");
 
     # there can be no object templates
-    while (my ($pan, $value) = each %$pans) {
+    foreach my $pan (sort keys %$pans) {
+        my $value = $pans->{$pan};
         $self->notok("No object template $pan found.") if ($value->{type} eq 'object');
     }
 
