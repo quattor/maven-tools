@@ -24,7 +24,7 @@ and the input text is rendered rather then passed.
 =head1 DESCRIPTION
 
 This class parses and executes the tests as described in a single regexptest.
-It inherits from Test::Quattor::RegexpTest with main difference that the 
+It inherits from Test::Quattor::RegexpTest with main difference that the
 text to test is rendered rather then passsed.
 
 =head2 Public methods
@@ -96,8 +96,13 @@ sub render
         includepath => $self->{ttincludepath},
         log         => $self,
     };
+
+    # element flags precede element settings from renderpath
     if(defined($self->{flags}->{element})) {
         $opts->{element} = $self->{flags}->{element};
+    } else {
+        my $elementpath = "$renderpath/element";
+        $opts->{element} = $self->{config}->getTree($elementpath);
     }
 
     $self->{trd} = EDG::WP4::CCM::TextRender->new(
@@ -133,4 +138,3 @@ sub preprocess
 }
 
 1;
-
