@@ -21,7 +21,7 @@ Test the TextRender suite unittest.
 
 =cut
 
-# Prepare the namespacepath 
+# Prepare the namespacepath
 my $base = getcwd()."/src/test/resources";
 my $tr = Test::Quattor::TextRender->new(
     basepath => $base,
@@ -40,15 +40,16 @@ my $st = Test::Quattor::TextRender::Suite->new(
     );
 
 # get_template_library_core should never be used like this
-set_panc_includepath($tr->{namespacepath}, 
+set_panc_includepath($tr->{namespacepath},
     Test::Quattor::Object::get_template_library_core($st));
 
-isa_ok($st, "Test::Quattor::TextRender::Suite", 
+isa_ok($st, "Test::Quattor::TextRender::Suite",
        "Returns Test::Quattor::TextRender::Suite instance for service");
 
 my $regexps = $st->gather_regexp();
 is_deeply($regexps, {
             'config' => ['config/base', 'config/quote', 'config/value'],
+            'configelement' => ['configelement'],
             'simple' => ['simple'],
             'nopan' => ['nopan/elementopts', 'nopan/nopan', 'nopan/override'],
             }, "Found regexps");
@@ -64,7 +65,8 @@ $st->{filter} = undef;
 
 my $objs = $st->gather_profile();
 is_deeply($objs, {
-            'config'=>'config.pan', 
+            'config'=>'config.pan',
+            'configelement'=>'configelement.pan',
             'simple' => 'simple.pan',
             'nopan' => 'nopan.pan',
             }, "Found profiles");

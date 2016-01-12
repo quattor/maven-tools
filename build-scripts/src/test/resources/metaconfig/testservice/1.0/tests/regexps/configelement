@@ -1,0 +1,6 @@
+Base test from config, but with element=doublequote set
+---
+/test/file
+---
+^"default"$
+^EXTRA "more"$
