@@ -423,7 +423,7 @@ sub set_file_contents
 {
     my ($filename, $contents) = @_;
 
-    $desired_file_contents{$filename} = $contents;
+    $desired_file_contents{$filename} = "$contents";
 }
 
 
