@@ -97,11 +97,11 @@ sub render
         log         => $self,
     };
 
-    # element flags precede element settings from renderpath
+    # element flags precede convert settings from renderpath
     if(defined($self->{flags}->{element})) {
         $opts->{element} = $self->{flags}->{element};
     } else {
-        my $elementpath = "$renderpath/element";
+        my $elementpath = "$renderpath/convert";
         $opts->{element} = $self->{config}->getTree($elementpath);
     }
 

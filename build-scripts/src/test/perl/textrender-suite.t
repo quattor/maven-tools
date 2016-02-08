@@ -49,7 +49,7 @@ isa_ok($st, "Test::Quattor::TextRender::Suite",
 my $regexps = $st->gather_regexp();
 is_deeply($regexps, {
             'config' => ['config/base', 'config/quote', 'config/value'],
-            'configelement' => ['configelement'],
+            'configconvert' => ['configconvert'],
             'simple' => ['simple'],
             'nopan' => ['nopan/elementopts', 'nopan/nopan', 'nopan/override'],
             }, "Found regexps");
@@ -66,7 +66,7 @@ $st->{filter} = undef;
 my $objs = $st->gather_profile();
 is_deeply($objs, {
             'config'=>'config.pan',
-            'configelement'=>'configelement.pan',
+            'configconvert'=>'configconvert.pan',
             'simple' => 'simple.pan',
             'nopan' => 'nopan.pan',
             }, "Found profiles");
