@@ -397,6 +397,31 @@ $reporter->mock("debug", \&new_debug);
 
 =pod
 
+=item C<CAF::Reporter::debug>
+
+Checks that each debug() call starts with a debuglevel between 0 and 5.
+
+=cut
+
+sub new_report
+{
+    my ($self, @args) = @_;
+
+    # Do not turn every report call in a test,
+    # simply report error or let a test fail hard if undef is passed
+    if (grep {! defined($_)} @args) {
+        my @newargs = map {defined($_) ? $_ : '<undef>'} @args;
+        ok(0, "One of the reported arguments contained an undef: @newargs");
+    }
+
+    my $report = $reporter->original("report");
+    return &$report($self, @args);
+}
+
+$reporter->mock("report", \&new_report);
+
+=pod
+
 =item C<IO::String::close>
 
 Prevents the buffers from being released when explicitly closing a file.
