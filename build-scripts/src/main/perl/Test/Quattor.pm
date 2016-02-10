@@ -251,17 +251,34 @@ foreach my $method (qw(run execute trun)) {
                     if (exists($command_status{$cmd})) {
                         $? = $command_status{$cmd};
                     } else {
+                        diag("$method command $cmd no status set, using 0") if $log_cmd;
                         $? = 0;
                     }
-                    if ($self->{OPTIONS}->{stdout}) {
-                        ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
+
+                    my ($tmp_stdout, $tmp_stderr);
+                    if (exists($desired_outputs{$cmd})) {
+                        $tmp_stdout = $desired_outputs{$cmd};
+                    } else {
+                        diag("$method command $cmd no desired stdout set, using empty string") if $log_cmd;
+                        $tmp_stdout = '';
                     }
+
+                    if (exists($desired_err{$cmd})) {
+                        $tmp_stderr = $desired_err{$cmd};
+                    } else {
+                        diag("$method command $cmd no desired stderr set, using empty string") if $log_cmd;
+                        $tmp_stderr = '';
+                    }
+
+                    if ($self->{OPTIONS}->{stdout}) {
+                        ${$self->{OPTIONS}->{stdout}} = $tmp_stdout;
+                    }
+
                     if ($self->{OPTIONS}->{stderr}) {
-                        my $tmp_stderr = $desired_err{$cmd};
                         if (ref($self->{OPTIONS}->{stderr})) {
                             ${$self->{OPTIONS}->{stderr}} = $tmp_stderr;
                         } else {
-                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if $tmp_stderr;
+                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if exists($desired_err{$cmd});
                         }
                     }
                     return 1;
