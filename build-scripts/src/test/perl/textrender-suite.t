@@ -51,6 +51,7 @@ is_deeply($regexps, {
             'config' => ['config/base', 'config/quote', 'config/value'],
             'configconvert' => ['configconvert'],
             'simple' => ['simple'],
+            'simpleconfigconvert' => ['simpleconfigconvert'],
             'nopan' => ['nopan/elementopts', 'nopan/nopan', 'nopan/override'],
             }, "Found regexps");
 
@@ -65,11 +66,12 @@ $st->{filter} = undef;
 
 my $objs = $st->gather_profile();
 is_deeply($objs, {
-            'config'=>'config.pan',
-            'configconvert'=>'configconvert.pan',
-            'simple' => 'simple.pan',
-            'nopan' => 'nopan.pan',
-            }, "Found profiles");
+    'config' => 'config.pan',
+    'configconvert' => 'configconvert.pan',
+    'simple' => 'simple.pan',
+    'simpleconfigconvert' => 'simpleconfigconvert.pan',
+    'nopan' => 'nopan.pan',
+}, "Found profiles");
 
 # This is the test to run
 $st->test();

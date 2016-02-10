@@ -66,6 +66,10 @@ sub render
     my ($self) = @_;
 
     my $renderpath = $self->{flags}->{renderpath};
+    # remove single trailing / (could also be the root)
+    # $renderpath variable is only used in path join here
+    $renderpath =~ s/\/$//;
+
     my ($module, $contentspath);
 
     if ($self->{flags}->{rendermodule}) {

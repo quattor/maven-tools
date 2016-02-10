@@ -1,0 +1,6 @@
+Base test from config, but with convert=doublequote set and data defined under /
+---
+//
+---
+^"default"$
+^EXTRA "more"$
