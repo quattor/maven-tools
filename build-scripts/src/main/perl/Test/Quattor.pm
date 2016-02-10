@@ -207,6 +207,7 @@ $main::this_app->verbose("Log options ", join(" ", @logopts));
 our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+our $reporter = Test::MockModule->new("CAF::Reporter");
 our $iostring = Test::MockModule->new("IO::String");
 
 sub import
@@ -369,6 +370,30 @@ sub new_fileeditor_open
 
 $fileeditor->mock("new", \&new_fileeditor_open);
 $fileeditor->mock("open", \&new_fileeditor_open);
+
+=pod
+
+=item C<CAF::Reporter::debug>
+
+Checks that each debug() call starts with a debuglevel between 0 and 5.
+
+=cut
+
+sub new_debug
+{
+    my ($self, $debuglvl, @args) = @_;
+
+    # Do not turn every debug call in a test,
+    # simply let a test fail hard if debuglvl is not valid
+    if (! defined($debuglvl) || $debuglvl !~ m/^[0-5]$/) {
+        ok(0, "Debug level is integer between 0 and 5: ".(defined($debuglvl) ? $debuglvl : "<undef>" ));
+    };
+
+    my $debug = $reporter->original("debug");
+    return &$debug($self, $debuglvl, @args);
+}
+
+$reporter->mock("debug", \&new_debug);
 
 =pod
 
