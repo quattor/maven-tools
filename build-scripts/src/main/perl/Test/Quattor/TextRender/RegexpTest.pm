@@ -66,6 +66,10 @@ sub render
     my ($self) = @_;
 
     my $renderpath = $self->{flags}->{renderpath};
+    # remove single trailing / (could also be the root)
+    # $renderpath variable is only used in path join here
+    $renderpath =~ s/\/$//;
+
     my ($module, $contentspath);
 
     if ($self->{flags}->{rendermodule}) {
@@ -97,11 +101,11 @@ sub render
         log         => $self,
     };
 
-    # element flags precede element settings from renderpath
+    # element flags precede convert settings from renderpath
     if(defined($self->{flags}->{element})) {
         $opts->{element} = $self->{flags}->{element};
     } else {
-        my $elementpath = "$renderpath/element";
+        my $elementpath = "$renderpath/convert";
         $opts->{element} = $self->{config}->getTree($elementpath);
     }
 

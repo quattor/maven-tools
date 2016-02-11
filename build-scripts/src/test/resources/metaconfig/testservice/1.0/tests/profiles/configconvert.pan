@@ -1,14 +1,14 @@
-object template configelement;
+object template configconvert;
 
 # This is a bad example, don't base any actual code on it.
 # Typically, there is only one config which has the correct
-# settings for that service. This configelement is only to test
-# the element settings
+# settings for that service. This configconvert is only to test
+# the convert settings
 
 include 'metaconfig/testservice/config';
 
 prefix "/software/components/metaconfig/services/{/test/file}";
-"element/doublequote" = true;
+"convert/doublequote" = true;
 
 prefix "/software/components/metaconfig/services/{/test/file}/contents";
 "data" = "default";
