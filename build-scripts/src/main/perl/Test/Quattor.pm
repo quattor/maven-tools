@@ -207,6 +207,7 @@ $main::this_app->verbose("Log options ", join(" ", @logopts));
 our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+our $reporter = Test::MockModule->new("CAF::Reporter");
 our $iostring = Test::MockModule->new("IO::String");
 
 sub import
@@ -250,17 +251,34 @@ foreach my $method (qw(run execute trun)) {
                     if (exists($command_status{$cmd})) {
                         $? = $command_status{$cmd};
                     } else {
+                        diag("$method command $cmd no status set, using 0") if $log_cmd;
                         $? = 0;
                     }
-                    if ($self->{OPTIONS}->{stdout}) {
-                        ${$self->{OPTIONS}->{stdout}} = $desired_outputs{$cmd};
+
+                    my ($tmp_stdout, $tmp_stderr);
+                    if (exists($desired_outputs{$cmd})) {
+                        $tmp_stdout = $desired_outputs{$cmd};
+                    } else {
+                        diag("$method command $cmd no desired stdout set, using empty string") if $log_cmd;
+                        $tmp_stdout = '';
                     }
+
+                    if (exists($desired_err{$cmd})) {
+                        $tmp_stderr = $desired_err{$cmd};
+                    } else {
+                        diag("$method command $cmd no desired stderr set, using empty string") if $log_cmd;
+                        $tmp_stderr = '';
+                    }
+
+                    if ($self->{OPTIONS}->{stdout}) {
+                        ${$self->{OPTIONS}->{stdout}} = $tmp_stdout;
+                    }
+
                     if ($self->{OPTIONS}->{stderr}) {
-                        my $tmp_stderr = $desired_err{$cmd};
                         if (ref($self->{OPTIONS}->{stderr})) {
                             ${$self->{OPTIONS}->{stderr}} = $tmp_stderr;
                         } else {
-                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if $tmp_stderr;
+                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if exists($desired_err{$cmd});
                         }
                     }
                     return 1;
@@ -369,6 +387,55 @@ sub new_fileeditor_open
 
 $fileeditor->mock("new", \&new_fileeditor_open);
 $fileeditor->mock("open", \&new_fileeditor_open);
+
+=pod
+
+=item C<CAF::Reporter::debug>
+
+Checks that each debug() call starts with a debuglevel between 0 and 5.
+
+=cut
+
+sub new_debug
+{
+    my ($self, $debuglvl, @args) = @_;
+
+    # Do not turn every debug call in a test,
+    # simply let a test fail hard if debuglvl is not valid
+    if (! defined($debuglvl) || $debuglvl !~ m/^[0-5]$/) {
+        ok(0, "Debug level is integer between 0 and 5: ".(defined($debuglvl) ? $debuglvl : "<undef>" ));
+    };
+
+    my $debug = $reporter->original("debug");
+    return &$debug($self, $debuglvl, @args);
+}
+
+$reporter->mock("debug", \&new_debug);
+
+=pod
+
+=item C<CAF::Reporter::debug>
+
+Checks that each debug() call starts with a debuglevel between 0 and 5.
+
+=cut
+
+sub new_report
+{
+    my ($self, @args) = @_;
+
+    # Do not turn every report call in a test,
+    # simply report error or let a test fail hard if undef is passed
+    if (grep {! defined($_)} @args) {
+        my @newargs = map {defined($_) ? $_ : '<undef>'} @args;
+        ok(0, "One of the reported arguments contained an undef: @newargs");
+    }
+
+    my $report = $reporter->original("report");
+    return &$report($self, @args);
+}
+
+$reporter->mock("report", \&new_report);
 
 =pod
 
