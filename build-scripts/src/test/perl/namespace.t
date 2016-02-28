@@ -8,13 +8,15 @@ our $orig_inc;
 
 BEGIN {
     # Copy of the original @INC
-
+    # Do it in a separate BEGIN block
+    # (the import magic in a Namespace module gets
+    # executed when parsing the BEGIN block)
     $orig_inc = [@INC];
     diag "orig_inc ", explain $orig_inc;
+}
 
-    use Test::Quattor::Namespace;
-
-    INC_insert_namespace('ncm');
+BEGIN {
+    use Test::Quattor::Namespace qw(ncm);
 }
 
 diag "namespace inserted \@INC ", explain \@INC;

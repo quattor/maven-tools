@@ -17,8 +17,7 @@ Module to help mock the namespace
 E.g. to fake NCM:: namespace provided by the 'ncm' namespace
 
     BEGIN {
-        use Test::Quattor::Namespace;
-        INC_insert_namespace('ncm');
+        use Test::Quattor::Namespace qw(ncm);
     }
 
     ...
@@ -35,6 +34,52 @@ our @EXPORT = qw(INC_insert_namespace);
 
 use File::Basename qw(dirname);
 
+
+sub import
+{
+    my $class = shift;
+
+    foreach my $namespace (@_) {
+        INC_insert_namespace($namespace);
+    }
+
+    $class->SUPER::export_to_level(1, $class, @EXPORT);
+}
+
+=head2 Variables
+
+=over
+
+=item inc_orig
+
+C<$inc_orig> holds arrayref to a copy of C<@INC> when
+C<INC_insert_namespace> was first called.
+
+=cut
+
+our $inc_orig;
+
+=item inc_history
+
+C<$inc_history> is an arrayref with copy of all references of all C<@INC>s modified
+
+=cut
+
+our $inc_history = [[@INC]];
+
+=item ignore
+
+Hashref with namespaces to ignore (if value is true) when C<INC_insert_namespace>
+is used.
+
+=cut
+
+our $ignore = {};
+
+=pod
+
+=back
+
 =head2 Functions
 
 =over
@@ -46,22 +91,16 @@ Returns modified @INC as reference.
 
 =cut
 
-# 2 variables to track modifications (e.g. to reset it from other modules/scripts)
-# inc_orig hold arrayref to copy of @INC when INC_insert_namespace was first called
-our $inc_orig;
-
-# $inc_history holds all @INCs ever modified
-our $inc_history = [[@INC]];
-
 sub INC_insert_namespace
 {
     my $name = shift;
+
     my $filename = $INC{"Test/Quattor/Namespace.pm"};
 
     my $dir = dirname($filename);
     my $namespace_dir = "$dir/namespace/$name";
 
-    if ($INC[0] ne $namespace_dir) {
+    if ((! $ignore->{$name}) && ($INC[0] ne $namespace_dir)) {
         $inc_orig = [@INC] if (! defined $inc_orig);
         push (@$inc_history, [@INC]);
 
@@ -71,6 +110,7 @@ sub INC_insert_namespace
 
     return \@INC;
 }
+
 
 =pod
 
