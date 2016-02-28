@@ -1,6 +1,15 @@
 use strict;
 use warnings;
 
+BEGIN {
+    use Test::Quattor::Namespace;
+    INC_insert_namespace('ncm');
+}
+
+# Test if the code provided by Test::Quattor::Component
+# can be used and is equal to the NCM::Component from the
+# provided one via the ncm namespace
+
 use Test::More;
 use Test::Quattor::Component;
 use NCM::Component;
@@ -24,7 +33,7 @@ sub test
     foreach my $method (@methods) {
         ok($inst->can($method), "$name instance has $method method");
     }
-    
+
     my $txt = "Something with whitespace and_underscore _d";
     # escape/unescape is equal with EDG::WP4::CCM::Element
     my $esctxt = escape($txt);
