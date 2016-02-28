@@ -36,6 +36,11 @@ EOF
 
 
 my $basepath = getcwd()."/src/test/resources";
+if ($basepath =~ m/package-build-scripts/) {
+    # Handle the case when ran from package-build-scripts
+    $basepath =~ s/package-build-scripts/build-scripts/;
+};
+
 my $testpath = "$basepath/metaconfig/testservice/1.0/tests";
 set_profile_cache_options(resources => "$testpath/profiles");
 
@@ -45,7 +50,7 @@ my $tr = Test::Quattor::TextRender::RegexpTest->new(
     config => $cfg,
     regexp => "$testpath/regexps/nopan/nopan",
     ttrelpath => 'metaconfig',
-    ttincludepath => $basepath, 
+    ttincludepath => $basepath,
 );
 
 # parse
@@ -74,7 +79,7 @@ is_deeply($srv, {
 
 # render
 $tr->render;
-isa_ok($tr->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved"); 
+isa_ok($tr->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved");
 
 ok(! exists($tr->{trd}->{fail}), "No failure (fail: ".($tr->{trd}->{fail} || "").")");
 
@@ -103,7 +108,7 @@ my $tro = Test::Quattor::TextRender::RegexpTest->new(
     config => $cfg,
     regexp => "$testpath/regexps/nopan/override",
     ttrelpath => 'metaconfig',
-    ttincludepath => $basepath, 
+    ttincludepath => $basepath,
 );
 $tro->parse();
 is_deeply($tro->{flags}, {
@@ -117,7 +122,7 @@ is_deeply($tro->{flags}, {
     }, "Flags found from block and defaults");
 
 $tro->render;
-isa_ok($tro->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved"); 
+isa_ok($tro->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved");
 ok(! exists($tro->{trd}->{fail}), "No failure (fail: ".($tro->{trd}->{fail} || "").")");
 is($tro->{trd}->{module}, 'testservice/1.0/override', "Correct override module set");
 is($tro->{text}, $EXPECTED_RENDERTEXT_OVERRIDE, "override text rendered correctly");
@@ -131,7 +136,7 @@ my $troo = Test::Quattor::TextRender::RegexpTest->new(
     config => $cfg,
     regexp => "$testpath/regexps/nopan/elementopts",
     ttrelpath => 'metaconfig',
-    ttincludepath => $basepath, 
+    ttincludepath => $basepath,
 );
 $troo->parse();
 is_deeply($troo->{flags}, {
@@ -146,7 +151,7 @@ is_deeply($troo->{flags}, {
     }, "Flags found from block and defaults");
 
 $troo->render;
-isa_ok($troo->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved"); 
+isa_ok($troo->{trd}, "EDG::WP4::CCM::TextRender", "EDG::WP4::CCM::TextRender instance saved");
 ok(! exists($troo->{trd}->{fail}), "No failure (fail: ".($troo->{trd}->{fail} || "").")");
 is($troo->{trd}->{module}, 'testservice/1.0/override', "Correct override module set");
 is($troo->{text}, $EXPECTED_RENDERTEXT_OVERRIDE_OPTS, "override text with element opts rendered correctly");

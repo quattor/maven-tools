@@ -24,8 +24,15 @@ use NCM::Component;
 
 
 my $ncm_component = $INC{'NCM/Component.pm'};
+
 # prove runs with -I pointing to original code
 my $ncm_expected = getcwd()."/src/main/perl/Test/Quattor/namespace/ncm/NCM/Component.pm";
+if ($ncm_expected =~ m/package-build-scripts/) {
+    # Handle the case when ran from package-build-scripts
+    # Test in package-build-script use the target code
+    $ncm_expected =~ s/src\/main/target\/lib/;
+}
+
 is($ncm_component, $ncm_expected, "NCM::Component provided by inserted ncm namespace");
 
 is_deeply($Test::Quattor::Namespace::inc_orig, $orig_inc, "INC before first modification");
