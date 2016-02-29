@@ -4,12 +4,12 @@
   <artifactId>perl-Test-Quattor</artifactId>
   <packaging>pom</packaging>
   <version>16.2.1-SNAPSHOT</version>
-  <name>Configuration Cache Manager for Quattor</name>
+  <name>Test framework for Quattor</name>
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
     <version>1.48</version>
-    <relativePath />
+    <relativePath/>
   </parent>
   <licenses>
     <license>
@@ -35,210 +35,200 @@
     </contributor>
   </contributors>
   <properties>
-    <unittest />
+    <unittest/>
   </properties>
-  <profiles>
-    <profile>
-      <id>cfg-module-dist</id>
-      <activation>
-        <file>
-          <missing>deactivate.cfg.module.dist</missing>
-        </file>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-resources-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>filter-perl-sources</id>
-                <phase>process-sources</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <configuration combine.self="override">
-                  <outputDirectory>${project.build.directory}/lib/perl/Test</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>src/main/perl/Test</directory>
-                      <includes>
-                        <include>*.pm</include>
-                        <include>**/*.pm</include>
-                      </includes>
-                      <filtering>true</filtering>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-              <execution>
-                <id>filter-pod-sources</id>
-                <phase>process-sources</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <configuration self.combine="override">
-                  <outputDirectory>${project.build.directory}/doc/pod/Test</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>src/main/perl</directory>
-                      <includes>
-                        <include>*.pm</include>
-                        <include>**/*.pm</include>
-                      </includes>
-                      <filtering>true</filtering>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <!-- Ok, so the build tools *really* want to have a bunch of
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>filter-perl-sources</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration combine.self="override">
+              <outputDirectory>${project.build.directory}/lib/perl/Test</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/perl/Test</directory>
+                  <includes>
+                    <include>*.pm</include>
+                    <include>**/*.pm</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>filter-pod-sources</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration self.combine="override">
+              <outputDirectory>${project.build.directory}/doc/pod/Test</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/perl/Test</directory>
+                  <includes>
+                    <include>*.pm</include>
+                    <include>**/*.pm</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>filter-bin-sources</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration combine.self="override">
+              <outputDirectory>${project.build.directory}/bin</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/perl/</directory>
+                  <includes>
+                    <include>*.pl</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Ok, so the build tools *really* want to have a bunch of
 	       .pod files under doc/pod. We just rename them. -->
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>rename-pod-sources</id>
-                <phase>process-sources</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks name="Rename">
-                    <move filtering="true" todir="${project.build.directory}/doc/pod/Test">
-                      <fileset dir="${project.build.directory}/doc/pod/Test" />
-                      <mapper>
-                        <globmapper from="*.pm" to="*.pod" />
-                      </mapper>
-                    </move>
-                    <echo>Renaming stuff?</echo>
-                  </tasks>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <extensions>true</extensions>
-            <executions>
-              <execution>
-                <id>tarballs</id>
-                <configuration combine.self="override">
-                  <descriptors>
-                    <descriptor>target/dependency/assemblies/bin.xml</descriptor>
-                  </descriptors>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>module-test</id>
-      <activation>
-        <property>
-          <name>env.PERL5LIB</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>prove</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>prove</executable>
-                  <workingDirectory>${basedir}</workingDirectory>
-                  <arguments>
-                    <!-- do not add src/main/perl here; the tests have to test target
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>rename-pod-sources</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks name="Rename">
+                <move filtering="true" todir="${project.build.directory}/doc/pod/Test">
+                  <fileset dir="${project.build.directory}/doc/pod/Test"/>
+                  <mapper>
+                    <globmapper from="*.pm" to="*.pod"/>
+                  </mapper>
+                </move>
+                <echo>Renaming stuff?</echo>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>tarballs</id>
+            <configuration combine.self="override">
+              <descriptors>
+                <descriptor>target/dependency/assemblies/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prove</id>
+            <phase>test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>prove</executable>
+              <workingDirectory>${basedir}</workingDirectory>
+              <arguments>
+                <!-- do not add src/main/perl here; the tests have to test target
                          (i.e. what is packaged).
                          This cannot work on the original build-scripts dir, because of
                          the parent groupid.
                     -->
-                    <argument>-I</argument>
-                    <argument>target/lib/perl</argument>
-                    <argument>-I</argument>
-                    <argument>src/test/perl</argument>
-                    <argument>${prove.args}</argument>
-                    <!-- do not add dependency/build-scripts here; this is dependency/build-scripts -->
-                    <argument>src/test/perl/${unittest}</argument>
-                  </arguments>
-		        </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>rpm-maven-plugin</artifactId>
-          <configuration>
-            <summary>Test Framework for Quattor Perl applications</summary>
-            <name>${project.artifactId}</name>
-            <mappings>
-              <mapping>
-                <directory>/usr/lib/perl/Test</directory>
-                <filemode>644</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
-                <directoryIncluded>false</directoryIncluded>
-                <sources>
-                  <source>
-                    <location>${project.build.directory}/lib/perl/Test</location>
-                  </source>
-                </sources>
-                <recurseDirectories>true</recurseDirectories>
+                <argument>-I</argument>
+                <argument>target/lib/perl</argument>
+                <argument>-I</argument>
+                <argument>src/test/perl</argument>
+                <argument>${prove.args}</argument>
+                <!-- do not add dependency/build-scripts here; this is dependency/build-scripts -->
+                <argument>src/test/perl/${unittest}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <configuration>
+          <summary>Test Framework for Quattor Perl applications</summary>
+          <name>${project.artifactId}</name>
+          <mappings>
+            <mapping>
+              <directory>/usr/lib/perl/Test</directory>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/lib/perl/Test</location>
+                </source>
+              </sources>
+              <recurseDirectories>true</recurseDirectories>
+            </mapping>
+            <!-- have no clue how maven is supposed to work. useless error messages do not help either
+            <mapping>
+              <directory>${man.page.dir}/man8</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <configuration>false</configuration>
+              <documentation>true</documentation>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/doc/man/man8</location>
+                </source>
+              </sources>
+              <recurseDirectories>true</recurseDirectories>
+            </mapping>
+            <mapping>
+              <directory>/usr/bin</directory>
+              <username>root</username>
+              <groupname>root</groupname>
+              <filemode>755</filemode>
+              <configuration>false</configuration>
+              <documentation>false</documentation>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/bin</location>
+                </source>
+              </sources>
+              <recurseDirectories>true</recurseDirectories>
               </mapping>
-              <!-- no doc/pod
-              <mapping>
-                <directory>/usr/share/doc/${project.artifactId}-${project.version}</directory>
-                <filemode>644</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
-                <documentation>true</documentation>
-                <directoryIncluded>false</directoryIncluded>
-                <sources>
-                  <source>
-                    <location>${basedir}</location>
-                    <includes>
-                      <include>ChangeLog</include>
-                    </includes>
-                  </source>
-                </sources>
-              </mapping>
-              <mapping>
-                <directory>${man.page.dir}/man8</directory>
-                <filemode>644</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
-                <configuration>false</configuration>
-                <documentation>true</documentation>
-                <directoryIncluded>false</directoryIncluded>
-                <sources>
-                  <source>
-                    <location>${project.build.directory}/doc/man/man8</location>
-                  </source>
-                </sources>
-                <recurseDirectories>true</recurseDirectories>
-                </mapping>
-                -->
-            </mappings>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+              -->
+          </mappings>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
