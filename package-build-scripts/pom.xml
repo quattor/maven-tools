@@ -179,13 +179,11 @@
         <artifactId>rpm-maven-plugin</artifactId>
         <configuration>
           <summary>Test Framework for Quattor Perl applications</summary>
+          <url>https://github.com/quattor/maven-tools/tree/master/package-build-scripts</url>
           <name>${project.artifactId}</name>
           <mappings>
             <mapping>
               <directory>/usr/lib/perl/Test</directory>
-              <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -194,28 +192,13 @@
               </sources>
               <recurseDirectories>true</recurseDirectories>
             </mapping>
-            <!-- have no clue how maven is supposed to work. useless error messages do not help either
             <mapping>
-              <directory>${man.page.dir}/man8</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <configuration>false</configuration>
-              <documentation>true</documentation>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>${project.build.directory}/doc/man/man8</location>
-                </source>
-              </sources>
-              <recurseDirectories>true</recurseDirectories>
+              <!-- 2nd mappig is doc ChangeLog -->
+              <directory>/usr/share/doc/${project.artifactId}-${project.version}</directory>
             </mapping>
             <mapping>
               <directory>/usr/bin</directory>
-              <username>root</username>
-              <groupname>root</groupname>
               <filemode>755</filemode>
-              <configuration>false</configuration>
               <documentation>false</documentation>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -223,9 +206,18 @@
                   <location>${project.build.directory}/bin</location>
                 </source>
               </sources>
-              <recurseDirectories>true</recurseDirectories>
-              </mapping>
-              -->
+            </mapping>
+            <mapping>
+              <!-- 4th mappig is doc, which is ok -->
+              <sources>
+                <source>
+                  <excludes>
+                    <!-- manpages from the namespace files should not be added -->
+                    <exclude>**/NCM*</exclude>
+                  </excludes>
+                </source>
+              </sources>
+            </mapping>
           </mappings>
         </configuration>
       </plugin>
