@@ -17,18 +17,58 @@ use Cwd;
 Readonly my $POM_XML => 'pom.xml';
 Readonly my $MAX_ITER => 2;
 
+my $debug_internal = -1;
 
-=head1 Description
+
+#
+# Caveat: When using the maven templates like '${a.b.c}' use '$'.'{a.b.c}'
+#         to prevent the substitution of the values during rpm creation.
+#         This script is also filtered when the rpm is created with mvn package.
+#
+
+=head1 NAME mvnprove.pl
 
 Run the unittests without maven.
 
-Set the internal debug level with MVNPROVE_DEBUG environment variable (See debug function). 
+=head1 SYNOPSIS
 
-Prove settings can be added via the C<~/.mvnprove> (instead of C<~/.proverc>)
+C<mvnprove.pl> allows one to run the prove unittests without any need for maven.
+It should run from the project directory, and it does not follow any subprojects.
+
+    cd <project dir with has pom.xml>
+    mvnprove.pl
+
+=head1 DESCRIPTION
+
+Following options are supported:
+
+=over
+
+=item run sepcific unittests by passing the name of the test
+
+E.g. C<mvnprove.pl test1 test2> will run the tests C<test1.t> and C<test2.t> from the C<src/test/perl> directory.
+
+By default, all tests are run.
+
+=item Set test debugging to C<QUATTOR_TEST_LOG_CMD_MISSING=1 QUATTOR_TEST_LOG_CMD=1 QUATTOR_TEST_LOG_DEBUGLEVEL=3>
+using C<-d>  or C<MVNPROVE_DEBUG> environment variable
+
+=item Set the internal debug level (See debug function)
+
+=over
+
+=item C<-D> sets the debuglevel to 2
+
+=item C<MVNPROVE_DEBUG_INTERNAL> environment variable
+
+=back
+
+=item Prove settings can be added via the C<~/.mvnprove> (instead of default C<~/.proverc>)
+
+=back
 
 =cut
 
-my $debug = defined($ENV{MVNPROVE_DEBUG}) ? $ENV{MVNPROVE_DEBUG} : -1;
 
 # For templating
 my $properties;
@@ -70,7 +110,7 @@ debug (Set to -1 by default, changeable via C<MVNPROVE_DEBUG> environment variab
 sub debug
 {
     my $level = shift;
-    print "DEBUG: @_\n" if $debug >= $level;
+    print "DEBUG: @_\n" if $debug_internal >= $level;
 }
 
 =item filter_source
@@ -123,15 +163,15 @@ sub read_pom
     # Defaults from maven-tools/build-profile
     my $directories = {
         'filter-pan-sources' => {
-            'outputDirectory' => '${project.build.directory}/pan/',
+            'outputDirectory' => '$'.'{project.build.directory}/pan/',
             'sources' => 'src/main/pan',
         },
         'filter-perl-sources' => {
-            'outputDirectory' => '${project.build.directory}/lib/perl/NCM/Component',
+            'outputDirectory' => '$'.'{project.build.directory}/lib/perl/NCM/Component',
             'sources' => 'src/main/perl',
         },
         'filter-pod-sources' => {
-            'outputDirectory' => '${project.build.directory}/doc/pod/NCM/Component',
+            'outputDirectory' => '$'.'{project.build.directory}/doc/pod/NCM/Component',
             'sources' => 'src/main/perl',
         },
     };
@@ -229,7 +269,7 @@ found via read_pom.
 sub prep
 {
     my $pom = shift;
-    my $target = filter_source('${project.build.directory}');
+    my $target = filter_source('$'.'{project.build.directory}');
     if (-d $target) {
         debug(2, "Removing existing target dir $target");
         rmtree($target);
@@ -276,7 +316,11 @@ sub process
         debug(2, "Wrote $dst_dir/$rel_fn");
     };
 
-    File::Find::find({wanted => \&$wanted, no_chdir => 1}, $src_dir);
+    if (-d $src_dir) {
+        File::Find::find({wanted => \&$wanted, no_chdir => 1}, $src_dir);
+    } else {
+        debug(1, "srcdir $src_dir does not exist");
+    }
 }
 
 =item prove
@@ -298,7 +342,7 @@ sub prove
     # Are added to beginning of INC and the order is kept
     # (first entry here will be first in @INC)
     my @includes = (
-        filter_source('${project.build.directory}/lib/perl'),
+        filter_source('$'.'{project.build.directory}/lib/perl'),
         $tests_dir,
 
         # This has to be last, should not take precedence over the code we are testing
@@ -332,9 +376,35 @@ sub prove
     return $ec;
 }
 
+=item get_options
+
+Handle commandline and/or environment settings, return array with test names
+
+=cut
+
+sub get_options
+{
+    my $debug = defined($ENV{MVNPROVE_DEBUG}) ? $ENV{MVNPROVE_DEBUG} : 0;
+    $debug = 1 if (grep {m/^-d$/} @ARGV);
+    if ($debug) {
+        $ENV{QUATTOR_TEST_LOG_CMD_MISSING} = 1;
+        $ENV{QUATTOR_TEST_LOG_CMD} = 1;
+        $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL} = 3;
+    }
+
+    $debug_internal = defined($ENV{MVNPROVE_DEBUG_INTERNAL}) ? $ENV{MVNPROVE_DEBUG_INTERNAL} : -1;
+    $debug_internal = 1 if (grep {m/^-D$/} @ARGV);
+
+    # Return all non-option args
+    return grep {$_ !~ m/^-/} @ARGV;
+}
+
 sub main
 {
     my $pom = read_pom();
+
+    # Also sets debuglevel
+    my @opts = get_options();
 
     set_properties($pom);
 
@@ -355,7 +425,7 @@ sub main
         process($dir->{sources}, $dir->{outputDirectory});
     };
 
-    my $ec = prove($pom, @ARGV);
+    my $ec = prove($pom, @opts);
 
     exit($ec);
 };
