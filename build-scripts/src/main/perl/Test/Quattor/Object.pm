@@ -214,6 +214,31 @@ sub error
     return $msg;
 }
 
+=head2 is_verbose / is_quiet / get_debuglevel
+
+Return the respective attributes (or 0 is undefined).
+
+=cut
+
+sub is_verbose
+{
+    my $self = shift;
+    return $self->{is_verbose} || 0;
+}
+
+sub is_quiet
+{
+    my $self = shift;
+    return $self->{is_quiet} || 0;
+}
+
+sub get_debuglevel
+{
+    my $self = shift;
+    return $self->{get_debuglevel} || 0;
+}
+
+
 =pod
 
 =head2 notok

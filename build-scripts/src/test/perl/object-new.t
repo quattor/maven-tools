@@ -19,13 +19,15 @@ Test new
 
 my $dt = Test::Quattor::Object->new(
     x => 'x',
+    is_verbose => 1,
+    get_debuglevel => 3,
     );
 
 isa_ok($dt, "Test::Quattor::Object", "Returns Test::Quattor::Object instance");
 
 is($dt->{x}, 'x', "Set attribute x");
 
-my @methods = qw(info verbose report debug warn error notok gather_pan);
+my @methods = qw(info verbose report debug warn error notok gather_pan is_verbose is_quiet get_debuglevel);
 foreach my $method (@methods) {
     ok($dt->can($method), "Object instance has $method method");
 }
@@ -84,5 +86,9 @@ is_deeply($dt->{LOGLATEST}, {
     'WARN', 'message1',
     'ERROR', 'message1',
 }, "Expected LOGLATEST");
+
+is($dt->is_quiet(), 0, "is_quiet returns 0 (default, not defined)");
+is($dt->is_verbose(), 1, "is_verbose returns 1 (as defined)");
+is($dt->get_debuglevel(), 3, "get_debuglevel returns 3 (as defined)");
 
 done_testing();
