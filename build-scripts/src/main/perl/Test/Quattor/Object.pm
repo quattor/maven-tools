@@ -214,6 +214,29 @@ sub error
     return $msg;
 }
 
+=head2 event
+
+event handler, store the metadata and report added event
+
+=cut
+
+sub event
+{
+    my ($self, $obj, %metadata) = @_;
+
+    # We cannot keep any references to objects alive, e.g. during DESTROY
+    my $ref = ref($obj);
+
+    $metadata{_objref} = $ref;
+
+    $self->loghist_add('EVENT', \%metadata);
+
+    diag("EVENT: added $ref ".join(',', map {"$_=".(defined($metadata{$_}) ? $metadata{$_} : '<undef>')} sort keys %metadata));
+
+    return \%metadata;
+}
+
+
 =head2 is_verbose / is_quiet / get_debuglevel
 
 Return the respective attributes (or 0 is undefined).

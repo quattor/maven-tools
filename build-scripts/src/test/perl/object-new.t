@@ -27,7 +27,7 @@ isa_ok($dt, "Test::Quattor::Object", "Returns Test::Quattor::Object instance");
 
 is($dt->{x}, 'x', "Set attribute x");
 
-my @methods = qw(info verbose report debug warn error notok gather_pan is_verbose is_quiet get_debuglevel);
+my @methods = qw(info verbose report debug warn error notok gather_pan is_verbose is_quiet get_debuglevel event);
 foreach my $method (@methods) {
     ok($dt->can($method), "Object instance has $method method");
 }
@@ -68,6 +68,8 @@ $dt->report("message1");
 $dt->info("message1");
 $dt->warn("message1");
 $dt->error("message1");
+# event is not supposed to be used like this
+$dt->event($dt, message => 'somemessage');
 
 is_deeply($dt->{LOGCOUNT}, {
     'DEBUG', 1,
@@ -76,6 +78,7 @@ is_deeply($dt->{LOGCOUNT}, {
     'INFO', 1,
     'WARN', 1,
     'ERROR', 1,
+    'EVENT', 1,
 }, "Expected LOGCOUNT");
 
 is_deeply($dt->{LOGLATEST}, {
@@ -85,6 +88,7 @@ is_deeply($dt->{LOGLATEST}, {
     'INFO', 'message1',
     'WARN', 'message1',
     'ERROR', 'message1',
+    'EVENT', {message => 'somemessage', _objref => 'Test::Quattor::Object'},
 }, "Expected LOGLATEST");
 
 is($dt->is_quiet(), 0, "is_quiet returns 0 (default, not defined)");
