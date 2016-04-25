@@ -364,28 +364,23 @@ ${line.separator}
           <artifactId>rpm-maven-plugin</artifactId>
           <configuration>
             <release>${RELEASE}</release>
-            <summary>ncm-${project.artifactId}</summary>
+            <summary>NCM component for ${project.artifactId}</summary>
             <name>ncm-${project.artifactId}</name>
             <group>Quattor</group>
             <packager>Quattor</packager>
             <vendor>Quattor</vendor>
+            <defaultDirmode>755</defaultDirmode>
+            <defaultFilemode>644</defaultFilemode>
+            <defaultUsername>root</defaultUsername>
+            <defaultGroupname>root</defaultGroupname>
+            <license>ASL 2.0 and EU Datagrid</license>
             <copyright>${license-url}</copyright>
-            <url>${project.url}</url>
-            <provides>
-              <provide>ncm-${project.artifactId}</provide>
-            </provides>
+            <url>https://github.com/quattor/configuration-modules-core/tree/master/ncm-${project.artifactId}</url>
             <needarch>noarch</needarch>
             <description>${project.name}</description>
-            <requires>
-              <require>ncm-ncd</require>
-              <require>libuser</require>
-            </requires>
             <mappings>
               <mapping>
                 <directory>/usr/lib</directory>
-                <filemode>755</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
                   <source>
@@ -411,9 +406,6 @@ ${line.separator}
               </mapping>
               <mapping>
                 <directory>/usr/share/doc/pan</directory>
-                <filemode>644</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
                 <documentation>true</documentation>
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
@@ -424,9 +416,6 @@ ${line.separator}
               </mapping>
               <mapping>
                 <directory>${man.page.dir}</directory>
-                <filemode>644</filemode>
-                <username>root</username>
-                <groupname>root</groupname>
                 <documentation>true</documentation>
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
