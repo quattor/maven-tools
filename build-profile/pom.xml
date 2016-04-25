@@ -22,8 +22,8 @@
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
     <unittest />
-    <!-- perl module headers. 
-         Usage: at the beginning of the module put: 
+    <!-- perl module headers.
+         Usage: at the beginning of the module put:
          #${PMpre} Some::Namespace::packagename${PMpost}
 
          The space after the ${PMpre} is mandatory, due to maven space eating properties
@@ -50,7 +50,8 @@ use version;
 our $VERSION = version-&gt;new("v${no-snapshot-version}");
 ${line.separator}
     </PMpost>
-
+    <changelogtimestamp>${maven.build.timestamp}</changelogtimestamp>
+    <maven.build.timestamp.format>E MMM dd yyyy</maven.build.timestamp.format>
   </properties>
   <dependencies>
     <dependency>
@@ -131,6 +132,30 @@ ${line.separator}
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-resources-plugin</artifactId>
             <executions>
+              <execution>
+                <id>filter-changelog</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <delimiters>
+                    <delimiter>${*}</delimiter>
+                  </delimiters>
+                  <useDefaultDelimiters>false</useDefaultDelimiters>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.build.directory}/dependency/build-scripts/</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>ChangeLog.template</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
               <execution>
                 <id>filter-pan-sources</id>
                 <phase>process-sources</phase>
@@ -216,7 +241,7 @@ ${line.separator}
                   <goal>check-syntax</goal>
                 </goals>
                 <configuration>
-                  <sourceDirectory>${basedir}/target/pan</sourceDirectory>
+                  <sourceDirectory>${project.build.directory}/pan</sourceDirectory>
                 </configuration>
               </execution>
             </executions>
@@ -260,7 +285,7 @@ ${line.separator}
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>target/dependency/build-scripts/pod2man.pl</executable>
+                  <executable>${project.build.directory}/dependency/build-scripts/pod2man.pl</executable>
                   <workingDirectory>${basedir}</workingDirectory>
                   <arguments>
                     <argument>${project.version}</argument>
@@ -280,7 +305,7 @@ ${line.separator}
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <descriptorSourceDirectory>target/dependency/assemblies</descriptorSourceDirectory>
+                  <descriptorSourceDirectory>${project.build.directory}/dependency/assemblies</descriptorSourceDirectory>
                 </configuration>
               </execution>
             </executions>
@@ -315,7 +340,7 @@ ${line.separator}
                   <workingDirectory>${basedir}</workingDirectory>
                   <arguments>
                     <argument>-I</argument>
-                    <argument>target/lib/perl</argument>
+                    <argument>${project.build.directory}/lib/perl</argument>
                     <argument>-I</argument>
                     <argument>src/test/perl</argument>
                     <argument>${prove.args}</argument>
@@ -376,6 +401,7 @@ ${line.separator}
             <license>ASL 2.0 and EU Datagrid</license>
             <copyright>${license-url}</copyright>
             <url>https://github.com/quattor/configuration-modules-core/tree/master/ncm-${project.artifactId}</url>
+            <changelogFile>${project.build.directory}/ChangeLog.template</changelogFile>
             <needarch>noarch</needarch>
             <description>${project.name}</description>
             <mappings>
@@ -384,7 +410,7 @@ ${line.separator}
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
                   <source>
-                    <location>target/lib</location>
+                    <location>${project.build.directory}/lib</location>
                   </source>
                 </sources>
               </mapping>
@@ -397,9 +423,9 @@ ${line.separator}
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
                   <source>
-                    <location>${basedir}</location>
+                    <location>${project.build.directory}</location>
                     <includes>
-                      <include>ChangeLog</include>
+                      <include>ChangeLog.template</include>
                     </includes>
                   </source>
                 </sources>
@@ -410,7 +436,7 @@ ${line.separator}
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
                   <source>
-                    <location>target/pan</location>
+                    <location>${project.build.directory}/pan</location>
                   </source>
                 </sources>
               </mapping>
@@ -420,7 +446,7 @@ ${line.separator}
                 <directoryIncluded>false</directoryIncluded>
                 <sources>
                   <source>
-                    <location>target/doc/man</location>
+                    <location>${project.build.directory}/doc/man</location>
                   </source>
                 </sources>
               </mapping>
