@@ -60,15 +60,22 @@ use CAF::FileWriter;
 use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
+use CAF::Path;
+use CAF::Object qw(SUCCESS);
 use IO::String;
 use base 'Exporter';
 use Cwd;
 use Carp qw(carp croak);
 use File::Path qw(mkpath);
+use File::Basename;
 use Test::MockModule;
 use Test::More;
 use CAF::Service qw(@FLAVOURS);
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
+use Readonly;
+
+# "File" content that will appear as a directory
+Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
 
 =pod
 
@@ -112,7 +119,7 @@ absolute paths to the files.
 
 =cut
 
-my %files_contents;
+our %files_contents;
 
 =pod
 
@@ -166,7 +173,7 @@ Optionally, initial contents for a file that should be "edited".
 
 =cut
 
-my %desired_file_contents;
+our %desired_file_contents;
 
 =pod
 
@@ -177,6 +184,14 @@ CAF::Process commands that were run.
 =cut
 
 my @command_history = ();
+
+=item * C<caf_check>
+
+A hashref with C<CAF::Path> methods and arrayref of reference of used arguments
+
+=cut
+
+our $caf_check = {};
 
 =pod
 
@@ -199,7 +214,8 @@ my $caf_file_close_diff = 0;
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
-                 set_caf_file_close_diff);
+                 set_caf_file_close_diff
+                 make_directory remove_any reset_caf_check);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -219,6 +235,7 @@ our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
 our $reporter = Test::MockModule->new("CAF::Reporter");
+our $check = Test::MockModule->new("CAF::Path");
 our $iostring = Test::MockModule->new("IO::String");
 
 sub import
@@ -332,15 +349,18 @@ sub new_filewriter_open
     my $f = $old_open->(@_);
 
     my $fn = *$f->{filename};
-    delete $files_contents{$fn};
-    $files_contents{$fn} = $f;
-
-    $files_contents{*$f->{filename}} = $f;
-
-    *$f->{_mocked} = {
-                     iostring => $iostring,
-                     filewriter => $filewriter,
-                    };
+    if (is_directory($fn)) {
+        diag("ERROR: Cannot new_filewriter_open: $fn is a directory");
+    } elsif(make_directory(dirname($fn))) {
+        delete $files_contents{$fn};
+        $files_contents{$fn} = $f;
+        *$f->{_mocked} = {
+            iostring => $iostring,
+            filewriter => $filewriter,
+        };
+    } else {
+        diag("ERROR: new_filewriter_open: failed to create directory for file $fn");
+    }
 
     return $f;
 }
@@ -389,10 +409,16 @@ sub new_fileeditor_open
 {
 
     my $f = CAF::FileWriter::new(@_);
-    $f->set_contents($desired_file_contents{*$f->{filename}});
 
-    *$f->{_mocked}->{fileeditor} = $fileeditor;
-
+    my $fn = *$f->{filename};
+    if (is_directory($fn)) {
+        diag("ERROR: Cannot new_fileeditor_open: $fn is a directory");
+    } elsif(make_directory(dirname($fn))) {
+        $f->set_contents($desired_file_contents{$fn});
+        *$f->{_mocked}->{fileeditor} = $fileeditor;
+    } else {
+        diag("ERROR: new_fileeditor_open: failed to create directory for file $fn");
+    }
     return $f;
 }
 
@@ -454,13 +480,76 @@ $reporter->mock("report", \&new_report);
 
 Prevents the buffers from being released when explicitly closing a file.
 
-=back
-
 =cut
 
 
 $iostring->mock("close", undef);
 
+=item C<CAF::Path::file_exists>
+
+Return the mocked C<is_file>
+
+=cut
+
+$check->mock("file_exists", sub {shift; return is_file(shift);});
+
+=item C<CAF::Path::directory_exists>
+
+Return the mocked C<is_directory>
+
+=cut
+
+$check->mock("directory_exists", sub {shift; return is_directory(shift);});
+
+=item C<CAF::Path::any_exists>
+
+Return the mocked C<is_any>
+
+=cut
+
+$check->mock("any_exists", sub {shift; return is_any(shift); });
+
+=item C<CAF::Path::directory>
+
+Return directory name unless mocked C<make_directory> or mocked C<LC_Check> fail.
+
+(The C<temp> is ignored wrt creating the directory name).
+
+=cut
+
+$check->mock("directory", sub {
+    my ($self, $directory, %opts) = @_;
+    if (make_directory($directory)) {
+        $directory = undef if ! $self->LC_Check("directory", [$directory], \%opts);
+    } else {
+        $directory = undef;
+    }
+    return $directory;
+});
+
+=item C<CAF::Path::LC_Check>
+
+Store args in C<caf_check> using C<add_caf_check>.
+
+=cut
+
+$check->mock('LC_Check', sub{ shift; return add_caf_check(@_); });
+
+=item C<CAF::Path::cleanup>
+
+C<remove_any> and store args in C<caf_check> using C<add_caf_check>.
+
+=cut
+
+# use ref of copy of args (similar to what is passed to LC_Check)
+$check->mock('cleanup', sub {
+    my($self, $dest, $backup, %opts) = @_;
+    remove_any($dest);
+    return add_caf_check('cleanup', [$dest, $backup], \%opts);
+});
+
+
+=back
 
 =pod
 
@@ -482,9 +571,13 @@ sub get_file
     my ($filename) = @_;
 
     if (exists($files_contents{$filename})) {
-        return $files_contents{$filename};
+        if (is_directory($filename)) {
+            diag("ERROR: get_file: $filename is a directory");
+        } else {
+            return $files_contents{$filename};
+        }
     }
-    return undef;
+    return;
 }
 
 
@@ -501,7 +594,15 @@ sub set_file_contents
 {
     my ($filename, $contents) = @_;
 
-    $desired_file_contents{$filename} = "$contents";
+    if (is_directory($filename)) {
+        diag("ERROR: Cannot set_file_contents: $filename is a directory");
+    } elsif(make_directory(dirname($filename))) {
+        $desired_file_contents{$filename} = "$contents";
+        return $desired_file_contents{$filename};
+    } else {
+        diag("ERROR: Cannot set_file_contents: cannot create directory for $filename");
+    }
+    return;
 }
 
 
@@ -662,6 +763,7 @@ sub set_service_variant
     my ($variant) = @_;
 
     if (grep {$_ eq $variant} @FLAVOURS) {
+        no warnings 'redefine';
         *CAF::Service::os_flavour = sub { return $variant; };
     } else {
         die "set_service_variant unsupported variant $variant";
@@ -724,6 +826,177 @@ sub set_caf_file_close_diff
     my $state = shift;
     $caf_file_close_diff = $state ? 1 :0;
 };
+
+
+=item sane_path
+
+sanitize path by
+
+=over
+
+=item squash multiple '/' into one
+
+=item remove all trailing '/'
+
+=back
+
+=cut
+
+sub sane_path
+{
+    my $path = shift;
+
+    $path =~ s/\/+/\//g;
+    $path =~ s/\/+$// if $path !~ m/^\/+$/;
+
+    return $path;
+}
+
+=item is_file
+
+Test if given C<$path> is a mocked file
+
+=cut
+
+sub is_file
+{
+    my $path = sane_path(shift);
+
+    my $f_c = exists($files_contents{$path}) && "$files_contents{$path}" ne $DIRECTORY;
+    my $d_f_c  = exists($desired_file_contents{$path}) && "$desired_file_contents{$path}" ne $DIRECTORY;
+
+    return $f_c || $d_f_c;
+}
+
+=item is_directory
+
+Test if given C<$path> is a mocked directory
+
+=cut
+
+sub is_directory
+{
+    my $path = sane_path(shift);
+
+    my $f_c = exists($files_contents{$path}) && "$files_contents{$path}" eq $DIRECTORY;
+    my $d_f_c  = exists($desired_file_contents{$path}) && "$desired_file_contents{$path}" eq $DIRECTORY;
+
+    return $f_c || $d_f_c;
+}
+
+=item is_any
+
+Test if given C<path> is known (as file or directory or anything else)
+
+=cut
+
+sub is_any
+{
+    my $path = sane_path(shift);
+
+    return exists($files_contents{$path}) || exists($desired_file_contents{$path});
+}
+
+
+
+=item make_directory
+
+Add a directory to the mocked directories.
+If C<rec> is true or undef, also add all underlying directories.
+
+If directory already exists and is a directory, return SUCCESS (undef otherwise).
+
+=cut
+
+# Make / dir
+make_directory('/', 0);
+
+sub make_directory
+{
+    my ($path, $rec) = @_;
+
+    $rec = 1 if ! defined($rec);
+
+    $path = sane_path($path);
+
+    if (is_file($path)) {
+        diag("ERROR: cannot make_directory $path: is_file");
+        return;
+    } else {
+        if ($rec) {
+            my $tmppath = '';
+            foreach my $p (split(/\/+/, $path)) {
+                $tmppath = "$tmppath/$p";
+                return if ! make_directory($tmppath, 0);
+            }
+        } else {
+            $files_contents{$path} = $DIRECTORY;
+        }
+    }
+
+    return SUCCESS;
+}
+
+=item remove_any
+
+Recusive removal of a C<path> from the files_contents / desired_file_contents
+
+=cut
+
+sub remove_any
+{
+    my $path = shift;
+
+    $path = sane_path($path);
+
+    my $filter = sub {
+        my $fs = shift;
+        my $pattern = '^'.$path.'/';
+        foreach my $p (grep {m/$pattern/} sort keys %$fs) {
+            delete $fs->{$p};
+        }
+        delete $fs->{$path};
+    };
+    &$filter(\%files_contents);
+    &$filter(\%desired_file_contents);
+
+    return SUCCESS;
+}
+
+=item add_caf_check
+
+Add array of arguments to C<caf_check> hashref using C<name>
+
+=cut
+
+sub add_caf_check
+{
+    my ($name, @args) = @_;
+
+    $caf_check->{$name} = [] if ! defined($caf_check->{$name});
+
+    # push a reference of a copy of the args
+    push(@{$caf_check->{$name}}, [@args]);
+}
+
+=item reset_caf_check
+
+Reset C<caf_check> ref. If C<name> is defined, only reset that cache.
+
+=cut
+
+sub reset_caf_check
+{
+    my ($name) = @_;
+
+    if (defined($name)) {
+        $caf_check->{$name} = [];
+    } else {
+        $caf_check = {};
+    }
+
+}
+
 
 1;
 
