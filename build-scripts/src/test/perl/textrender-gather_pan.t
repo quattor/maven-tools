@@ -14,6 +14,11 @@ Test the pan files location and validity
 =cut
 
 my $resourcesdir = getcwd()."/src/test/resources";
+if ($resourcesdir =~ m/package-build-scripts/) {
+    # Handle the case when ran from package-build-scripts
+    $resourcesdir =~ s/package-build-scripts/build-scripts/;
+};
+
 my $dt = Test::Quattor::TextRender->new(
     basepath => $resourcesdir,
     ttpath => 'metaconfig/testservice',

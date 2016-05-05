@@ -1,3 +1,8 @@
+# ${license-info}
+# ${developer-info}
+# ${author-info}
+# ${build-info}
+
 =pod
 
 =head1 SYNOPSIS
@@ -45,6 +50,12 @@ package Test::Quattor;
 
 use strict;
 use warnings;
+
+BEGIN {
+    # Insert the NCM:: namespace
+    use Test::Quattor::Namespace qw(ncm);
+}
+
 use CAF::FileWriter;
 use CAF::Process;
 use CAF::FileEditor;

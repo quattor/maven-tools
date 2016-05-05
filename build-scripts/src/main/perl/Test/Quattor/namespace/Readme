@@ -1,0 +1,3 @@
+This is a directory to allow fake namespaces.
+
+See Test::Quattor::Namespace how to use it.
