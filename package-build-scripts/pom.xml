@@ -3,13 +3,13 @@
   <groupId>org.quattor.client.libraries</groupId>
   <artifactId>perl-Test-Quattor</artifactId>
   <packaging>pom</packaging>
-  <version>16.2.1-SNAPSHOT</version>
+  <version>16.4.0</version>
   <name>Test framework for Quattor</name>
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
     <version>1.48</version>
-    <relativePath/>
+    <relativePath />
   </parent>
   <licenses>
     <license>
@@ -35,7 +35,7 @@
     </contributor>
   </contributors>
   <properties>
-    <unittest/>
+    <unittest />
   </properties>
   <build>
     <plugins>
@@ -118,9 +118,9 @@
             <configuration>
               <tasks name="Rename">
                 <move filtering="true" todir="${project.build.directory}/doc/pod/Test">
-                  <fileset dir="${project.build.directory}/doc/pod/Test"/>
+                  <fileset dir="${project.build.directory}/doc/pod/Test" />
                   <mapper>
-                    <globmapper from="*.pm" to="*.pod"/>
+                    <globmapper from="*.pm" to="*.pod" />
                   </mapper>
                 </move>
                 <echo>Renaming stuff?</echo>
