@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
-    <version>1.50-SNAPSHOT</version>
+    <version>1.49</version>
     <relativePath />
   </parent>
   <licenses>
@@ -21,7 +21,7 @@
   <scm>
     <connection>scm:git:git://github.com/quattor/maven-tools.git</connection>
     <developerConnection>scm:git:git@github.com:quattor/maven-tools.git</developerConnection>
-    <url>https://github.com/quattor/mvane-tools</url>
+    <url>https://github.com/quattor/maven-tools</url>
   </scm>
   <developers>
     <developer>
