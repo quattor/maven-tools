@@ -141,7 +141,7 @@ A release of a component (*artifact* in Maven terminology) managed by Maven is d
 It produces also a few files that allow to revert the release process.
 * `release:perform`: publish the new release
 
-The `release` plugin be viewed as sort of a wrapper over the `deploy` phase. It should be
+The `release` plugin must be viewed as sort of a wrapper over the `deploy` phase. It should be
 considered **mandatory** to use the `release` plugin to deploy releases.
 
 In case of an error during of the goals above, they can be run again as many times as necessary
@@ -160,9 +160,11 @@ It is not possible to use `--batch-mode` at the moment because you need to enter
 If the userid used to push the package is incorrect, you will probably need to use the `-Dusername=XXX` property.
 
 *Before deploying a release, in particular if you are not familiar with the process,
-it is a good practice to deploy a snapshot. This is done with the `deploy` phase: before running
-the `deploy` phase, check that the artifact version in the pom file is ending with `-SNAPSHOT`. It
-allows to check that the basic configuration, in particular to interact with Sonatype, is correct.*
+it is a good practice to deploy a snapshot. This is done with the `deploy` phase (don't forget to use the usual options 
+as specified at the beginning of this document).
+To deploy a snapshot rather than a release, check that the artifact version in the pom file ends with -SNAPSHOT, 
+before running the deploy phase. This allows the
+basic configuration to be checked for correctness (in particular the parameters used to upload to Sonatype Nexus).
 
 ### Build release and push to nexus
 
@@ -176,9 +178,13 @@ an up-to-date version of `template-library-core` repository (required by tests).
   1. `git clone https://github.com/quattor/template-library-core.git /tmp/template-library-core-master`
   2. `export QUATTOR_TEST_TEMPLATE_LIBRARY_CORE=/tmp/template-library-core-master` 
 
+1. Clean the build area:
+
+  `$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" clean`
+
 1. Prepare the release:
 
-  `$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" clean release:prepare`
+  `$ mvn -P\!cfg-module-dist -P\!cfg-module-rpm -Darguments="-P\!cfg-module-dist -P\!cfg-module-rpm -P\!module-test" release:prepare`
 
 1. Perform the release:
 
@@ -219,7 +225,7 @@ after you logged in) and search for [org.quattor.maven](https://oss.sonatype.org
   ```bash
   $ mvn release:clean
   # For each commit added by Maven, in reverse order
-  $ git revert commit_id -m 'prepare release cancelled'
+  $ git revert commit_id
   $ git push -n upstream (or whatever your upstream remote is): checks that it will do what is expected!
   $ git push upstream  (never use -f)
   Connect to GitHub and delete the new tag if it has been created
