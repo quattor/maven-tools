@@ -28,8 +28,15 @@ use NCM::Component;
 my $ncm_component = $INC{'NCM/Component.pm'};
 
 # prove runs with -I pointing to original code
-my $ncm_expected = getcwd()."/src/main/perl/Test/Quattor/namespace/ncm/NCM/Component.pm";
-if ($ncm_expected =~ m/package-build-scripts/) {
+my $pwd = getcwd();
+$pwd =~ s/\/$//;
+
+my $ncm_expected = "src/main/perl/Test/Quattor/namespace/ncm/NCM/Component.pm";
+if ($ncm_component =~ m/^\//) {
+    $ncm_expected = "$pwd/$ncm_expected";
+};
+
+if ($pwd =~ m/package-build-scripts/) {
     # Handle the case when ran from package-build-scripts
     # Test in package-build-script use the target code
     $ncm_expected =~ s/src\/main/target\/lib/;
