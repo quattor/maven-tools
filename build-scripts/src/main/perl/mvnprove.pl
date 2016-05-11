@@ -372,7 +372,8 @@ sub prove
 
     my $ec = $app->run ? 0 : 1;
     if($ec) {
-        error("Prove failed");
+        # do not use error/die, this is normal termination of mvnprove
+        info("ERROR: Prove failed with ec $?");
     } else {
         info("Prove ok");
     };
