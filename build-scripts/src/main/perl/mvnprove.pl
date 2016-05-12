@@ -57,7 +57,7 @@ using C<-d>  or C<MVNPROVE_DEBUG> environment variable
 
 =over
 
-=item C<-D> sets the debuglevel to 2
+=item C<-D> sets the debuglevel to 1
 
 =item C<MVNPROVE_DEBUG_INTERNAL> environment variable
 
@@ -185,6 +185,9 @@ sub read_pom
 
     my @plugins;
     my $project_build = $pom->{project}->{build}->{plugins}->{plugin} || [];
+    push(@plugins, @{$project_build});
+
+    $project_build = $pom->{project}->{build}->{pluginManagement}->{plugins}->{plugin} || [];
     push(@plugins, @{$project_build});
 
     my $profiles = $pom->{project}->{profiles}->{profile} || [];
@@ -369,7 +372,8 @@ sub prove
 
     my $ec = $app->run ? 0 : 1;
     if($ec) {
-        error("Prove failed");
+        # do not use error/die, this is normal termination of mvnprove
+        info("ERROR: Prove failed with ec $?");
     } else {
         info("Prove ok");
     };
@@ -401,10 +405,10 @@ sub get_options
 
 sub main
 {
-    my $pom = read_pom();
-
     # Also sets debuglevel
     my @opts = get_options();
+
+    my $pom = read_pom();
 
     set_properties($pom);
 
