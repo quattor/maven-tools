@@ -259,8 +259,11 @@ sub prepare_profile_cache
 =head2 C<get_config_for_profile>
 
 Returns a configuration object for the profile given as an
-argument. The profile should be one of the arguments given to this
-module when loading it.
+argument. The profile should be one of the arguments given to
+L<Test::Quattor> when loading it.
+
+If the configuration cannot be found, an error is reported, and
+a test fails.
 
 =cut
 
@@ -268,7 +271,13 @@ sub get_config_for_profile
 {
     my ($profile) = @_;
 
-    return $configs{profile_cache_name($profile)};
+    my $cfg = $configs{profile_cache_name($profile)};
+    if (! $cfg) {
+        my $msg = "get_config_for_profile failed for profile $profile (forgot 'use Test::Quattor qw($profile);'?)";
+        $object->error($msg);
+        ok(0, $msg);
+    }
+    return $cfg;
 }
 
 =pod
