@@ -391,7 +391,7 @@ ${line.separator}
             <release>${RELEASE}</release>
             <summary>NCM component for ${project.artifactId}</summary>
             <name>ncm-${project.artifactId}</name>
-            <group>Quattor</group>
+            <group>System Environment/Base</group>
             <packager>Quattor</packager>
             <vendor>Quattor</vendor>
             <defaultDirmode>755</defaultDirmode>
