@@ -75,17 +75,17 @@ ok(!$s->directory_exists($dirbase), "mocked missing dir $dirbase returns false d
 is($s->make_directory($dirbase), SUCCESS, "make_directory returns success");
 ok($s->directory_exists($dirbase), "mocked dir $dirbase returns true directory_exists");
 
-# check caf_check hashref
-is_deeply($Test::Quattor::caf_check->{directory}, [[[qw(/some/where/dirs/subdir)], {}]],
-          "caf_check hash updated after CAF::Path::directory");
+# check caf_path hashref
+is_deeply($Test::Quattor::caf_path->{directory}, [[[qw(/some/where/dirs/subdir)], {}]],
+          "caf_path hash updated after CAF::Path::directory");
 
-$Test::Quattor::caf_check->{test} = [qw(1 2 3)];
-reset_caf_check('directory');
-is_deeply($Test::Quattor::caf_check, {directory => [], test => [qw(1 2 3)]},
-          "reset_caf_check only resets the named item");
-reset_caf_check();
-is_deeply($Test::Quattor::caf_check, {},
-          "reset_caf_check resets all if no named item is passed");
+$Test::Quattor::caf_path->{test} = [qw(1 2 3)];
+reset_caf_path('directory');
+is_deeply($Test::Quattor::caf_path, {directory => [], test => [qw(1 2 3)]},
+          "reset_caf_path only resets the named item");
+reset_caf_path();
+is_deeply($Test::Quattor::caf_path, {},
+          "reset_caf_path resets all if no named item is passed");
 
 # recreate dir return EXISTS
 is($s->make_directory($dirbase), $simple_caf::EXISTS, "make_directory returns EXISTS 2nd time");
@@ -110,14 +110,14 @@ is_deeply({ %Test::Quattor::desired_file_contents }, {}, "entries in desired_fil
 
 =cut
 
-reset_caf_check();
+reset_caf_path();
 
 is($s->directory($dirbase), $dirbase, "created directory $dirbase and returned directory name");;
 ok($s->directory_exists($dirbase), "directory $dirbase exists");
 ok($s->cleanup($BASEPATH, 1, option => 2), "directory $BASEPATH cleaned up");
 ok(! $s->directory_exists($dirbase), "directory $dirbase cleanedup (via recursive removal)");
-is_deeply($Test::Quattor::caf_check->{cleanup}, [[[$BASEPATH, 1], {option => 2}]],
-          "caf_check hash updated after CAF::Path::cleanup");
+is_deeply($Test::Quattor::caf_path->{cleanup}, [[[$BASEPATH, 1], {option => 2}]],
+          "caf_path hash updated after CAF::Path::cleanup");
 
 
 done_testing();

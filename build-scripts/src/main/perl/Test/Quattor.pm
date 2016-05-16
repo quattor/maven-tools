@@ -185,13 +185,13 @@ CAF::Process commands that were run.
 
 my @command_history = ();
 
-=item * C<caf_check>
+=item * C<caf_path>
 
 A hashref with C<CAF::Path> methods and arrayref of reference of used arguments
 
 =cut
 
-our $caf_check = {};
+our $caf_path = {};
 
 =pod
 
@@ -215,7 +215,7 @@ our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
                  set_caf_file_close_diff
-                 make_directory remove_any reset_caf_check);
+                 make_directory remove_any reset_caf_path);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -529,15 +529,15 @@ $check->mock("directory", sub {
 
 =item C<CAF::Path::LC_Check>
 
-Store args in C<caf_check> using C<add_caf_check>.
+Store args in C<caf_path> using C<add_caf_path>.
 
 =cut
 
-$check->mock('LC_Check', sub{ shift; return add_caf_check(@_); });
+$check->mock('LC_Check', sub{ shift; return add_caf_path(@_); });
 
 =item C<CAF::Path::cleanup>
 
-C<remove_any> and store args in C<caf_check> using C<add_caf_check>.
+C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 
 =cut
 
@@ -545,7 +545,7 @@ C<remove_any> and store args in C<caf_check> using C<add_caf_check>.
 $check->mock('cleanup', sub {
     my($self, $dest, $backup, %opts) = @_;
     remove_any($dest);
-    return add_caf_check('cleanup', [$dest, $backup], \%opts);
+    return add_caf_path('cleanup', [$dest, $backup], \%opts);
 });
 
 
@@ -963,36 +963,36 @@ sub remove_any
     return SUCCESS;
 }
 
-=item add_caf_check
+=item add_caf_path
 
-Add array of arguments to C<caf_check> hashref using C<name>
+Add array of arguments to C<caf_path> hashref using C<name>
 
 =cut
 
-sub add_caf_check
+sub add_caf_path
 {
     my ($name, @args) = @_;
 
-    $caf_check->{$name} = [] if ! defined($caf_check->{$name});
+    $caf_path->{$name} = [] if ! defined($caf_path->{$name});
 
     # push a reference of a copy of the args
-    push(@{$caf_check->{$name}}, [@args]);
+    push(@{$caf_path->{$name}}, [@args]);
 }
 
-=item reset_caf_check
+=item reset_caf_path
 
-Reset C<caf_check> ref. If C<name> is defined, only reset that cache.
+Reset C<caf_path> ref. If C<name> is defined, only reset that cache.
 
 =cut
 
-sub reset_caf_check
+sub reset_caf_path
 {
     my ($name) = @_;
 
     if (defined($name)) {
-        $caf_check->{$name} = [];
+        $caf_path->{$name} = [];
     } else {
-        $caf_check = {};
+        $caf_path = {};
     }
 
 }
