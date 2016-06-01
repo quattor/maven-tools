@@ -239,9 +239,9 @@ sub set_properties
         'rpm.release' => $snapshot,
         # from build-profile
         RELEASE => $snapshot,
-        PMpost => "\n\nuse strict;\nuse warnings;\n\nuse version;\nour \$VERSION = version->new(\"v$version\");\n\n",
+        PMpost => ";\n\nuse strict;\nuse warnings;\n\nuse version;\nour \$VERSION = version->new(\"v$version\");\n\n",
         'project.build.directory' => 'target',
-        PMPre => "\# Some headers\n\npackage", # headers are not relevant
+        PMpre => "\# Some headers\n\npackage", # headers are not relevant
         basedir => getcwd(), #
     };
 
