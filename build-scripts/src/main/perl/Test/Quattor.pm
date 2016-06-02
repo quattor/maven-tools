@@ -175,7 +175,18 @@ A hashref with C<CAF::Path> methods and arrayref of reference of used arguments
 
 our $caf_path = {};
 
-=pod
+=item * C<NoAction>
+
+Set C<Test::Quattor::NoAction> to override C<CAF::Object::NoAction>
+in any of the mocked C<Test::Quattor> methods (where relevant, e.g.
+mocked FileWriter and FileEditor).
+
+E.g. if you want to run tests with C<CAF::Object::NoAction> not set
+(to test the behaviour of regular C<CAF::Object::NoAction>).
+
+=cut
+
+our $NoAction;
 
 =item * C<caf_file_close_diff>
 
@@ -334,6 +345,10 @@ sub new_filewriter_open
 {
     my $f = $old_open->(@_);
 
+    if(defined($NoAction)) {
+        *$f->{options}->{noaction} = $NoAction;
+    }
+
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
         diag("ERROR: Cannot new_filewriter_open: $fn is a directory");
@@ -395,6 +410,10 @@ sub new_fileeditor_open
 {
 
     my $f = CAF::FileWriter::new(@_);
+
+    if(defined($NoAction)) {
+        *$f->{options}->{noaction} = $NoAction;
+    }
 
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
