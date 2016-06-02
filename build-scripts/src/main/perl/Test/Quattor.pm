@@ -692,24 +692,53 @@ sub command_history_reset
 
 =item C<command_history_ok>
 
-Given a list of commands, it checks the C<@command_history> if all commands were
+Given an arrayref of C<required_commands>,
+it checks the C<@command_history> if all commands were
 called in the given order (it allows for other commands to exist inbetween).
 The commands are interpreted as regular expressions.
 
 E.g. if C<@command_history> is (x1, x2, x3) then
-C<command_history_ok([x1,X3])> returns 1 (Both x1 and x3 were called and in that order,
+C<command_history_ok([x1,X3])> returns 1
+(Both x1 and x3 were called and in that order,
 the fact that x2 was also called but not checked is allowed.).
 C<command_history_ok([x3,x2])> returns 0 (wrong order),
 C<command_history_ok([x1,x4])> returns 0 (no x4 command).
+
+A second arrayref of C<forbidden_commands> can be given,
+and the C<@command_history> is then first checked that
+none of those commands occured.
+If you only want to check the non-occurence of commands,
+pass an undef as the first argument
+(and not an empty arrayref).
 
 =cut
 
 sub command_history_ok
 {
-    my $commands = shift;
+    my ($required_commands, $forbidden_commands) = @_;
+
+    if ($forbidden_commands) {
+        foreach my $cmd (@$forbidden_commands) {
+            if (grep {$_ =~ /$cmd/} @command_history) {
+                diag "command_history_ok: forbidden command '$cmd' found in history; return false";
+                return 0;
+            };
+        }
+    }
+
+    if (! defined($required_commands)) {
+        if ($forbidden_commands) {
+            # This is ok.
+            diag "No required commands to test and forbidden commands check was ok.";
+            return 1;
+        } else {
+            # Fatal
+            ok(0, "command_history_ok: neither required nor forbidden commands arguments specified");
+        }
+    };
 
     my $lastidx = -1;
-    foreach my $cmd (@$commands) {
+    foreach my $cmd (@$required_commands) {
         # start iterating from lastidx+1
         my ( $index )= grep { $command_history[$_] =~ /$cmd/  } ($lastidx+1)..$#command_history;
         my $msg = "command_history_ok command pattern '$cmd'";
