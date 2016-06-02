@@ -77,8 +77,6 @@ use Readonly;
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
 
-=pod
-
 =over
 
 =item * QUATTOR_TEST_LOG_DEBUGLEVEL
@@ -98,8 +96,6 @@ Can also be set via the QUATTOR_TEST_LOG_CMD environment variable.
 
 our $log_cmd = $ENV{QUATTOR_TEST_LOG_CMD};
 
-=pod
-
 =item * C<$log_cmd_missing>
 
 A boolean to log each cmd that has output mocked but has no output set.
@@ -110,8 +106,6 @@ Can also be set via the QUATTOR_TEST_LOG_CMD_MISSING environment variable.
 our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING};
 
 
-=pod
-
 =item * C<%files_contents>
 
 Contents of a file after it is closed. The keys of this hash are the
@@ -121,17 +115,13 @@ absolute paths to the files.
 
 our %files_contents;
 
-=pod
-
 =item * C<%commands_run>
 
 CAF::Process objects being associated to a command execution.
 
 =cut
 
-my %commands_run;
-
-=pod
+our %commands_run;
 
 =item * C<%commands_status>
 
@@ -140,9 +130,7 @@ it is assumed to succeed.
 
 =cut
 
-my %command_status;
-
-=pod
+our %command_status;
 
 =item * C<%desired_outputs>
 
@@ -152,9 +140,7 @@ deal with.
 
 =cut
 
-my %desired_outputs;
-
-=pod
+our %desired_outputs;
 
 =item * C<%desired_err>
 
@@ -163,9 +149,7 @@ supply it through this hash.
 
 =cut
 
-my %desired_err;
-
-=pod
+our %desired_err;
 
 =item * C<%desired_file_contents>
 
@@ -175,15 +159,13 @@ Optionally, initial contents for a file that should be "edited".
 
 our %desired_file_contents;
 
-=pod
-
 =item * C<@command_history>
 
 CAF::Process commands that were run.
 
 =cut
 
-my @command_history = ();
+our @command_history = ();
 
 =item * C<caf_path>
 
@@ -269,67 +251,71 @@ Prevent any command from being executed.
 
 foreach my $method (qw(run execute trun)) {
     $procs->mock($method, sub {
-                    my $self = shift;
-                    my $cmd = join(" ", @{$self->{COMMAND}});
-                    push(@command_history, $cmd);
-                    diag("$method command $cmd") if $log_cmd;
-                    $commands_run{$cmd} = { object => $self,
-                                            method => $method
-                                          };
-                    if (exists($command_status{$cmd})) {
-                        $? = $command_status{$cmd};
-                    } else {
-                        diag("$method command $cmd no status set, using 0") if $log_cmd;
-                        $? = 0;
-                    }
+        my $self = shift;
+        my $cmd = join(" ", @{$self->{COMMAND}});
+        push(@command_history, $cmd);
+        diag("$method command $cmd") if $log_cmd;
+        $commands_run{$cmd} = {
+            object => $self,
+            method => $method,
+        };
 
-                    my ($tmp_stdout, $tmp_stderr);
-                    if (exists($desired_outputs{$cmd})) {
-                        $tmp_stdout = $desired_outputs{$cmd};
-                    } else {
-                        diag("$method command $cmd no desired stdout set, using empty string") if $log_cmd;
-                        $tmp_stdout = '';
-                    }
+        if (exists($command_status{$cmd})) {
+            $? = $command_status{$cmd};
+        } else {
+            diag("$method command $cmd no status set, using 0") if $log_cmd;
+            $? = 0;
+        }
 
-                    if (exists($desired_err{$cmd})) {
-                        $tmp_stderr = $desired_err{$cmd};
-                    } else {
-                        diag("$method command $cmd no desired stderr set, using empty string") if $log_cmd;
-                        $tmp_stderr = '';
-                    }
+        my ($tmp_stdout, $tmp_stderr);
+        if (exists($desired_outputs{$cmd})) {
+            $tmp_stdout = $desired_outputs{$cmd};
+        } else {
+            diag("$method command $cmd no desired stdout set, using empty string") if $log_cmd;
+            $tmp_stdout = '';
+        }
 
-                    if ($self->{OPTIONS}->{stdout}) {
-                        ${$self->{OPTIONS}->{stdout}} = $tmp_stdout;
-                    }
+        if (exists($desired_err{$cmd})) {
+            $tmp_stderr = $desired_err{$cmd};
+        } else {
+            diag("$method command $cmd no desired stderr set, using empty string") if $log_cmd;
+            $tmp_stderr = '';
+        }
 
-                    if ($self->{OPTIONS}->{stderr}) {
-                        if (ref($self->{OPTIONS}->{stderr})) {
-                            ${$self->{OPTIONS}->{stderr}} = $tmp_stderr;
-                        } else {
-                            ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if exists($desired_err{$cmd});
-                        }
-                    }
-                    return 1;
-                });
+        if ($self->{OPTIONS}->{stdout}) {
+            ${$self->{OPTIONS}->{stdout}} = $tmp_stdout;
+        }
+
+        if ($self->{OPTIONS}->{stderr}) {
+            if (ref($self->{OPTIONS}->{stderr})) {
+                ${$self->{OPTIONS}->{stderr}} = $tmp_stderr;
+            } else {
+                ${$self->{OPTIONS}->{stdout}} .= $tmp_stderr if exists($desired_err{$cmd});
+            }
+        }
+        return 1;
+    });
 }
 
 foreach my $method (qw(output toutput)) {
     $procs->mock($method, sub {
-                    my $self = shift;
+        my $self = shift;
 
-                    my $cmd = join(" ", @{$self->{COMMAND}});
-                    push(@command_history, $cmd);
-                    diag("$method command $cmd") if $log_cmd;
-                            $commands_run{$cmd} = { object => $self,
-                                                    method => $method};
-                            $? = $command_status{$cmd} || 0;
-                    if (exists($desired_outputs{$cmd})) {
-                        return $desired_outputs{$cmd};
-                    } else {
-                        diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
-                        return ""; # always return something, like LC:Process does
-                    };
-                });
+        my $cmd = join(" ", @{$self->{COMMAND}});
+        push(@command_history, $cmd);
+        diag("$method command $cmd") if $log_cmd;
+        $commands_run{$cmd} = {
+            object => $self,
+            method => $method,
+        };
+        $? = $command_status{$cmd} || 0;
+        if (exists($desired_outputs{$cmd})) {
+            return $desired_outputs{$cmd};
+        } else {
+            diag("$method no desired output for cmd $cmd") if $log_cmd_missing;
+            return ""; # always return something, like LC:Process does
+        };
+    });
 }
 
 =pod
