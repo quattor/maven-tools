@@ -119,5 +119,26 @@ ok(! $s->directory_exists($dirbase), "directory $dirbase cleanedup (via recursiv
 is_deeply($Test::Quattor::caf_path->{cleanup}, [[[$BASEPATH, 1], {option => 2}]],
           "caf_path hash updated after CAF::Path::cleanup");
 
+=head2 mock move
+
+=cut
+
+reset_caf_path();
+
+my $src = "/test/move/src/file";
+my $dest = "/test/move/dest/file";
+set_file_contents($src, "source");
+set_file_contents($dest, "dest");
+
+ok($s->file_exists($src), "src $src exists");
+ok($s->file_exists($dest), "dest $dest exists");
+
+ok($s->move($src, $dest, '.old', option => 2), "move ok");
+ok(!$s->file_exists($src), "src $src does not exists");
+ok($s->file_exists($dest), "dest $dest exists");
+ok($s->file_exists("$dest.old"), "dest backup $dest.old exists");
+
+is_deeply($Test::Quattor::caf_path->{move}, [[[$src, $dest, '.old'], {option => 2}]],
+          "caf_path hash updated after CAF::Path::move");
 
 done_testing();
