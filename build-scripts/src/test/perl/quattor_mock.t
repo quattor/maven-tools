@@ -50,6 +50,11 @@ print $fh5 $DATA x 2;
 $changed = $fh5->close();
 ok($changed, "Same file, new data, NoAction and caf_file_close_diff set");
 
+my $fh6 = CAF::FileWriter->new($fn2, backup => '.old');
+print $fh6 $DATA x 3;
+$changed = $fh6->close();
+ok($changed, "Same file, new data, backup, NoAction and caf_file_close_diff set");
+
 #
 # Read what has been written
 #
@@ -58,6 +63,13 @@ $fh = CAF::FileReader->new($fn);
 is("$fh", $DATA, "Reader reads what Writer has written");
 $fh->close;
 
+$fh = CAF::FileReader->new("$fn2");
+is("$fh", $DATA x 3, "Reader reads what Writer fh6 has written");
+$fh->close;
+
+$fh = CAF::FileReader->new("$fn2.old");
+# backup is fh5
+is("$fh", $DATA x 2, "Reader reads what Writer fh6 has written as backup");
+$fh->close;
 
 done_testing;
-

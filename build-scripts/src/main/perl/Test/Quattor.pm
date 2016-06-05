@@ -387,6 +387,10 @@ sub new_filewriter_close
         $ret = (! defined($current_content)) || $current_content ne $new_content;
     }
 
+    if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
+        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} =  $current_content;
+    }
+
     return $ret;
 }
 
