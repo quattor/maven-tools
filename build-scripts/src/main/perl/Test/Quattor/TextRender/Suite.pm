@@ -29,15 +29,15 @@ Test::Quattor::TextRender::Suite - Class for a template test suite.
 
 =head1 DESCRIPTION
 
-A TextRender test suite corresponds to one or more 
-regexptests that are tested against the profile genereated 
+A TextRender test suite corresponds to one or more
+regexptests that are tested against the profile genereated
 from one corresponding object template.
 
-A test suite can be a combination of file (implying one regexptest, and that 
+A test suite can be a combination of file (implying one regexptest, and that
 file being the regexptest) and/or a directory
 (one or more regexptests; each file in the directory is one
-regexptest; no subdirectory structure allowed); 
-with the file or directory name 
+regexptest; no subdirectory structure allowed);
+with the file or directory name
 identical to the corresponding object template.
 
 The names cannot start with a '.'.
@@ -50,7 +50,7 @@ Support options
 
 =item testspath
 
-Basepath for the suite tests. 
+Basepath for the suite tests.
 
 =item regexps
 
@@ -70,7 +70,7 @@ relpath to use for CAF::TextRender.
 
 =item filter
 
-A compiled regular expression that is used to filter the found regexptest files 
+A compiled regular expression that is used to filter the found regexptest files
 (matching relative filenames are kept; non-matcing ones are removed).
 
 One can also set the C<QUATTOR_TEST_SUITE_FILTER> enviroment variable, which will be
@@ -96,7 +96,7 @@ sub _initialize
 
     # TT relpath
     ok($self->{ttrelpath}, "TT relpath defined ".($self->{ttrelpath} || '<undef>'));
-    
+
     # testspath
     $self->{testspath} = abs_path($self->{testspath});
     if (defined($self->{testspath})) {
@@ -249,6 +249,8 @@ sub regexptest
 {
     my ($self, $name, $profile, $regexps) = @_;
 
+    $self->verbose("regexptest name $name profile $profile");
+
     # Compile, setup CCM cache and get the configuration instance
     my $cfg = prepare_profile_cache($profile);
 
@@ -290,7 +292,7 @@ sub test
 
     set_profile_cache_options(resources => $self->{profilespath});
 
-    foreach my $name (keys %$regexps) {
+    foreach my $name (sort keys %$regexps) {
         $self->regexptest($name, "$self->{profilespath}/$profiles->{$name}", $regexps->{$name});
     }
 
