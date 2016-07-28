@@ -19,6 +19,7 @@ Readonly my $MAX_ITER => 2;
 
 my $debug_internal = -1;
 
+my $trace;
 
 #
 # Caveat: When using the maven templates like '${a.b.c}' use '$'.'{a.b.c}'
@@ -60,6 +61,17 @@ using C<-d>  or C<MVNPROVE_DEBUG> environment variable
 =item C<-D> sets the debuglevel to 1
 
 =item C<MVNPROVE_DEBUG_INTERNAL> environment variable
+
+=back
+
+=item The prove `-d:Trace` commandline can be generated via
+(it will not run the tests, only create the commandline to run).
+
+=over
+
+=item C<-t> commandline option
+
+=item C<MVNPROVE_TRACE> environment variable
 
 =back
 
@@ -336,9 +348,10 @@ sub prove
 {
     my ($pom, @test_names) = @_;
 
+    my @args;
     # -v : verbose
     # ignore default proverc, use mvnprove
-    my @args = qw(-v --norc --rc ~/.mvnprove);
+    push(@args, qw(-v --norc --rc ~/.mvnprove)) if ! $trace;
 
     my $tests_dir = 'src/test/perl';
 
@@ -362,22 +375,27 @@ sub prove
         };
     } else {
         # --state: run all tests, last failed first
-        push(@args, '--state=failed,all,save', $tests_dir);
+        push(@args, '--state=failed,all,save', $tests_dir) if ! $trace;
     }
 
-    debug(1, "Going to run prove with args @args");
-
-    my $app = App::Prove->new;
-    $app->process_args(@args);
-
-    my $ec = $app->run ? 0 : 1;
-    if($ec) {
-        # do not use error/die, this is normal termination of mvnprove
-        info("ERROR: Prove failed with ec $?");
+    if ($trace) {
+        debug(1, "Trace enabled, not running prove with args @args");
+        info("Commandline to run tests with trace:\nperl -d:Trace @args");
     } else {
-        info("Prove ok");
-    };
-    return $ec;
+        debug(1, "Going to run prove with args @args");
+
+        my $app = App::Prove->new;
+        $app->process_args(@args);
+
+        my $ec = $app->run ? 0 : 1;
+        if($ec) {
+            # do not use error/die, this is normal termination of mvnprove
+            info("ERROR: Prove failed with ec $?");
+        } else {
+            info("Prove ok");
+        };
+        return $ec;
+    }
 }
 
 =item get_options
@@ -388,6 +406,11 @@ Handle commandline and/or environment settings, return array with test names
 
 sub get_options
 {
+    $trace = defined($ENV{MVNPROVE_TRACE}) ? $ENV{MVNPROVE_TRACE} : 0;
+    $trace = 1 if (grep {m/^-t$/} @ARGV);
+
+    info(($trace ? "En" : "Dis")."abling trace");
+
     my $debug = defined($ENV{MVNPROVE_DEBUG}) ? $ENV{MVNPROVE_DEBUG} : 0;
     $debug = 1 if (grep {m/^-d$/} @ARGV);
     if ($debug) {
