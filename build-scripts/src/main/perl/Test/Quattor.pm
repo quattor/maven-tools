@@ -228,7 +228,7 @@ our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
 our $reporter = Test::MockModule->new("CAF::Reporter");
-our $check = Test::MockModule->new("CAF::Path");
+our $cpath = Test::MockModule->new("CAF::Path");
 our $iostring = Test::MockModule->new("IO::String");
 
 sub import
@@ -496,7 +496,7 @@ Return the mocked C<is_file>
 
 =cut
 
-$check->mock("file_exists", sub {shift; return is_file(shift);});
+$cpath->mock("file_exists", sub {shift; return is_file(shift);});
 
 =item C<CAF::Path::directory_exists>
 
@@ -504,7 +504,7 @@ Return the mocked C<is_directory>
 
 =cut
 
-$check->mock("directory_exists", sub {shift; return is_directory(shift);});
+$cpath->mock("directory_exists", sub {shift; return is_directory(shift);});
 
 =item C<CAF::Path::any_exists>
 
@@ -512,7 +512,7 @@ Return the mocked C<is_any>
 
 =cut
 
-$check->mock("any_exists", sub {shift; return is_any(shift); });
+$cpath->mock("any_exists", sub {shift; return is_any(shift); });
 
 =item C<CAF::Path::directory>
 
@@ -522,7 +522,7 @@ Return directory name unless mocked C<make_directory> or mocked C<LC_Check> fail
 
 =cut
 
-$check->mock("directory", sub {
+$cpath->mock("directory", sub {
     my ($self, $directory, %opts) = @_;
     if (make_directory($directory)) {
         $directory = undef if ! $self->LC_Check("directory", [$directory], \%opts);
@@ -538,7 +538,7 @@ Store args in C<caf_path> using C<add_caf_path>.
 
 =cut
 
-$check->mock('LC_Check', sub{ shift; return add_caf_path(@_); });
+$cpath->mock('LC_Check', sub{ shift; return add_caf_path(@_); });
 
 =item C<CAF::Path::cleanup>
 
@@ -547,12 +547,26 @@ C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 =cut
 
 # use ref of copy of args (similar to what is passed to LC_Check)
-$check->mock('cleanup', sub {
+$cpath->mock('cleanup', sub {
     my($self, $dest, $backup, %opts) = @_;
-    remove_any($dest);
+    my $newbackup = defined($backup) ? $backup : $self->{backup};
+    remove_any($dest, $newbackup);
     return add_caf_path('cleanup', [$dest, $backup], \%opts);
 });
 
+=item C<CAF::Path::move>
+
+C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
+
+=cut
+
+# use ref of copy of args (similar to what is passed to LC_Check)
+$cpath->mock('move', sub {
+    my($self, $src, $dest, $backup, %opts) = @_;
+    my $newbackup = defined($backup) ? $backup : $self->{backup};
+    move($src, $dest, $newbackup);
+    return add_caf_path('move', [$src, $dest, $backup], \%opts);
+});
 
 =back
 
@@ -973,7 +987,7 @@ sub make_directory
 
 =item remove_any
 
-Recusive removal of a C<path> from the files_contents / desired_file_contents
+Recursive removal of a C<path> from the files_contents / desired_file_contents
 
 =cut
 
@@ -996,6 +1010,31 @@ sub remove_any
 
     return SUCCESS;
 }
+
+=item move
+
+move C<src> to C<dest>. If C<backup> is defined and not empty string,
+move C<dest> to backup (C<backup> is a suffix).
+
+=cut
+
+sub move
+{
+    my ($src, $dest, $backup) = @_;
+
+    if (is_any($src)) {
+        if (is_any($dest)) {
+            if (defined($backup) && $backup ne '') {
+                move($dest,$dest.$backup);
+            }
+            remove_any($dest);
+        };
+        # Move src to dest
+        $files_contents{$dest} = delete $files_contents{$src};
+        $desired_file_contents{$dest} = delete $desired_file_contents{$src};
+    };
+    return SUCCESS;
+};
 
 =item add_caf_path
 
