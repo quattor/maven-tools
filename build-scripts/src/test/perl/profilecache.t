@@ -52,6 +52,7 @@ profile http://www.quattor.org
 cache_root $target/test/cache
 retrieve_wait 0
 retrieve_retries 1
+tabcompletion 0
 EOF
 
 my $ccmcfg = Test::Quattor::ProfileCache::get_ccm_config_default();
