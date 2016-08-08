@@ -42,6 +42,7 @@ profile http://www.quattor.org
 cache_root __CACHE_ROOT__
 retrieve_wait 0
 retrieve_retries 1
+tabcompletion 0
 EOF
 
 our @EXPORT = qw(get_config_for_profile prepare_profile_cache
