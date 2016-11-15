@@ -203,12 +203,15 @@ Defaults to false (to keep regular C<NoAction> behaviour).
 
 my $caf_file_close_diff = 0;
 
+# By default, perl warnings are not ok
+my $_warn_is_ok = 0;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
                  set_caf_file_close_diff
-                 make_directory remove_any reset_caf_path);
+                 make_directory remove_any reset_caf_path
+                 warn_is_ok);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -241,6 +244,15 @@ sub import
 
     $class->SUPER::export_to_level(1, $class, @EXPORT);
 }
+
+$SIG{__WARN__} = sub {
+    my $msg = "Perl warning: $_[0]";
+    if ($_warn_is_ok) {
+        diag $msg;
+    } else {
+        ok(0, $msg);
+    }
+};
 
 =pod
 
@@ -1074,6 +1086,22 @@ sub reset_caf_path
 
 }
 
+=item warn_is_ok
+
+By default, Perl warnings are mapped to failing tests.
+
+
+
+=cut
+
+sub warn_is_ok
+{
+    my ($bool) = @_;
+
+    $bool = 1 if ! defined($bool);
+
+    $_warn_is_ok = $bool ? 1 : 0;
+}
 
 1;
 
