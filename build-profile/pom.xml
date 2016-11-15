@@ -48,6 +48,47 @@ use version;
 our $VERSION = version-&gt;new("v${no-snapshot-version}");
 ${line.separator}
     </PMpost>
+
+    <!--
+        Generic component config.pan template
+            Assumes main component type to be named <name>_component
+            Ends with a pan /software/components/<name> prefix
+    -->
+
+    <componentconfignospma>
+${license-info}
+${developer-info}
+${author-info}
+
+unique template components/${project.artifactId}/config;
+
+include 'components/${project.artifactId}/schema';
+
+bind '/software/components/${project.artifactId}' = ${project.artifactId}_component;
+
+'/software/packages' = pkg_repl('ncm-${project.artifactId}', '${no-snapshot-version}-${rpm.release}', 'noarch');
+
+include if_exists('components/${project.artifactId}/site-config.pan');
+
+prefix '/software/components/${project.artifactId}';
+'active' ?= true;
+'dispatch' ?= true;
+'version' ?= '${no-snapshot-version}';
+    </componentconfignospma>
+
+    <componentconfig>
+${componentconfignospma}
+'dependencies/pre' ?= list('spma');
+    </componentconfig>
+
+    <componentschema>
+${license-info}
+${developer-info}
+${author-info}
+
+declaration template components/${project.artifactId}/schema;
+    </componentschema>
+
     <changelogtimestamp>${maven.build.timestamp}</changelogtimestamp>
     <maven.build.timestamp.format>E MMM dd yyyy</maven.build.timestamp.format>
   </properties>
