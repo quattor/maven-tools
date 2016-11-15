@@ -926,8 +926,10 @@ sub is_file
 {
     my $path = sane_path(shift);
 
-    my $f_c = exists($files_contents{$path}) && "$files_contents{$path}" ne $DIRECTORY;
-    my $d_f_c  = exists($desired_file_contents{$path}) && "$desired_file_contents{$path}" ne $DIRECTORY;
+    my $f_c = exists($files_contents{$path}) &&
+        (! defined($files_contents{$path}) || "$files_contents{$path}" ne $DIRECTORY);
+    my $d_f_c  = exists($desired_file_contents{$path}) &&
+        (! defined($desired_file_contents{$path}) || "$desired_file_contents{$path}" ne $DIRECTORY);
 
     return $f_c || $d_f_c;
 }
@@ -942,8 +944,10 @@ sub is_directory
 {
     my $path = sane_path(shift);
 
-    my $f_c = exists($files_contents{$path}) && "$files_contents{$path}" eq $DIRECTORY;
-    my $d_f_c  = exists($desired_file_contents{$path}) && "$desired_file_contents{$path}" eq $DIRECTORY;
+    my $f_c = exists($files_contents{$path}) &&
+        $files_contents{$path} && "$files_contents{$path}" eq $DIRECTORY;
+    my $d_f_c  = exists($desired_file_contents{$path}) &&
+        $desired_file_contents{$path} && "$desired_file_contents{$path}" eq $DIRECTORY;
 
     return $f_c || $d_f_c;
 }
