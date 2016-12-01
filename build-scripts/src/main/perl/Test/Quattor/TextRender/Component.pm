@@ -83,23 +83,27 @@ Default is not to skip any pan related tests.
 
 =cut
 
+# return default basepath
+sub _default_basepath
+{
+    my $srcpath = getcwd() . "/src/main";
+    return "$srcpath/resources";
+}
+
 sub _initialize
 {
     my ($self) = @_;
 
-    ok($self->{component}, "Component name set " . ($self->{component} || ""));
+    ok($self->{component}, "Component name set " . ($self->{component} || "<undef>"));
 
     if (!defined($self->{usett})) {
         $self->{usett} = 1;
     }
     $self->verbose("usett $self->{usett}");
 
-    my $srcpath    = getcwd() . "/src/main";
     my $targetpath = getcwd() . "/target";
 
-    if (!$self->{basepath}) {
-        $self->{basepath} = "$srcpath/resources";
-    }
+    $self->{basepath} = _default_basepath() if (!$self->{basepath});
 
     # TT files are unfolded in the targetpath wrt the expected relpath
     # by the pom.xml (tt file under src/main/resources/data.tt for component

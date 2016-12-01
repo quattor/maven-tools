@@ -1,5 +1,5 @@
 BEGIN {
-our $TQU = <<'EOF';
+    our $TQU = <<'EOF';
 [load]
 prefix=Test::Quattor::
 # Do NOT list Unittest here, it will cause an infinite loop
