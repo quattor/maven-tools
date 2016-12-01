@@ -20,18 +20,20 @@ END {
     done_testing() if $do_test;
 }
 
+use Test::Quattor::Doc;
+
 # When changing, also change the pod in read_cfg
 Readonly our $CFG_FILENAME => 'tqu.cfg';
 Readonly our $DEFAULT_CFG => <<'EOF';
 [load]
 enable = 1
 
-[pod]
+[doc]
 enable = 1
 
 EOF
 
-Readonly::Array our @TESTS => qw(load);
+Readonly::Array our @TESTS => qw(load doc);
 
 =pod
 
@@ -234,6 +236,36 @@ sub load
     }
 }
 
+
+=item doc
+
+Documentation tests using C<Test::Quattor::Doc>.
+
+Configuration options C<poddirs>, C<podfiles>, C<panpaths> and
+C<panout> are prased as comma-sperated lists
+and passed to C<Test::Quattor::Doc->new>.
+
+C<panpaths> value C<NOPAN> is special, as it disables the pan tests.
+
+=cut
+
+sub doc
+{
+    my ($self, $cfg) = @_;
+
+    my %opts;
+    foreach my $opt (qw(poddirs podfiles panpaths panout)) {
+        $opts{$opt} = [split(/\s*,\s*/, $cfg->{$opt})] if exists $cfg->{$opt};
+    }
+
+    my $doc = Test::Quattor::Doc->new(%opts);
+    if(($cfg->{panpaths} || '') eq 'NOPAN') {
+        $self->verbose('disabling pan doc tests');
+        $doc->{panpaths} = undef;
+    }
+
+    $doc->test();
+}
 
 =pod
 
