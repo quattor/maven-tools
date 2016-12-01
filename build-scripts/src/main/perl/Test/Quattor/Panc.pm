@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::Panc;
+
 use strict;
 use warnings;
-
-package Test::Quattor::Panc;
 
 use base 'Exporter';
 

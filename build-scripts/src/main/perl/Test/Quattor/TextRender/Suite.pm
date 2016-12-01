@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::TextRender::Suite;
+
 use strict;
 use warnings;
-
-package Test::Quattor::TextRender::Suite;
 
 use Test::More;
 use Cwd qw(abs_path);

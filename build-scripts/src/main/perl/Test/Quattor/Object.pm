@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::Object;
+
 use strict;
 use warnings;
-
-package Test::Quattor::Object;
 
 use base 'Exporter';
 
@@ -328,9 +328,9 @@ sub gather_pan
             my $expectedname = "$panrel$tplname";
 
             # must match template namespace
-            open(TPL, $_);
+            open(my $TPL, $_);
             my $value = {};
-            while (my $line = <TPL>) {
+            while (my $line = <$TPL>) {
                 chomp($line);         # no newline in regexp
                 if ($line =~ m/$namespacereg/) {
                     if ($2 eq $expectedname) {
@@ -342,7 +342,7 @@ sub gather_pan
                     }
                 }
             }
-            close(TPL);
+            close($TPL);
             if ($value->{type}) {
                 $pans{$name} = $value;
             } else {

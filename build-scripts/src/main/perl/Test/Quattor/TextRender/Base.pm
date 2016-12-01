@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::TextRender::Base;
+
 use strict;
 use warnings;
-
-package Test::Quattor::TextRender::Base;
 
 use Test::More;
 use Test::MockModule;

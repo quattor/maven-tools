@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::RegexpTest;
+
 use strict;
 use warnings;
-
-package Test::Quattor::RegexpTest;
 
 use Test::More;
 
@@ -101,9 +101,9 @@ sub parse
     my ($self) = @_;
 
     # cut textfile in 3 blocks
-    open REG, $self->{regexp};
-    my @blocks = split($BLOCK_SEPARATOR, join("", <REG>));
-    close REG;
+    open my $REG, $self->{regexp};
+    my @blocks = split($BLOCK_SEPARATOR, join("", <$REG>));
+    close $REG;
 
     is(scalar @blocks, $EXPECTED_BLOCKS, "Expected number of blocks in regexptest $self->{regexp}");
 

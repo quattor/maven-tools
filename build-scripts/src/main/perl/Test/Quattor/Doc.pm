@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::Doc;
+
 use strict;
 use warnings;
-
-package Test::Quattor::Doc;
 
 use base qw(Test::Quattor::Object Exporter);
 use Test::More;

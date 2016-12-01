@@ -1,6 +1,3 @@
-use strict;
-use warnings;
-
 =pod
 
 =head1 DESCRIPTION
@@ -11,6 +8,9 @@ with no real logic.
 =cut
 
 package Test::Quattor::Component;
+
+use strict;
+use warnings;
 
 use parent qw(CAF::Object Exporter);
 use Template;
