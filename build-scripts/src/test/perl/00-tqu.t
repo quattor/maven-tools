@@ -8,6 +8,10 @@ modules=:,CommonDeps,Component,Doc,Namespace,Object,Panc,ProfileCache,RegexpTest
 [doc]
 poddirs=src/main/perl
 panpaths=NOPAN
+[critic]
+codedirs=src/main/perl
+# there is not ${PMpost} templating in maven-tools
+exclude=Modules::RequireVersionVar
 EOF
     }
 use Test::Quattor::Unittest;
