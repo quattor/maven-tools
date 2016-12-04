@@ -15,7 +15,7 @@ use Test::Quattor::Unittest qw(notest);
 my $u = Test::Quattor::Unittest->new();
 isa_ok($u, 'Test::Quattor::Unittest');
 
-is_deeply(\@Test::Quattor::Unittest::TESTS, [qw(load doc tt critic)],
+is_deeply(\@Test::Quattor::Unittest::TESTS, [qw(load doc tt critic tidy)],
           'ordered tests as expected');
 
 $u->read_cfg();

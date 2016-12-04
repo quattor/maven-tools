@@ -50,11 +50,12 @@ END {
 
 use Test::Quattor::Doc;
 use Test::Quattor::Critic;
+use Test::Quattor::Tidy;
 use Test::Quattor::ProfileCache qw(set_json_typed);
 use Test::Quattor::TextRender::Component;
 set_json_typed();
 
-Readonly::Array our @TESTS => qw(load doc tt critic);
+Readonly::Array our @TESTS => qw(load doc tt critic tidy);
 
 # When changing, also change the pod in read_cfg
 Readonly our $CFG_FILENAME => 'tqu.cfg';
@@ -69,6 +70,9 @@ enable = 1
 enable = 1
 
 [critic]
+enable = 1
+
+[tidy]
 enable = 1
 
 EOF
@@ -386,6 +390,35 @@ sub critic
     $opts{exclude} = $cfg->{exclude} if $cfg->{exclude};
 
     Test::Quattor::Critic->new(%opts)->test();
+}
+
+=item tidy
+
+Run C<Test::Quattor::Tidy>
+
+Options
+
+=over
+
+=item codedirs
+
+Comma-separated list of directories to look for code to test.
+(Defaults to C<target/lib/perl>).
+
+=back
+
+=cut
+
+sub tidy
+{
+    my ($self, $cfg) = @_;
+
+    my %opts;
+    foreach my $opt (qw(codedirs)) {
+        $opts{$opt} = [split(/\s*,\s*/, $cfg->{$opt})] if exists $cfg->{$opt};
+    }
+
+    Test::Quattor::Tidy->new(%opts)->test();
 }
 
 =pod
