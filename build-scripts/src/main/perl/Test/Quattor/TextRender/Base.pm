@@ -73,7 +73,6 @@ sub test
 
     set_profile_cache_options(cache => $cachedir);
 
-    my $base = getcwd() . "/src/test/resources";
     my $st   = Test::Quattor::TextRender::Suite->new(
         ttrelpath => $self->{ttrelpath},
         ttincludepath => $self->{ttincludepath},

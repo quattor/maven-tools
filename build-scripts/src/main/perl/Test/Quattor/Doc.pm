@@ -131,10 +131,10 @@ sub pod_files
 
 =item pan_annotations
 
-Generate annotations, return arrayref with templates that 
+Generate annotations, return arrayref with templates that
 have valid annotations and one for templates with invalid annotations.
 
-TODO: Does not require annotations at all nor validates 
+TODO: Does not require annotations at all nor validates
 minimal contents.
 
 =cut
@@ -189,8 +189,10 @@ sub test
     my ($ok, $not_ok) = $self->pod_files();
     is(scalar @$not_ok, 0, "No faulty pod files: ");
 
-    ($ok, $not_ok) = $self->pan_annotations();
-    is(scalar @$not_ok, 0, "No faulty pan annotation: ".join(",", @$not_ok));
+    if (defined($self->{panpaths})) {
+        ($ok, $not_ok) = $self->pan_annotations();
+        is(scalar @$not_ok, 0, "No faulty pan annotation: ".join(",", @$not_ok));
+    }
 }
 
 =pod
