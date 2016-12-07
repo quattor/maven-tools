@@ -244,8 +244,29 @@ sub set_properties
 
     my $fullversion = $pom->{version} || '0.0.0-NOVERSIONFOUND';
     my ($version, $snapshot) = split(/-/, $fullversion);
+
+    my $project = $pom->{artifactId} || 'NoArtifactFound';
+
+    my $componentconfignospma = <<"EOF";
+unique template components/$project/config;
+
+include 'components/$project/schema';
+
+bind '/software/components/$project' = ${project}_component;
+
+'/software/packages' = pkg_repl('ncm-$project', '$version-$snapshot', 'noarch');
+
+include if_exists('components/$project/site-config.pan');
+
+prefix '/software/components/$project';
+'active' ?= true;
+'dispatch' ?= true;
+'version' ?= '$version';
+
+EOF
+
     my $props = {
-        'project.artifactId' => $pom->{artifactId} || 'NoArtifactFound',
+        'project.artifactId' => $project,
         'project.version' => $fullversion,
         'no-snapshot-version' => $version,
         'rpm.release' => $snapshot,
@@ -254,7 +275,10 @@ sub set_properties
         PMpost => ";\n\nuse strict;\nuse warnings;\n\nuse version;\nour \$VERSION = version->new(\"v$version\");\n\n",
         'project.build.directory' => 'target',
         PMpre => "\# Some headers\n\npackage", # headers are not relevant
-        basedir => getcwd(), #
+        basedir => getcwd(),
+        componentconfignospma => $componentconfignospma,
+        componentconfig => "$componentconfignospma\n'dependencies/pre' ?= list('spma');\n",
+        componentschema => "# headers\ndeclaration template components/$project/schema;\n",
     };
 
     foreach my $prop (sort keys %$props) {
