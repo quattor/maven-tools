@@ -13,14 +13,11 @@ with no real logic.
 package Test::Quattor::Component;
 
 use parent qw(CAF::Object Exporter);
-use Template;
-use Template::Stash;
 use Readonly;
 
 our @EXPORT = qw($NoAction);
 
 our $NoAction;
-$Template::Stash::PRIVATE = undef;
 
 Readonly my $RELATIVE_TEMPLATE_INCLUDE_PATH => 'target/share/templates/quattor';
 
@@ -33,18 +30,7 @@ sub _initialize
     $self->{name} = $name;
     $self->{log} = $log || $main::this_app;
 
-    $self->{template} = Template->new(
-        INCLUDE_PATH => $RELATIVE_TEMPLATE_INCLUDE_PATH,
-        #DEBUG => 'undef',
-	);
-
     return 1;
-}
-
-sub template
-{
-    my $self = shift;
-    return $self->{template};
 }
 
 no strict 'refs';
@@ -70,38 +56,12 @@ sub prefix
     return "/software/components/$ns[-1]";
 }
 
-sub unescape
-{
-    my ($self, $str) = @_;
-
-    # Only disable the waning during the unittest of this method.
-    warn "Called unescape through the component. This will be removed soon. ",
-         "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element."
-         if $warn_deprecate_escape;
-
-    $str =~ s!(_[0-9a-f]{2})!sprintf("%c",hex($1))!eg;
-    return $str;
-}
-
-sub escape
-{
-    my ($self, $str) = @_;
-
-    # Only disable the waning during the unittest of this method.
-    warn "Called escape() through the component. This will be removed soon. ",
-        "Please upgrade your code to use the version supplied by EDG::WP4::CCM::Element."
-        if $warn_deprecate_escape;
-
-    $str =~ s/(^[0-9]|[^a-zA-Z0-9])/sprintf("_%lx", ord($1))/eg;
-    return $str;
-}
-
-# A private method only here to disable the deprecation warnings  
-# of NCM::Component::escape and NCM::Component::unescape 
+# A private method only here to disable the deprecation warnings
+# of NCM::Component::escape and NCM::Component::unescape
 # to allow unittesting these methods (it is the only case where the warnings
 # are not required).
 # Do NOT disable the warning anywhere else!
-sub _disable_warn_deprecate_escape 
+sub _disable_warn_deprecate_escape
 {
     $warn_deprecate_escape=0;
 }
