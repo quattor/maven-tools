@@ -660,7 +660,7 @@ sub get_command
     if (exists($commands_run{$cmd})) {
         return $commands_run{$cmd};
     }
-    return undef;
+    return;
 }
 
 =pod

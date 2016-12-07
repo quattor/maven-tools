@@ -1,4 +1,7 @@
-#%{PMpre} Test::Quattor::CommonDeps%{PMpost}
+package Test::Quattor::CommonDeps;
+
+use strict;
+use warnings;
 
 =head1 NAME
 

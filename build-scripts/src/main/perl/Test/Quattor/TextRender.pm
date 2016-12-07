@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::TextRender;
+
 use strict;
 use warnings;
-
-package Test::Quattor::TextRender;
 
 use File::Basename;
 use File::Copy;
@@ -221,14 +221,14 @@ sub gather_tt
         if (-T && m/\.(tt)$/) {
             if ($name !~ m/(^|\/)(pan|tests)\//) {
                 my $tp = Template::Parser->new({});
-                open TT, $_;
-                if ($tp->parse(join("", <TT>))) {
+                open (my $TT, $_);
+                if ($tp->parse(join("", <$TT>))) {
                     push(@tts, $name);
                 } else {
                     $self->verbose("failed syntax validation TT $name with " . $tp->error());
                     push(@invalid_tts, $name);
                 }
-                close TT;
+                close $TT;
             } else {
                 push(@invalid_tts, $name);
             }

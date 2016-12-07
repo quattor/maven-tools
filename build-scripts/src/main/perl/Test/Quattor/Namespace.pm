@@ -3,8 +3,16 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::Namespace;
+
 use strict;
 use warnings;
+
+use base 'Exporter';
+
+our @EXPORT = qw(INC_insert_namespace);
+
+use File::Basename qw(dirname);
 
 =pod
 
@@ -25,14 +33,6 @@ E.g. to fake NCM:: namespace provided by the 'ncm' namespace
     ...
 
 =cut
-
-package Test::Quattor::Namespace;
-
-use base 'Exporter';
-
-our @EXPORT = qw(INC_insert_namespace);
-
-use File::Basename qw(dirname);
 
 
 sub import

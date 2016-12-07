@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::TextRender::Component;
+
 use strict;
 use warnings;
-
-package Test::Quattor::TextRender::Component;
 
 use File::Basename;
 

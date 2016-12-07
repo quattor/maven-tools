@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::ProfileCache;
+
 use strict;
 use warnings;
-
-package Test::Quattor::ProfileCache;
 
 use base 'Exporter';
 

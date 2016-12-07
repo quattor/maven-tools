@@ -3,10 +3,10 @@
 # ${author-info}
 # ${build-info}
 
+package Test::Quattor::TextRender::RegexpTest;
+
 use strict;
 use warnings;
-
-package Test::Quattor::TextRender::RegexpTest;
 
 use Test::More;
 
