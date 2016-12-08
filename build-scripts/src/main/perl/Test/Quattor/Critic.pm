@@ -9,6 +9,7 @@ use strict;
 use warnings;
 
 use Test::Pod;
+use File::Temp qw(tempfile);
 use Perl::Critic;
 use Perl::Critic::Violation;
 use Readonly;
@@ -85,9 +86,10 @@ sub make_critic
 {
     my $self = shift;
 
+    my ($fh, $filename) = tempfile('critic_empty_profile.XXXXX', UNLINK => 1);
     my $critic = Perl::Critic->new(
         -verbose => 8, # Use verbose level 8 to show the name of the policy
-        -profile => '/dev/null', # don't load any profile
+        -profile => $filename, # empty temporary file, i.e. don't load any profile
         -severity => 1, # all policies
         );
 
