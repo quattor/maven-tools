@@ -9,11 +9,8 @@ modules=:,CommonDeps,Component,Critic,Doc,Filetools,Namespace,Object,Panc,Profil
 poddirs=src/main/perl
 panpaths=NOPAN
 [critic]
-codedirs=src/main/perl
-# there is not ${PMpost} templating in maven-tools
+# there is no ${PMpost} templating in maven-tools
 exclude=Modules::RequireVersionVar
-[tidy]
-codedirs=src/main/perl
 EOF
     }
 use Test::Quattor::Unittest;
