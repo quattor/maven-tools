@@ -153,6 +153,7 @@ sub test
 
         if (@fs) {
             foreach my $file (@fs) {
+                next if ($file =~ m/\.pod$/);
                 my @violations = $critic->critique($file);
                 $self->check(\@violations);
             }

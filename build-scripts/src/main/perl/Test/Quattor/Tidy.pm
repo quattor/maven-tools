@@ -129,6 +129,7 @@ sub test
 
         if (@fs) {
             foreach my $file (@fs) {
+                next if ($file =~ m/\.pod$/);
                 $self->check($file);
             }
         } else {
