@@ -72,6 +72,7 @@ use Test::MockModule;
 use Test::More;
 use CAF::Service qw(@FLAVOURS);
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
+use Test::Quattor::Object qw(warn_is_ok);
 use Readonly;
 
 # "File" content that will appear as a directory
@@ -203,8 +204,6 @@ Defaults to false (to keep regular C<NoAction> behaviour).
 
 my $caf_file_close_diff = 0;
 
-# By default, perl warnings are not ok
-my $_warn_is_ok = 0;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
@@ -244,15 +243,6 @@ sub import
 
     $class->SUPER::export_to_level(1, $class, @EXPORT);
 }
-
-$SIG{__WARN__} = sub {
-    my $msg = "Perl warning: $_[0]";
-    if ($_warn_is_ok) {
-        diag $msg;
-    } else {
-        ok(0, $msg);
-    }
-};
 
 =pod
 
@@ -1088,23 +1078,6 @@ sub reset_caf_path
         $caf_path = {};
     }
 
-}
-
-=item warn_is_ok
-
-By default, Perl warnings are mapped to failing tests.
-
-
-
-=cut
-
-sub warn_is_ok
-{
-    my ($bool) = @_;
-
-    $bool = 1 if ! defined($bool);
-
-    $_warn_is_ok = $bool ? 1 : 0;
 }
 
 1;

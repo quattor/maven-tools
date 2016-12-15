@@ -114,6 +114,7 @@ sub _initialize
 
     if($self->{skippan}) {
         $self->verbose("Skippan enabled");
+        $self->{pannamespace} = '';
     } else {
         $self->{pannamespace}  = "components/$self->{component}"
             if ! defined($self->{pannamespace});

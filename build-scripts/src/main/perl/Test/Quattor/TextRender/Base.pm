@@ -65,11 +65,11 @@ sub test
     }
 
     my $testspath = $self->{testspath};
-    $testspath .= "/$self->{version}" if (exists($self->{version}));
+    $testspath .= "/$self->{version}" if (defined($self->{version}));
 
     my $orig_dirs = get_profile_cache_dirs();
     my $cachedir = "$DEFAULT_PROFILE_CACHE_DIRS{cache}/$self->{pannamespace}";
-    $cachedir .= "/$self->{version}" if (exists($self->{version}));
+    $cachedir .= "/$self->{version}" if (defined($self->{version}));
 
     set_profile_cache_options(cache => $cachedir);
 
