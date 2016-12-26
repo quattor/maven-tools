@@ -14,7 +14,7 @@ use Test::More;
 use Test::Quattor::Component;
 use NCM::Component;
 
-use EDG::WP4::CCM::Element qw(escape unescape);
+use EDG::WP4::CCM::Path qw(escape unescape);
 
 # Only to be used in this unittest
 Test::Quattor::Component::_disable_warn_deprecate_escape();

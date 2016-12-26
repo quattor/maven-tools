@@ -8,6 +8,17 @@ package Test::Quattor::TextRender::RegexpTest;
 use strict;
 use warnings;
 
+# Compatibility with pre ccm-17.2
+my $config_class;
+BEGIN {
+    $config_class = "EDG::WP4::CCM::CacheManager::Configuration";
+    local $@;
+    eval "use $config_class";
+    if ($@) {
+        $config_class =~ s/CacheManager:://;
+    }
+}
+
 use Test::More;
 
 use base qw(Test::Quattor::RegexpTest);
@@ -127,8 +138,8 @@ sub preprocess
     my ($self) = @_;
     isa_ok(
         $self->{config},
-        "EDG::WP4::CCM::Configuration",
-        "config EDG::WP4::CCM::Configuration instance"
+        $config_class,
+        "config $config_class instance"
     );
 
     # render the text

@@ -5,7 +5,7 @@ use Test::More;
 use Test::MockModule;
 use Test::Quattor::RegexpTest;
 
-use EDG::WP4::CCM::Element qw(escape);
+use EDG::WP4::CCM::Path qw(escape);
 
 use Readonly;
 

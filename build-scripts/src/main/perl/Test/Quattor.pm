@@ -27,7 +27,7 @@ as C<target/test/profiles/foo.json>, while the cache will be stored in
 under C<target/test/profiles/foo/>.
 
 This binary cache may be converted in an
-L<EDG::WP4::CCM::Configuration> object using the
+L<EDG::WP4::CCM::CacheManager::Configuration> object using the
 C<get_config_for_profile> function.
 
 =head1 INTERNAL INFRASTRUCTURE
