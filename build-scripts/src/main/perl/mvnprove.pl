@@ -347,8 +347,8 @@ sub process
         debug(2, "Process wanted $fn (rel $rel_fn)");
         mkpath("$dst_dir/$rel_dir") if (! -d "$dst_dir/$rel_dir");
 
-        open(my $src, $fn) || die("Failed to open source file $fn: $!");
-        open(my $dst, "> $dst_dir/$rel_fn") || die ("Failed to open destination file $dst_dir/$rel_fn: $!");
+        open(my $src, '<', $fn) || die("Failed to open source file $fn: $!");
+        open(my $dst, '>', "$dst_dir/$rel_fn") || die ("Failed to open destination file $dst_dir/$rel_fn: $!");
         print $dst filter_source(join('', <$src>));
         close($dst);
         close($src);

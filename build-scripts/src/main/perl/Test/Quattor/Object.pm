@@ -355,7 +355,7 @@ sub gather_pan
             my $expectedname = "$panrel$tplname";
 
             # must match template namespace
-            open(my $TPL, $_);
+            open(my $TPL, '<', $_);
             my $value = {};
             while (my $line = <$TPL>) {
                 chomp($line);         # no newline in regexp
@@ -381,7 +381,7 @@ sub gather_pan
 
     find({
         wanted => $wanted,
-        preprocess => sub { return sort { $a cmp $b } @_ },
+        preprocess => sub { my @res = sort { $a cmp $b } @_; return @res; },
     }, $panpath);
 
     return \%pans, \@invalid_pans;

@@ -221,7 +221,7 @@ sub gather_tt
         if (-T && m/\.(tt)$/) {
             if ($name !~ m/(^|\/)(pan|tests)\//) {
                 my $tp = Template::Parser->new({});
-                open (my $TT, $_);
+                open (my $TT, '<', $_);
                 if ($tp->parse(join("", <$TT>))) {
                     push(@tts, $name);
                 } else {
@@ -237,7 +237,7 @@ sub gather_tt
 
     find( {
         wanted => $wanted,
-        preprocess => sub { return sort { $a cmp $b } @_ },
+        preprocess => sub { my @res = sort { $a cmp $b } @_; return @res;  },
     },  $self->{ttpath});
 
     $cache->{tts}         = \@tts;

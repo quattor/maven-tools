@@ -101,7 +101,7 @@ sub parse
     my ($self) = @_;
 
     # cut textfile in 3 blocks
-    open my $REG, $self->{regexp};
+    open (my $REG, '<', $self->{regexp});
     my @blocks = split($BLOCK_SEPARATOR, join("", <$REG>));
     close $REG;
 

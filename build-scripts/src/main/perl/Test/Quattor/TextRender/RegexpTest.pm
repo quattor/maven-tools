@@ -11,9 +11,11 @@ use warnings;
 # Compatibility with pre ccm-17.2
 my $config_class;
 BEGIN {
+    use Module::Load;
+
     $config_class = "EDG::WP4::CCM::CacheManager::Configuration";
     local $@;
-    eval "use $config_class";
+    eval { load $config_class };
     if ($@) {
         $config_class =~ s/CacheManager:://;
     }
