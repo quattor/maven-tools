@@ -17,17 +17,40 @@ use Test::More;
 
 use parent qw(Test::Quattor::Object);
 
-# Load these and test for these
-Readonly::Array my @DEFAULT_POLICIES => qw(
+
+# Do not report violations of the blacklisted policies
+# Precedes whitelist and severity
+Readonly::Array my @BLACKLIST_POLICIES => qw(
+);
+
+# Report all violations of these policies
+Readonly::Array my @WHITELIST_POLICIES => qw(
     InputOutput::ProhibitBarewordFileHandles
     Modules::RequireEndWithOne
     Modules::RequireExplicitPackage
     Modules::RequireVersionVar
-    TestingAndDebugging::RequireUseStrict
     TestingAndDebugging::RequireUseWarnings
-    Subroutines::ProhibitExplicitReturnUndef
 );
 
+# Report all violations that have higher or equal severity
+Readonly my $SEVERITY => 5;
+
+# Policy configuration
+Readonly::Hash my %POLICIES => {
+    'TestingAndDebugging::ProhibitNoStrict' => {
+        allow => 'refs', # space separated list
+    }
+};
+
+
+# work around annoying Critic bug https://github.com/Perl-Critic/Perl-Critic/pull/711
+use Perl::Critic::Policy::Modules::RequireVersionVar;
+no warnings 'redefine';
+*Perl::Critic::Policy::Modules::RequireVersionVar::prepare_to_scan_document = sub {
+    my ( $self, $document ) = @_;
+    return $document->is_module();   # Must be a library or module.
+};
+use warnings 'redefine';
 
 =pod
 
@@ -70,10 +93,15 @@ sub _initialize
     $self->{codedirs} = [qw(target/lib/perl)] if ! $self->{codedirs};
 
     # Don't pass these for now.
-    $self->{policies} = \@DEFAULT_POLICIES if (! defined($self->{policies}));
-    # exclude filter
-    $self->{policies} = [grep {$_ !~ /$self->{exclude}/} @{$self->{policies}}] if $self->{exclude};
+    # But can be used for unittesting
+    $self->{whitelist} = \@WHITELIST_POLICIES if (! defined($self->{whitelist}));
+    $self->{blacklist} = \@BLACKLIST_POLICIES if (! defined($self->{blacklist}));
+    $self->{severity} = $SEVERITY if (! defined($self->{severity}));
+    $self->{policies} = {%POLICIES} if (! defined($self->{policies}));
 
+    # exclude filter
+    $self->{whitelist} = [grep {$_ !~ /$self->{exclude}/} @{$self->{whitelist}}] if $self->{exclude};
+    $self->{blacklist} = [grep {$_ !~ /$self->{exclude}/} @{$self->{blacklist}}] if $self->{exclude};
 }
 
 =item make_critic
@@ -87,21 +115,26 @@ sub make_critic
     my $self = shift;
 
     my ($fh, $filename) = tempfile('critic_empty_profile.XXXXX', UNLINK => 1);
+    foreach my $policy (sort keys %{$self->{policies}}) {
+        print $fh "[$policy]\n";
+        foreach my $key (sort keys %{$self->{policies}->{$policy}}) {
+            print $fh "$key = ".$self->{policies}->{$policy}->{$key}."\n";
+        }
+    }
+    $fh->flush();
+
     my $critic = Perl::Critic->new(
         -verbose => 8, # Use verbose level 8 to show the name of the policy
-        -profile => $filename, # empty temporary file, i.e. don't load any profile
+        -profile => $filename, # contains all policy configuration
         -severity => 1, # all policies
         );
 
-    foreach my $policy (@{$self->{policies}}) {
-        $critic->add_policy(-policy => $policy);
-    }
 
     #my @active_policies = $critic->policies();
     #$self->debug(1, "critic policies: @active_policies");
 
     # Readable format
-    Perl::Critic::Violation::set_format("%f %p %m L%l C%c %e");
+    Perl::Critic::Violation::set_format("%f %s %p %m L%l C%c %e");
 
     return $critic;
 }
@@ -117,7 +150,9 @@ sub check
 {
     my ($self, $violations) = @_;
 
-    my $policy_pattern = '('.join('|', @{$self->{policies}}).')$';
+    my ($wl_pattern, $bl_pattern);
+    $wl_pattern = '('.join('|', @{$self->{whitelist}}).')$'  if @{$self->{whitelist}};;
+    $bl_pattern = '('.join('|', @{$self->{blacklist}}).')$' if @{$self->{blacklist}};;;
 
     my @reported;
 
@@ -125,8 +160,12 @@ sub check
         # Don't check/report multiple times
         next if grep {$_ eq "$v"} @reported;
 
-        if ($v->policy() =~ m/$policy_pattern/) {
-            $self->notok("Failed policy violation $v");
+        if ($bl_pattern && $v->policy() =~ m/$bl_pattern/) {
+            $self->verbose("Ignore blacklisted violation $v");
+        } elsif ($v->severity() >= $self->{severity}) {
+            $self->notok("Failed policy violation $v (severity)");
+        } elsif ($wl_pattern && $v->policy() =~ m/$wl_pattern/) {
+            $self->notok("Failed policy violation $v (whitelist)");
         } else {
             # Last one, report for future consideration
             $self->verbose("Ignore violation $v");
