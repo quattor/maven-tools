@@ -369,7 +369,7 @@ Options
 =item codedirs
 
 Comma-separated list of directories to look for code to test.
-(Defaults to C<target/lib/perl>).
+(Defaults to poddirs (from doc test) or C<target/lib/perl>).
 
 =item exclude
 
@@ -384,6 +384,15 @@ sub critic
     my ($self, $cfg) = @_;
 
     my %opts;
+
+    # default to poddirs if defined
+    my $doccfg = $self->{cfg}->{doc};
+    if (!exists($cfg->{codedirs}) && $doccfg && exists($doccfg->{poddirs})) {
+        $self->verbose("Using poddirs as codedirs for critic test");
+        $cfg->{codedirs} = $doccfg->{poddirs};
+    };
+
+
     foreach my $opt (qw(codedirs)) {
         $opts{$opt} = [split(/\s*,\s*/, $cfg->{$opt})] if exists $cfg->{$opt};
     }
@@ -403,7 +412,7 @@ Options
 =item codedirs
 
 Comma-separated list of directories to look for code to test.
-(Defaults to C<target/lib/perl>).
+(Defaults to poddirs (from doc test) or C<target/lib/perl>).
 
 =back
 
@@ -414,6 +423,14 @@ sub tidy
     my ($self, $cfg) = @_;
 
     my %opts;
+
+    # default to poddirs if defined
+    my $doccfg = $self->{cfg}->{doc};
+    if (!exists($cfg->{codedirs}) && $doccfg && exists($doccfg->{poddirs})) {
+        $self->verbose("Using poddirs as codedirs for critic test");
+        $cfg->{codedirs} = $doccfg->{poddirs};
+    };
+
     foreach my $opt (qw(codedirs)) {
         $opts{$opt} = [split(/\s*,\s*/, $cfg->{$opt})] if exists $cfg->{$opt};
     }

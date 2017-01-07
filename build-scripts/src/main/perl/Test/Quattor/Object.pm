@@ -31,10 +31,37 @@ if(! defined &note) {
 # to-be-distributed pan templates
 Readonly our $TARGET_PAN_RELPATH => 'target/pan';
 
-our @EXPORT = qw($TARGET_PAN_RELPATH);
+our @EXPORT = qw($TARGET_PAN_RELPATH warn_is_ok);
 
 # Keep track of all logged messages
 my $loghist = {};
+
+# By default, perl warnings are not ok
+our $_warn_is_ok = 0;
+$SIG{__WARN__} = sub {
+    my $msg = "Perl warning: $_[0]";
+    if ($_warn_is_ok) {
+        diag $msg;
+    } else {
+        ok(0, $msg);
+    }
+};
+
+=head2 warn_is_ok
+
+By default, Perl warnings are mapped to failing tests.
+
+=cut
+
+sub warn_is_ok
+{
+    my ($bool) = @_;
+
+    $bool = 1 if ! defined($bool);
+
+    $_warn_is_ok = $bool ? 1 : 0;
+}
+
 
 sub new
 {
