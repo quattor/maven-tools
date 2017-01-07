@@ -21,10 +21,9 @@ use Cwd qw(getcwd);
 use Test::Quattor::Object;
 use Test::Quattor::Panc qw(panc set_panc_includepath get_panc_includepath);
 
-use EDG::WP4::CCM::Configuration;
 use EDG::WP4::CCM::CacheManager;
 use EDG::WP4::CCM::Fetch;
-use EDG::WP4::CCM::Element qw(escape unescape);
+use EDG::WP4::CCM::Path 16.10.0 qw(escape unescape);
 use EDG::WP4::CCM::CCfg;
 
 use Readonly;

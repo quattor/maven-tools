@@ -1,15 +1,26 @@
 use strict;
 use warnings;
 
+# Compatibility with pre ccm-17.2
+my $config_class;
+BEGIN {
+    $config_class = "EDG::WP4::CCM::CacheManager::Configuration";
+    local $@;
+    eval "use $config_class";
+    if ($@) {
+        $config_class =~ s/CacheManager:://;
+    }
+}
+
 use Test::More;
 
 use Cwd;
 
-use EDG::WP4::CCM::Element qw(escape);
+use EDG::WP4::CCM::Path qw(escape);
 
 use Test::Quattor::ProfileCache qw(prepare_profile_cache
     get_config_for_profile set_profile_cache_options
-    get_profile_cache_dirs set_json_typed get_json_typed 
+    get_profile_cache_dirs set_json_typed get_json_typed
     %DEFAULT_PROFILE_CACHE_DIRS);
 use Test::Quattor::Object qw($TARGET_PAN_RELPATH);
 use Test::Quattor::Panc qw(get_panc_includepath);
@@ -23,7 +34,7 @@ is_deeply(\%DEFAULT_PROFILE_CACHE_DIRS,
               profiles => "target/test/profiles",
               cache => "target/test/cache",
           }, "Expected DEFAULT_PROFILE_CACHE_DIRS");
-          
+
 # Can't have NoAction here, since no CAF mocking happens
 # and otherwise nothing would be written
 
@@ -62,8 +73,7 @@ is($ccmcfg, $ccm_default,
 
 my $cfg = prepare_profile_cache('profilecache');
 
-isa_ok($cfg, "EDG::WP4::CCM::Configuration",
-            "get_config_for_profile returns a EDG::WP4::CCM::Configuration instance");
+isa_ok($cfg, $config_class, "get_config_for_profile returns a $config_class instance");
 
 is_deeply($cfg->getElement("/")->getTree(),
             {test => "data"},
@@ -127,8 +137,7 @@ my $profile = "$dirs->{resources}/absprofilecache.pan";
 ok (-f $profile, "Found profile $profile");
 my $abscfg = prepare_profile_cache($profile);
 
-isa_ok($abscfg, "EDG::WP4::CCM::Configuration",
-            "get_config_for_profile returns a EDG::WP4::CCM::Configuration instance for abs profile");
+isa_ok($abscfg, $config_class, "get_config_for_profile returns a $config_class instance for abs profile");
 
 is_deeply($abscfg->getElement("/")->getTree(),
             {test => "data"},

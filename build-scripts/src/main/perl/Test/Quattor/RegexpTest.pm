@@ -12,7 +12,7 @@ use Test::More;
 
 use base qw(Test::Quattor::Object);
 
-use EDG::WP4::CCM::Element qw(escape);
+use EDG::WP4::CCM::Path qw(escape);
 
 use Readonly;
 

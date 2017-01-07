@@ -1,6 +1,17 @@
 use strict;
 use warnings;
 
+# Compatibility with pre ccm-17.2
+my $config_class;
+BEGIN {
+    $config_class = "EDG::WP4::CCM::CacheManager::Configuration";
+    local $@;
+    eval "use $config_class";
+    if ($@) {
+        $config_class =~ s/CacheManager:://;
+    }
+}
+
 use Test::More;
 
 # Test the import method
@@ -13,8 +24,7 @@ $CAF::Object::NoAction = 1;
 
 my $cfg = get_config_for_profile('quattor');
 
-isa_ok($cfg, "EDG::WP4::CCM::Configuration",
-            "get_config_for_profile returns a EDG::WP4::CCM::Configuration instance");
+isa_ok($cfg, $config_class, "get_config_for_profile returns a $config_class instance");
 
 is_deeply($cfg->getElement("/")->getTree(),
             {test => "data"},
