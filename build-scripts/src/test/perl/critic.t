@@ -21,7 +21,7 @@ $c->test();
 diag explain $msgs;
 is(scalar @$msgs, 6, "5 fatal violations");
 like($msgs->[0],
-     qr{Failed policy violation src/test/resources/critic/test.pl Modules::RequireVersionVar },
+     qr{Failed policy violation src/test/resources/critic/test.pl 2 Modules::RequireVersionVar },
      "Expected Perl::Critic messages");
 
 done_testing();

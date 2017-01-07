@@ -50,7 +50,7 @@ Read the content of file C<fn> and return it.
 sub readfile
 {
     my $fn = shift;
-    open(my $fh, $fn) or die "Filetools readfile failed to open $fn: $!";
+    open(my $fh, '<', $fn) or die "Filetools readfile failed to open $fn: $!";
     my $txt = join('', <$fh>);
     close($fh) or die "Filetools readfile failed to close $fn: $!";
 

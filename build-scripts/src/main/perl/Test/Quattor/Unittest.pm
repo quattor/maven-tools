@@ -232,7 +232,7 @@ sub _get_modules
 
     my @split = split(/\s*,\s*/, $cfg->{modules} || '');
 
-    my @modules = map {s/:*$//;$_} map {$prefix . ($_ eq ':' ? '' : $_)} @split;
+    my @modules = map {my $txt = $_; $txt =~ s/:*$//; $txt} map {$prefix . ($_ eq ':' ? '' : $_)} @split;
 
     if (@modules) {
         $self->verbose("Configured modules to load: ", join(', ', @modules));
