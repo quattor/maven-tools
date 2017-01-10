@@ -10,7 +10,7 @@ use warnings;
 
 use Test::Pod;
 use File::Temp qw(tempfile);
-use Perl::Critic;
+use Perl::Critic 1.118;
 use Perl::Critic::Violation;
 use Readonly;
 use Test::More;
