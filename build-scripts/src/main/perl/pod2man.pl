@@ -9,6 +9,7 @@ use warnings;
 use File::Path qw(mkpath);
 use File::Find ();
 use Pod::Man;
+use IO::Compress::Gzip qw(gzip $GzipError);
 
 # for the convenience of &wanted calls, including -eval statements:
 use vars qw/*name *dir *prune/;
@@ -89,7 +90,9 @@ sub create_man_page {
     if (-e $gzfile) {
         unlink $gzfile;
     }
-    `gzip $ofile`;
+
+    gzip $ofile => $gzfile  or die "gzip $ofile failed: $GzipError\n";
+    unlink $ofile or die "failed to remove original file $ofile";
 
     return;
 }
@@ -99,7 +102,7 @@ sub process_perl_module {
     my ($name) = @_;
 
     print "Generating man page from $name\n";
-    
+
     my $module_name = eval{extract_module_name($name);} || return;
     my $pod_name = extract_pod_name($name);
     create_man_page($pod_name, $module_name, 8);
@@ -131,4 +134,3 @@ sub wanted {
     is_perl_file($name) && process_perl_module($name);
     return;
 }
-
