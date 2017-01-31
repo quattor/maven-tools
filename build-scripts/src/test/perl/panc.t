@@ -5,7 +5,7 @@ use Test::More;
 use Cwd;
 use Test::Quattor::Panc qw(set_panc_options reset_panc_options
     get_panc_options get_panc_includepath set_panc_includepath
-    panc panc_annotations);
+    panc panc_annotations is_object_template);
 
 
 set_panc_options(debug => undef);
@@ -20,6 +20,19 @@ is_deeply(get_panc_includepath(), \@dirs, "Includepath retrieved");
 
 reset_panc_options();
 is_deeply(get_panc_options(), {}, "Options reset");
+
+ok(is_object_template('ok.pan', 'src/test/resources/panc'),
+   "is_object_template returns true for valid object template");
+ok(is_object_template('src/test/resources/panc/ok'),
+   "is_object_template returns true for valid object template (semi-relative path without extension)");
+ok(is_object_template('src/test/resources/panc/okanno1'),
+   "is_object_template returns true for valid object template (multiline annotation)");
+ok(is_object_template('src/test/resources/panc/okanno2'),
+   "is_object_template returns true for valid object template (single line annotation)");
+ok(!is_object_template('nosuchpan', 'src/test/resources/panc'),
+   "is_object_template returns false for non-existing object template");
+ok(!is_object_template('notok.pan', 'src/test/resources/panc'),
+   "is_object_template returns false for invalid object template");
 
 # Test compilation
 my $currentdir = getcwd();

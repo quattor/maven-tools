@@ -22,7 +22,7 @@ use Carp qw(carp croak);
 use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
-our @EXPORT = qw(panc panc_annotations
+our @EXPORT = qw(panc panc_annotations is_object_template
                  set_panc_options reset_panc_options get_panc_options
                  set_panc_includepath get_panc_includepath);
 
@@ -124,6 +124,49 @@ sub get_panc_includepath
     } else {
         return [];
     }
+}
+
+
+=pod
+
+=head2 is_object_template
+
+Given profile name (and optional resourcesdir for relative profile filename),
+test if the profile is a valid object template.
+
+=cut
+
+sub is_object_template
+{
+    my ($profile, $resourcesdir) = @_;
+
+    $profile .= ".pan" if ($profile !~ m/\.pan$/ );
+    $profile = "$resourcesdir/$profile" if $resourcesdir && $profile !~ m/^\//;
+
+    if (! -f $profile) {
+        $object->error("Profile $profile does not exist.");
+        return;
+    };
+
+    my $ok;
+    open(my $TPL, '<', $profile) or croak("is_object_template failed to open $profile: $!");
+    my $annotation;
+    while (my $line = <$TPL>) {
+        chomp($line);
+        next if ($line =~ m/^\s*($|#)/); # ignore whitespace/comments
+        if ($line =~ m/^\s*@\{/ || $annotation) {
+            $annotation = $line !~ m/(^\s*@\{.*|@)\}\s*$/;
+        } else {
+            $ok = $line =~ m/^\s*object\s*template/;
+            last;
+        };
+    };
+    close($TPL);
+
+    if (! $ok) {
+        $object->error("Profile $profile is not valid object template");
+    };
+    return $ok;
 }
 
 =pod
