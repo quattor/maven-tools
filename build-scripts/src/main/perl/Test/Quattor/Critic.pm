@@ -8,6 +8,11 @@ package Test::Quattor::Critic;
 use strict;
 use warnings;
 
+BEGIN {
+    # Insert the Policy::Critic::Policy::Quattor namespace
+    use Test::Quattor::Namespace qw(critic);
+}
+
 use Test::Pod;
 use File::Temp qw(tempfile);
 use Perl::Critic 1.118;
@@ -17,7 +22,6 @@ use Test::More;
 
 use parent qw(Test::Quattor::Object);
 
-
 # Do not report violations of the blacklisted policies
 # Precedes whitelist and severity
 Readonly::Array my @BLACKLIST_POLICIES => qw(
@@ -26,6 +30,7 @@ Readonly::Array my @BLACKLIST_POLICIES => qw(
 # Report all violations of these policies
 Readonly::Array my @WHITELIST_POLICIES => qw(
     InputOutput::ProhibitBarewordFileHandles
+    InputOutput::ProhibitBacktickOperators
     Modules::RequireEndWithOne
     Modules::RequireExplicitPackage
     Modules::RequireVersionVar
