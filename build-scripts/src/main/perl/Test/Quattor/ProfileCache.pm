@@ -19,7 +19,7 @@ use File::Path qw(mkpath);
 use Cwd qw(getcwd);
 
 use Test::Quattor::Object;
-use Test::Quattor::Panc qw(panc set_panc_includepath get_panc_includepath);
+use Test::Quattor::Panc qw(panc is_object_template set_panc_includepath get_panc_includepath);
 
 use EDG::WP4::CCM::CacheManager;
 use EDG::WP4::CCM::Fetch;
@@ -199,6 +199,12 @@ sub prepare_profile_cache
     my ($profile, $croak_on_error) = @_;
 
     my $dirs = get_profile_cache_dirs();
+
+    # Failure
+    if (!is_object_template($profile, $dirs->{resources})) {
+        note("Profile $profile is not a valid object template");
+        return 1; # failure
+    }
 
     my $cachename = profile_cache_name($profile);
 
