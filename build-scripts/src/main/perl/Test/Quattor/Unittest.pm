@@ -84,6 +84,9 @@ On import, run the tests.
 Pass C<notest> to disable automatic testing
 (only useful when testing this code).
 
+Pass C<nopod> to set the C<nopodflag> (for C<doc> test)
+when testing (is ignored when C<notest> is passed).
+
 =cut
 
 sub import
@@ -91,7 +94,11 @@ sub import
     my $class = shift;
 
     $do_test = ! grep {m/notest/} @_;
-    $class->new()->test() if $do_test;
+    if ($do_test) {
+        my $inst = $class->new();
+        $inst->{nopodflag} = (grep {m/nopod/} @_) ? 1 : 0;
+        $inst->test();
+    };
 }
 
 =pod
@@ -273,9 +280,12 @@ sub load
 
 Documentation tests using C<Test::Quattor::Doc>.
 
-Configuration options C<poddirs>, C<podfiles>, C<panpaths> and
-C<panout> are prased as comma-sperated lists
+Configuration options C<poddirs>, C<podfiles>, C<emptypoddirs>, C<panpaths> and
+C<panout> are parsed as comma-seperated lists
 and passed to C<Test::Quattor::Doc->new>.
+
+If the C<nopodflag> attribute is true, and no C<emptypoddirs> are defined,
+the C<Test::Quattor::Doc::DOC_TARGET_POD> is set as C<emptypoddirs>.
 
 C<panpaths> value C<NOPAN> is special, as it disables the pan tests.
 
@@ -286,8 +296,12 @@ sub doc
     my ($self, $cfg) = @_;
 
     my %opts;
-    foreach my $opt (qw(poddirs podfiles panpaths panout)) {
+    foreach my $opt (qw(poddirs podfiles emptypoddirs panpaths panout)) {
         $opts{$opt} = [split(/\s*,\s*/, $cfg->{$opt})] if exists $cfg->{$opt};
+    }
+
+    if (!exists($opts{emptypoddirs}) && $self->{nopodflag}) {
+        $opts{emptypoddirs} = [$Test::Quattor::Doc::DOC_TARGET_POD];
     }
 
     my $doc = Test::Quattor::Doc->new(%opts);
