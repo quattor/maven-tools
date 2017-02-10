@@ -54,7 +54,7 @@ ${line.separator}
             Assumes main component type to be named <name>_component
             Ends with a pan /software/components/<name> prefix
     -->
-
+    <PMcomponent>${PMpre} NCM::Component::${project.artifactId}${PMpost}</PMcomponent>
     <componentconfignospma>
 ${license-info}
 ${developer-info}
