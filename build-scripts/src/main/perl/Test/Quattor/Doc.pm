@@ -61,6 +61,12 @@ list of defaults or resp. C<$DOC_TARGET_PERL> and <$DOC_TARGET_POD>)
 
 Array reference of podfiles to test (default empty)
 
+=item emptypoddirs
+
+Array reference of poddirs that must be empty (or non-existing).
+If a directory is in both C<poddirs> and C<emptypoddirs>,
+if is considered an empty poddir.
+
 =item panpaths
 
 Array reference of paths that hold pan files to check for annotations.
@@ -81,6 +87,7 @@ sub _initialize
 
     $self->{poddirs} = \@DOC_TEST_PATHS if (! defined($self->{poddirs}));
     $self->{podfiles} = [] if (! defined($self->{podfiles}));
+    $self->{emptypoddirs} = [] if (! defined($self->{emptypoddirs}));
 
     $self->{panpaths} = [$DOC_TARGET_PAN] if (! defined($self->{panpaths}));
     $self->{panout} = $DOC_TARGET_PANOUT if (! defined($self->{panout}));
@@ -104,12 +111,22 @@ sub pod_files
 
     my @files = @{$self->{podfiles}};
     foreach my $dir (@{$self->{poddirs}}) {
+        next if (grep {$_ eq $dir} @{$self->{emptypoddirs}});
         $self->notok("poddir $dir is not a directory") if ! -d $dir;
         my @fs = all_pod_files($dir);
         # Do not allow empty pod dirs,
         # remove them from the poddirs if they are not relevant
         ok(@fs, "Directory $dir has files");
         push(@files, @fs);
+    };
+
+    foreach my $dir (@{$self->{emptypoddirs}}) {
+        if (! -d $dir) {
+            $self->notok("emptypoddir $dir is not a directory")
+        } else {
+            my @fs = all_pod_files($dir);
+            ok(! @fs, "emptypoddir $dir has no files");
+        };
     };
 
     my (@ok, @not_ok);
