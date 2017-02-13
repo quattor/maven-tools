@@ -265,6 +265,7 @@ prefix '/software/components/$project';
 
 EOF
 
+    my $PMpost = ";\n\nuse strict;\nuse warnings;\n\nuse version;\nour \$VERSION = version->new(\"v$version\");\n\n";
     my $props = {
         'project.artifactId' => $project,
         'project.version' => $fullversion,
@@ -272,9 +273,10 @@ EOF
         'rpm.release' => $snapshot,
         # from build-profile
         RELEASE => $snapshot,
-        PMpost => ";\n\nuse strict;\nuse warnings;\n\nuse version;\nour \$VERSION = version->new(\"v$version\");\n\n",
+        PMpost => $PMpost,
         'project.build.directory' => 'target',
         PMpre => "\# Some headers\n\npackage", # headers are not relevant
+        PMcomponent => "package NCM::Component::$project$PMpost", # headers are not relevant
         basedir => getcwd(),
         componentconfignospma => $componentconfignospma,
         componentconfig => "$componentconfignospma\n'dependencies/pre' ?= list('spma');\n",
