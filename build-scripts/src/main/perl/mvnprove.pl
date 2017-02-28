@@ -1,7 +1,12 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -d
 
 use warnings;
 use strict;
+
+BEGIN {
+    use Devel::Trace;
+    $Devel::Trace::TRACE = 0;
+}
 
 use Readonly;
 use Data::Dumper;
@@ -64,8 +69,7 @@ using C<-d>  or C<MVNPROVE_DEBUG> environment variable
 
 =back
 
-=item The prove `-d:Trace` commandline can be generated via
-(it will not run the tests, only create the commandline to run).
+=item Run prove under `-d:Trace` via
 
 =over
 
@@ -405,23 +409,23 @@ sub prove
     }
 
     if ($trace) {
-        debug(1, "Trace enabled, not running prove with args @args");
         info("Commandline to run tests with trace:\nperl -d:Trace @args");
-    } else {
-        debug(1, "Going to run prove with args @args");
-
-        my $app = App::Prove->new;
-        $app->process_args(@args);
-
-        my $ec = $app->run ? 0 : 1;
-        if($ec) {
-            # do not use error/die, this is normal termination of mvnprove
-            info("ERROR: Prove failed with ec $?");
-        } else {
-            info("Prove ok");
-        };
-        return $ec;
+        $Devel::Trace::TRACE = 1;
     }
+
+    debug(1, "Going to run prove with args @args");
+
+    my $app = App::Prove->new;
+    $app->process_args(@args);
+
+    my $ec = $app->run ? 0 : 1;
+    if($ec) {
+        # do not use error/die, this is normal termination of mvnprove
+        info("ERROR: Prove failed with ec $?");
+    } else {
+        info("Prove ok");
+    };
+    return $ec;
 }
 
 =item get_options
