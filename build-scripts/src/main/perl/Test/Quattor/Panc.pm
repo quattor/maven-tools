@@ -154,8 +154,8 @@ sub is_object_template
     while (my $line = <$TPL>) {
         chomp($line);
         next if ($line =~ m/^\s*($|#)/); # ignore whitespace/comments
-        if ($line =~ m/^\s*@\{/ || $annotation) {
-            $annotation = $line !~ m/(^\s*@\{.*|@)\}\s*$/;
+        if ($line =~ m/^\s*@\w*\{/ || $annotation) {
+            $annotation = $line !~ m/\}\s*$/;
         } else {
             $ok = $line =~ m/^\s*object\s*template/;
             last;
