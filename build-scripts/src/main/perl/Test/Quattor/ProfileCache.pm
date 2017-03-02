@@ -266,7 +266,7 @@ sub prepare_profile_cache
 
 Returns a configuration object for the profile given as an
 argument. The profile should be one of the arguments given to
-L<Test::Quattor> when loading it.
+C<Test::Quattor> when loading it.
 
 If the configuration cannot be found, an error is reported, and
 a test fails.
