@@ -61,7 +61,7 @@ use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
 use CAF::Path;
-use CAF::Object qw(SUCCESS);
+use CAF::Object qw(SUCCESS CHANGED);
 use IO::String;
 use base 'Exporter';
 use Cwd;
@@ -73,10 +73,14 @@ use Test::More;
 use CAF::Service qw(@FLAVOURS);
 use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile);
 use Test::Quattor::Object qw(warn_is_ok);
+use Cwd;
 use Readonly;
 
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
+# "File" content that will appear as a symlink 
+Readonly our $SYMLINK => 'MAGIC STRING, THIS IS A MOCKED SYMLINK: ';
+Readonly our $HARDLINK => 'MAGIC STRING, THIS IS A MOCKED HARDLINK: ';
 
 =over
 
@@ -209,8 +213,7 @@ our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
                  set_caf_file_close_diff
-                 make_directory remove_any reset_caf_path
-                 warn_is_ok);
+                 make_directory remove_any reset_caf_path warn_is_ok);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -519,6 +522,141 @@ Return the mocked C<is_any>
 =cut
 
 $cpath->mock("any_exists", sub {shift; return is_any(shift); });
+
+=item is_symlink
+
+Test if given C<path> is a mocked symlink
+
+=cut
+
+$cpath->mock("is_symlink", sub {
+    my ($self, $path) = @_;
+    $path = sane_path($path);
+
+    return $files_contents{$path} && "$files_contents{$path}" =~ qr/^$SYMLINK/;
+});
+
+=item has_hardlinks
+
+Test if given C<path> is a mocked hardlink
+
+Note that it is not a perfect replacement for the c<CAF::Path> C<has_hardlinks> because
+the current implementation of mocked hardlinks does not allow to mimic multiple references
+to an inode. The differences are : the link used at creation time must be queried, not the 
+target (where in a real hardlink target and link are undistinguishable); if the path is
+a hardlink the number of references for the inode is always 1.
+
+=cut
+
+$cpath->mock("has_hardlinks", sub {
+    my ($self, $path) = @_;
+    $path = sane_path($path);
+
+    return $files_contents{$path} && "$files_contents{$path}" =~ qr/^$HARDLINK/;
+});
+
+=item is_hardlink
+
+Test if C<path1> and C<path2> are hardlinked
+
+=cut
+
+$cpath->mock("is_hardlink", sub {
+    my ($self, $path1, $path2) = @_;
+    $path1 = sane_path($path1);
+    $path2 = sane_path($path2);
+
+    # Order of arguments does not matter with real hardlink() method:
+    # mimic this behaviour.
+    # If both paths are hardlinks, they are considered different
+    my $link_path;
+    my $target;
+    if ( $self->has_hardlinks($path1) ) {
+        $link_path = $path1;
+        $target = $path2;
+    } elsif ( $self->has_hardlinks($path2) && ! defined($link_path) ) {
+        $link_path = $path2;
+        $target = $path1;
+    } else {
+        return;
+    }
+
+    if ( ($files_contents{$link_path} =~ qr/^$HARDLINK(\S+)/) && ($1 eq $target) ) {
+        return SUCCESS;
+    } else {
+        return;
+    }
+
+});
+
+=item _make_link
+
+Add a mocked C<_make_link>.
+
+This mocked method implements most of the checks done in C<LC::Check::link>, the function
+doing the real work in C<_make_link>, and returns the same values as C<CAF::Path> C<_make_link>.
+See C<CAF::Path> comments for details.
+
+=cut
+
+$cpath->mock('_make_link', sub {
+    my ($self, $target, $link_path, %opts) = @_;
+    $link_path = sane_path($link_path);
+    $target = sane_path($target);
+
+    # Check options passed
+    Readonly my @MAKE_LINK_VALID_OPTS => qw(hard backup nocheck force);
+    for my $opt (sort keys %opts) {
+        unless ( grep (/^$opt$/, @MAKE_LINK_VALID_OPTS) ) {
+            ok(0, "Invalid option ($opt) passed to _make_link()");
+            return;
+        }
+    }
+
+    my $target_full_path = $target;
+    unless ( $target_full_path =~ qr{^/} ) {
+        $target_full_path = cwd() . "/$target_full_path";
+    }
+
+    # Check that target exists if it is a hardlink or if option 'nocheck' is false
+    if ( $opts{hard} or ! $opts{nocheck} ) {
+        unless ( $files_contents{$target_full_path} ) {
+            ok(0, "Symlink target ($target_full_path) doesn't exist");
+            return;
+        }
+    }
+
+    my $link_pattern = 0;
+    my $is_link_method;
+    if ( $opts{hard} ) {
+        $link_pattern = $HARDLINK;
+        $is_link_method = "has_hardlinks";
+    } else {
+        $link_pattern = $SYMLINK;
+        $is_link_method = "is_symlink";
+    }
+    if ( $self->$is_link_method($link_path) ) {
+        if ( ($files_contents{$link_path} =~ qr/^$link_pattern(\S+)/) && ($1 eq $target) ) {
+            # Link already properly defined
+            return SUCCESS;
+        }; 
+    }
+    if ( ! $self->$is_link_method($link_path) ) {
+        if ( $self->file_exists($link_path) ) {
+            unless ( $opts{force} ) {
+                ok(0, "File $link_path already exists and option 'force' not specified");
+                return
+            }
+        } elsif ( $self->any_exists($link_path) ) {
+            ok(0, "$link_path already exists and is not a symlink");
+            return
+        }
+    }
+
+    $files_contents{$link_path} = "$link_pattern$target";
+
+    return CHANGED;
+});
 
 =item C<CAF::Path::directory>
 
@@ -943,7 +1081,6 @@ sub is_directory
 }
 
 =item is_any
-
 Test if given C<path> is known (as file or directory or anything else)
 
 =cut
