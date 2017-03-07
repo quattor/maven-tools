@@ -210,7 +210,7 @@ sub panc
     push(@panccmd, $profile);
 
     my $pancmsg = "Pan compiler called from directory $resourcesdir";
-    return process(\@panccmd, $pancmsg, $croak_on_error, $currentdir);
+    return process(\@panccmd, $pancmsg, croak_on_error => $croak_on_error, srcdir => $currentdir);
 }
 
 =pod
@@ -234,11 +234,12 @@ sub panc_annotations
     my $panccmd = ["panc-annotations",
                    "--base-dir", $basedir,
                    "--output-dir", $outputdir,
+                   "-v", # verbose
                   ];
     push(@$panccmd, @$profiles);
 
     my $pancmsg = "Pan annotations called";
-    return process($panccmd, $pancmsg);
+    return process($panccmd, $pancmsg, output => 1);
 }
 
 =pod
@@ -247,15 +248,26 @@ sub panc_annotations
 
 Sort-of private method to use C<CAF::Process> bypassing the mocking of C<CAF::Process>.
 
-Arrayhash C<$cmd> for the command, C<$message> for a message to print,
-C<$croak_on_error> for croak_on_errror, and optional C<srcdir> to return to.
+Arrayhash C<$cmd> for the command, C<$message> for a message to print.
+
+Options
+
+=over
+
+=item croak_on_error: C<croak> on error
+
+=item srcdir: srcdir to return to after actual command is executed.
+
+=item output: return arrayref with exitcode and output (stdout combined with stderr)
+
+=back
 
 =cut
 
 sub process
 {
 
-    my ($cmd, $message, $croak_on_error, $srcdir) = @_;
+    my ($cmd, $message, %opts) = @_;
 
     my $output;
     # Test::MockModule keeps the currently mocked modules in a local hash,
@@ -272,12 +284,12 @@ sub process
         $proc->execute();
     };
 
-    chdir($srcdir) if defined($srcdir);
+    chdir($opts{srcdir}) if defined($opts{srcdir});
 
-    if($?) {
+    if ($?) {
         my $msg = "Process failed. Minimal panc version is $PANC_MINIMAL. ";
         $msg .= "$message (proc $proc) with output\n$output";
-        if($croak_on_error) {
+        if($opts{croak_on_error}) {
             croak($msg);
         } else {
             $object->info($msg);
@@ -286,7 +298,11 @@ sub process
         $object->debug("$message (proc $proc)");
     }
 
-    return $?;
+    if ($opts{output}) {
+        return [$?, $output];
+    } else {
+        return $?;
+    };
 };
 
 

@@ -170,19 +170,27 @@ sub pan_annotations
         my @templates = keys %$okpan;
         ok(@templates, "Found valid templates in $dir");
 
-        my $ec = panc_annotations($dir, $self->{panout}, \@templates);
-        if($ec) {
-            $self->notok("panc-annotations ended with ec 0");
+        my $res = panc_annotations($dir, $self->{panout}, \@templates);
+        my ($ec, $output) = @$res;
+
+        if ($ec) {
+            $self->notok("panc-annotations ended with ec $ec");
             push(@not_ok, @templates);
         } else {
+            my $missing_annotation;
             foreach my $tmpl (@templates) {
                 my $anno = "$self->{panout}/$tmpl.annotation.xml";
                 if (-f $anno) {
                     push(@ok, $tmpl);
                 } else {
+                    $self->verbose("Did not find annotation xml $anno for template $tmpl");
+                    $missing_annotation = 1;
                     push(@not_ok, $tmpl);
                 }
             }
+            if (!$missing_annotation) {
+                $self->verbose("Templates with missing xml with command stdout/stderr $output");
+            };
         }
     }
 

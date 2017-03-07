@@ -43,8 +43,10 @@ is(getcwd(), $currentdir, "Back in original directory");
 ok(-f "target/pancout/quattor.json", "Found compiled JSON file");
 
 # Test annotations
-is(panc_annotations('src/test/resources', 'target/pancannotationsout', ['quattor.pan']),
-   0, "panc-annotations succes");
+my $res = panc_annotations('src/test/resources', 'target/pancannotationsout', ['quattor.pan']);
+is($res->[0], 0, "panc-annotations success");
+like($res->[1], qr{Templates to process.*quattor.pan}, "panc-annotations output");
+
 ok(-f "target/pancannotationsout/quattor.pan.annotation.xml", "Found annotation file");
 
 done_testing();
