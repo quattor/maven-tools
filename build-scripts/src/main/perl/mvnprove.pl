@@ -1,12 +1,7 @@
-#!/usr/bin/perl -d
+#!/usr/bin/perl
 
 use warnings;
 use strict;
-
-BEGIN {
-    use Devel::Trace;
-    $Devel::Trace::TRACE = 0;
-}
 
 use Readonly;
 use Data::Dumper;
@@ -24,7 +19,7 @@ Readonly my $MAX_ITER => 2;
 
 my $debug_internal = -1;
 
-my $trace;
+my ($trace, $fulltrace);
 
 #
 # Caveat: When using the maven templates like '${a.b.c}' use '$'.'{a.b.c}'
@@ -69,13 +64,23 @@ using C<-d>  or C<MVNPROVE_DEBUG> environment variable
 
 =back
 
-=item Run prove under `-d:Trace` via
+=item Run tests with prove under `-d:Trace` via
 
 =over
 
 =item C<-t> commandline option
 
 =item C<MVNPROVE_TRACE> environment variable
+
+=back
+
+=item Run tests with prove under `-d:Trace` including compiletime via
+
+=over
+
+=item C<-T> commandline option
+
+=item C<MVNPROVE_FULLTRACE> environment variable
 
 =back
 
@@ -395,22 +400,42 @@ sub prove
         '/usr/lib/perl',
         );
 
-    foreach my $inc (@includes) {
-        push(@args, '-I', $inc);
+    if ($trace) {
+        my $perlexec = 'perl -d:Trace '.join(' ', map {"-I$_"} @includes);
+        info("Commandline to run prove tests with trace:$perlexec");
+        push(@args, '--exec', $perlexec);
+    } else {
+        foreach my $inc (@includes) {
+            push(@args, '-I', $inc);
+        }
     }
 
     if (@test_names) {
+        my $ftdir;
+        if ($fulltrace) {
+            my $target = filter_source('$'.'{project.build.directory}');
+            mkdir $target if !-d $target;
+            $ftdir = "$target/fulltrace";
+            mkdir $ftdir;
+        }
         foreach my $test_name (@test_names) {
-            push(@args, "$tests_dir/$test_name.t");
+            if ($fulltrace) {
+                open (my $ft_fh, '>', "$ftdir/$test_name.t");
+                # wrap in do block, forcing the whole code in runtime, incl the regular compiletime
+                print $ft_fh "do './$tests_dir/$test_name.t'\n";
+                close($ft_fh);
+                push(@args, "$ftdir/$test_name.t");
+            } else {
+                push(@args, "$tests_dir/$test_name.t");
+            }
         };
     } else {
-        # --state: run all tests, last failed first
-        push(@args, '--state=failed,all,save', $tests_dir) if ! $trace;
-    }
-
-    if ($trace) {
-        info("Commandline to run tests with trace:\nperl -d:Trace @args");
-        $Devel::Trace::TRACE = 1;
+        if ($fulltrace) {
+            error("Cannot run fulltrace with all tests; select one or more") if $fulltrace;
+        } else {
+            # --state: run all tests, last failed first
+            push(@args, '--state=failed,all,save', $tests_dir) if ! $trace;
+        }
     }
 
     debug(1, "Going to run prove with args @args");
@@ -439,7 +464,13 @@ sub get_options
     $trace = defined($ENV{MVNPROVE_TRACE}) ? $ENV{MVNPROVE_TRACE} : 0;
     $trace = 1 if (grep {m/^-t$/} @ARGV);
 
-    info(($trace ? "En" : "Dis")."abling trace");
+    $fulltrace = defined($ENV{MVNPROVE_FULLTRACE}) ? $ENV{MVNPROVE_FULLTRACE} : 0;
+    $fulltrace = 1 if (grep {m/^-T$/} @ARGV);
+
+    # always enable trace with fulltrace
+    $trace = 1 if $fulltrace;
+
+    info(($trace ? "En" : "Dis")."abling ".($fulltrace ? "full" : "")."trace");
 
     my $debug = defined($ENV{MVNPROVE_DEBUG}) ? $ENV{MVNPROVE_DEBUG} : 0;
     $debug = 1 if (grep {m/^-d$/} @ARGV);
