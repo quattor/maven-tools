@@ -17,7 +17,7 @@ is(readfile($dest), $Test::Quattor::Filetools::DEFAULT_CONTENT,
 
 $dest = "$dir/base1/file2";
 
-my $tstcnt = "testcontent";
+my $tstcnt = "0";
 writefile($dest, $tstcnt);
 ok(-f $dest, "writefile created correct file incl parent dir");
 is(readfile($dest), $tstcnt, "read written content of writefile");
