@@ -256,6 +256,8 @@ sub set_properties
 
     my $project = $pom->{artifactId} || 'NoArtifactFound';
 
+    my $PMpre = "\# Some headers\n\npackage"; # headers are not relevant
+
     my $componentconfignospma = <<"EOF";
 unique template components/$project/config;
 
@@ -284,8 +286,8 @@ EOF
         RELEASE => $snapshot,
         PMpost => $PMpost,
         'project.build.directory' => 'target',
-        PMpre => "\# Some headers\n\npackage", # headers are not relevant
-        PMcomponent => "package NCM::Component::$project$PMpost", # headers are not relevant
+        PMpre => $PMpre,
+        PMcomponent => "$PMpre NCM::Component::$project$PMpost",
         basedir => getcwd(),
         componentconfignospma => $componentconfignospma,
         componentconfig => "$componentconfignospma\n'dependencies/pre' ?= list('spma');\n",
