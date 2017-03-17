@@ -33,11 +33,11 @@ content of the file (default is text C<ok> (no newline)).
 
 sub writefile
 {
-    my $fn = shift;
+    my ($fn, $content) = @_;
     my $dir = dirname($fn);
     mkpath $dir if ! -d $dir;
     open(my $fh, '>', $fn) or die "Filetools writefile failed to open $fn: $!";
-    print $fh (shift || $DEFAULT_CONTENT);
+    print $fh (defined($content) ? $content : $DEFAULT_CONTENT);
     close($fh) or die "Filetools writefile failed to close $fn: $!";
 }
 
