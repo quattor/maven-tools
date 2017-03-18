@@ -234,8 +234,8 @@ sub prepare_profile_cache
     my $ccmconfig = "$dirs->{resources}/ccm.cfg";
     if( ! -f $ccmconfig) {
         # Make a new default one
-        note("Creating default ccm.cfg in $dirs->{cache}");
-        $ccmconfig = "$dirs->{cache}/ccm.cfg";
+        note("Creating default ccm.cfg in $cache for profile $profile");
+        $ccmconfig = "$cache/ccm.cfg";
         if (! -f $ccmconfig) {
             my $fh = CAF::FileWriter->new($ccmconfig);
             print $fh get_ccm_config_default();
