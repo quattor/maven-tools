@@ -84,7 +84,7 @@ my $dirbase = "$BASEPATH/dirs/subdir";
 # verify dir does not exist
 ok(!$s->directory_exists($dirbase), "mocked missing dir $dirbase returns false directory_exists");
 # create dir
-is($s->make_directory($dirbase), SUCCESS, "make_directory returns success");
+is(int($s->directory($dirbase)), SUCCESS, "directory() returns success");
 ok($s->directory_exists($dirbase), "mocked dir $dirbase returns true directory_exists");
 
 # check caf_path hashref
@@ -100,7 +100,7 @@ is_deeply($Test::Quattor::caf_path, {},
           "reset_caf_path resets all if no named item is passed");
 
 # recreate dir return EXISTS
-is($s->make_directory($dirbase), $simple_caf::EXISTS, "make_directory returns EXISTS 2nd time");
+is(make_directory($dirbase), SUCCESS, "make_directory returns SUCCESS if directory exists");
 
 # test recursive paths
 my $tmppath = '';
@@ -135,7 +135,7 @@ my $dirtest = "$targetbase/dirtest";
 is($s->make_file($target1, "Link tests: target1"), SUCCESS, "make_file returns success for $target1");
 is($s->make_file($target2, "Link tests: target2"), SUCCESS, "make_file returns success for $target2");
 is($s->make_file($target3, "Link tests: target3"), SUCCESS, "make_file returns success for $target3");
-is($s->make_directory($dirtest, "Link tests: dirtest"), SUCCESS, "make_directory returns success for $dirtest");
+is(make_directory($dirtest, "Link tests: dirtest"), SUCCESS, "make_directory returns success for $dirtest");
 
 is($s->symlink($target1, $symlink1), CHANGED, "Symlink $symlink1 successfully created");
 ok($s->is_symlink($symlink1), "$symlink1 is a symlink");
