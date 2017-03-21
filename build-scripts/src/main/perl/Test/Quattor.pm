@@ -116,6 +116,11 @@ our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING};
 Contents of a file after it is closed. The keys of this hash are the
 absolute paths to the files.
 
+This hash is a global variable whose contents can be checked in a
+test, if necessary. But if you want to set the file content
+before using the C<CAF::Path> methods (for example, using 
+C<set_file_contents>), it is preferable to use C<%desired_file_contents>.
+
 =cut
 
 our %files_contents;
@@ -158,7 +163,11 @@ our %desired_err;
 
 =item * C<%desired_file_contents>
 
-Optionally, initial contents for a file that should be "edited".
+Initial contents for a file that should be "edited". The content of this hash
+(keys are the absolute path names) is managed/updated by all the C<CAF::FileWriter>
+methods. It is preferable to use it rather than C<%files_contents>, if you don't need
+to access its contents directly from another module (C<CAF::FileWriter> methods give
+access to its contents in fact).
 
 =cut
 
