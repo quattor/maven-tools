@@ -116,6 +116,11 @@ our $log_cmd_missing = $ENV{QUATTOR_TEST_LOG_CMD_MISSING};
 Contents of a file after it is closed. The keys of this hash are the
 absolute paths to the files.
 
+This hash is a global variable whose contents can be checked in a
+test, if necessary. But if you want to set the file content
+before using the C<CAF::Path> methods (for example, using 
+C<set_file_contents>), it is preferable to use C<%desired_file_contents>.
+
 =cut
 
 our %files_contents;
@@ -158,7 +163,11 @@ our %desired_err;
 
 =item * C<%desired_file_contents>
 
-Optionally, initial contents for a file that should be "edited".
+Initial contents for a file that should be "edited". The content of this hash
+(keys are the absolute path names) is managed/updated by all the C<CAF::FileWriter>
+methods. It is preferable to use it rather than C<%files_contents>, if you don't need
+to access its contents directly from another module (C<CAF::FileWriter> methods give
+access to its contents in fact).
 
 =cut
 
@@ -533,7 +542,7 @@ $cpath->mock("is_symlink", sub {
     my ($self, $path) = @_;
     $path = sane_path($path);
 
-    return $files_contents{$path} && "$files_contents{$path}" =~ qr/^$SYMLINK/;
+    return $desired_file_contents{$path} && "$desired_file_contents{$path}" =~ qr/^$SYMLINK/;
 });
 
 =item has_hardlinks
@@ -552,7 +561,7 @@ $cpath->mock("has_hardlinks", sub {
     my ($self, $path) = @_;
     $path = sane_path($path);
 
-    return $files_contents{$path} && "$files_contents{$path}" =~ qr/^$HARDLINK/;
+    return $desired_file_contents{$path} && "$desired_file_contents{$path}" =~ qr/^$HARDLINK/;
 });
 
 =item is_hardlink
@@ -581,7 +590,7 @@ $cpath->mock("is_hardlink", sub {
         return;
     }
 
-    if ( ($files_contents{$link_path} =~ qr/^$HARDLINK(\S+)/) && ($1 eq $target) ) {
+    if ( ($desired_file_contents{$link_path} =~ qr/^$HARDLINK(\S+)/) && ($1 eq $target) ) {
         return SUCCESS;
     } else {
         return;
@@ -596,6 +605,11 @@ Add a mocked C<_make_link>.
 This mocked method implements most of the checks done in C<LC::Check::link>, the function
 doing the real work in C<_make_link>, and returns the same values as C<CAF::Path> C<_make_link>.
 See C<CAF::Path> comments for details.
+
+Internally, this mocked symlink/hardlink support uses the file contents to track that a path
+is a symlink or hardlink. Thus, in addition to the symlink() and hardlink() methods, a link
+can be created with C<set_file_contents($filename, $Test::Quattor::SYMLINK)> for a symlink
+and C<set_file_contents($filename, $Test::Quattor::HARDLINK)> for a hardlink.
 
 =cut
 
@@ -620,7 +634,7 @@ $cpath->mock('_make_link', sub {
 
     # Check that target exists if it is a hardlink or if option 'nocheck' is false
     if ( $opts{hard} or ! $opts{nocheck} ) {
-        unless ( $files_contents{$target_full_path} ) {
+        unless ( $desired_file_contents{$target_full_path} ) {
             ok(0, "Symlink target ($target_full_path) doesn't exist");
             return;
         }
@@ -636,7 +650,7 @@ $cpath->mock('_make_link', sub {
         $is_link_method = "is_symlink";
     }
     if ( $self->$is_link_method($link_path) ) {
-        if ( ($files_contents{$link_path} =~ qr/^$link_pattern(\S+)/) && ($1 eq $target) ) {
+        if ( ($desired_file_contents{$link_path} =~ qr/^$link_pattern(\S+)/) && ($1 eq $target) ) {
             # Link already properly defined
             return SUCCESS;
         }; 
@@ -653,7 +667,7 @@ $cpath->mock('_make_link', sub {
         }
     }
 
-    $files_contents{$link_path} = "$link_pattern$target";
+    $desired_file_contents{$link_path} = "$link_pattern$target";
 
     return CHANGED;
 });
