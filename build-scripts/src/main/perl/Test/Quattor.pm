@@ -360,8 +360,13 @@ sub new_filewriter_open
 {
     my $f = $old_open->(@_);
 
+    # Default in mocked FileWriter is to have 'noaction'
+    # option set to 1. Define Test::Quattor::NoAction=0
+    # to override the default.
     if(defined($NoAction)) {
         *$f->{options}->{noaction} = $NoAction;
+    } else {
+        *$f->{options}->{noaction} = 1;
     }
 
     my $fn = *$f->{filename};
@@ -432,10 +437,6 @@ sub new_fileeditor_open
 
     my ($class, $path, %opts) = @_;
     *$f->{options}->{source} = $opts{source} if exists ($opts{source});
-
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
 
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
