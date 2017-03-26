@@ -78,7 +78,7 @@ use Readonly;
 
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
-# "File" content that will appear as a symlink 
+# "File" content that will appear as a symlink
 Readonly our $SYMLINK => 'MAGIC STRING, THIS IS A MOCKED SYMLINK: ';
 Readonly our $HARDLINK => 'MAGIC STRING, THIS IS A MOCKED HARDLINK: ';
 
@@ -118,7 +118,7 @@ absolute paths to the files.
 
 This hash is a global variable whose contents can be checked in a
 test, if necessary. But if you want to set the file content
-before using the C<CAF::Path> methods (for example, using 
+before using the C<CAF::Path> methods (for example, using
 C<set_file_contents>), it is preferable to use C<%desired_file_contents>.
 
 =cut
@@ -551,7 +551,7 @@ Test if given C<path> is a mocked hardlink
 
 Note that it is not a perfect replacement for the c<CAF::Path> C<has_hardlinks> because
 the current implementation of mocked hardlinks does not allow to mimic multiple references
-to an inode. The differences are : the link used at creation time must be queried, not the 
+to an inode. The differences are : the link used at creation time must be queried, not the
 target (where in a real hardlink target and link are undistinguishable); if the path is
 a hardlink the number of references for the inode is always 1.
 
@@ -653,7 +653,7 @@ $cpath->mock('_make_link', sub {
         if ( ($desired_file_contents{$link_path} =~ qr/^$link_pattern(\S+)/) && ($1 eq $target) ) {
             # Link already properly defined
             return SUCCESS;
-        }; 
+        };
     }
     if ( ! $self->$is_link_method($link_path) ) {
         if ( $self->file_exists($link_path) ) {
@@ -724,6 +724,26 @@ $cpath->mock('move', sub {
     my $newbackup = defined($backup) ? $backup : $self->{backup};
     move($src, $dest, $newbackup);
     return add_caf_path('move', [$src, $dest, $backup], \%opts);
+});
+
+=item C<CAF::Path::_listdir>
+
+Mock underlying _listdir method that does the actual opendir/readdir/closedir.
+
+Has 2 args, one directory and one test function. The is no validation
+of any kind. Do not use this method directly, use C<listdir> instead.
+
+=cut
+
+$cpath->mock('_listdir', sub {
+    my($self, $dir, $test) = @_;
+
+    # find /, use hash to make entries unique
+    my %allfiles = map {$_ => 1} (keys %desired_file_contents, keys %files_contents);
+    # only related files and apply test, sort to make unittests reproducable
+    my @entries = grep {$_ =~ m{^$dir/} && &$test($_, $dir) } sort keys %allfiles;
+    # strip directory prefix
+    return [map {my $a = $_; $a =~ s{^$dir/}{}; $a; } @entries];
 });
 
 =back
