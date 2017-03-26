@@ -184,6 +184,9 @@ $opts{force} = 1;
 is($s->symlink($target2, $target3, %opts), CHANGED, "$target3 updated to a symlink ('force' option present)");
 ok($s->is_symlink($target3), "$target3 is a symlink");
 
+$opts{keeps_state} = 1;
+is($s->symlink($target2, $target3, %opts), SUCCESS, "symlink: 'keeps_state' option is accepted");
+
 
 =head2 Test mocked hardlink creation
 

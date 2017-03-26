@@ -619,7 +619,7 @@ $cpath->mock('_make_link', sub {
     $target = sane_path($target);
 
     # Check options passed
-    Readonly my @MAKE_LINK_VALID_OPTS => qw(hard backup nocheck force);
+    Readonly my @MAKE_LINK_VALID_OPTS => qw(hard backup nocheck force keeps_state);
     for my $opt (sort keys %opts) {
         unless ( grep (/^$opt$/, @MAKE_LINK_VALID_OPTS) ) {
             ok(0, "Invalid option ($opt) passed to _make_link()");
