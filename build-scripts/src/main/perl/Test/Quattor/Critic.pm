@@ -29,6 +29,7 @@ Readonly::Array my @BLACKLIST_POLICIES => qw(
 
 # Report all violations of these policies
 Readonly::Array my @WHITELIST_POLICIES => qw(
+    CodeLayout::ProhibitTrailingWhitespace
     InputOutput::ProhibitBarewordFileHandles
     InputOutput::ProhibitBacktickOperators
     Modules::RequireEndWithOne

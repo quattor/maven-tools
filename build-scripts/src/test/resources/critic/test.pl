@@ -6,6 +6,7 @@
 # [TestingAndDebugging::RequireUseWarnings] Code before warnings are enabled at line 1, column 1.  (Severity: 4)
 # [TestingAndDebugging::ProhibitNoStrict] Stricture disabled at line 11, column 5.  (Severity: 5)
 # [Subroutines::ProhibitExplicitReturnUndef] "return" statement with explicit "undef" at line 3, column 5.  (Severity: 5)
+# [CodeLayout::ProhibitTrailingWhitespace] Found "\N{SPACE}" at the end of the line at line 16, column 18.  (Severity: 1)
 sub abc
 {
 
@@ -13,5 +14,6 @@ sub abc
     my $a = 1; # just an example
     use strict refs;
 
-    return undef;
+    # trailing whitespace is intentional to test ProhibitTrailingWhitespace
+    return undef; 
 }
