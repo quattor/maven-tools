@@ -635,7 +635,7 @@ $cpath->mock('_make_link', sub {
     # Check that target exists if it is a hardlink or if option 'nocheck' is false
     if ( $opts{hard} or ! $opts{nocheck} ) {
         unless ( $desired_file_contents{$target_full_path} ) {
-            ok(0, "Symlink target ($target_full_path) doesn't exist");
+            ok(0, ($opts{hard} ? "Hard" : "Sym")."link target ($target_full_path) doesn't exist");
             return;
         }
     }
