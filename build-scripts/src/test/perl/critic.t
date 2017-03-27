@@ -19,7 +19,7 @@ $mock->mock('notok', sub {shift; push(@$msgs, shift);});
 $c->test();
 
 diag explain $msgs;
-is(scalar @$msgs, 9, "9 fatal violations");
+is(scalar @$msgs, 10, "10 fatal violations");
 my $all_text = join("\n", @$msgs);
 like($all_text,
      qr{Failed policy violation src/test/resources/critic/test.pl 2 Modules::RequireVersionVar },

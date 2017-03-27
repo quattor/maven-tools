@@ -12,4 +12,4 @@ our $VERSION = version->new('1.0.0');
 system('echo "system in tests is ok"');
 
 
-1; 
+1;
