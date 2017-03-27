@@ -634,9 +634,10 @@ $cpath->mock('_make_link', sub {
 
     # Check that target exists if it is a hardlink or if option 'nocheck' is false
     if ( $opts{hard} or ! $opts{nocheck} ) {
-        unless ( $desired_file_contents{$target_full_path} ) {
-            ok(0, ($opts{hard} ? "Hard" : "Sym")."link target ($target_full_path) doesn't exist");
-            return;
+        unless ($self->file_exists($target_full_path)) {
+            my $msg = ($opts{hard} ? "Hard" : "Sym")."link target ($target_full_path) doesn't exist";
+            ok(0, $msg);
+            return $self->fail($msg);
         }
     }
 
@@ -658,12 +659,14 @@ $cpath->mock('_make_link', sub {
     if ( ! $self->$is_link_method($link_path) ) {
         if ( $self->file_exists($link_path) ) {
             unless ( $opts{force} ) {
-                ok(0, "File $link_path already exists and option 'force' not specified");
-                return
+                my $msg = "File $link_path already exists and option 'force' not specified";
+                ok(0, $msg);
+                return $self->fail($msg);
             }
         } elsif ( $self->any_exists($link_path) ) {
-            ok(0, "$link_path already exists and is not a symlink");
-            return
+            my $msg = "$link_path already exists and is not a symlink";
+            ok(0, $msg);
+            return $self->fail($msg);
         }
     }
 
