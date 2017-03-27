@@ -429,6 +429,9 @@ sub new_fileeditor_open
 
     my $f = CAF::FileWriter::new(@_);
 
+    my ($class, $path, %opts) = @_;
+    *$f->{options}->{source} = $opts{source} if exists ($opts{source});
+
     if(defined($NoAction)) {
         *$f->{options}->{noaction} = $NoAction;
     }
@@ -437,7 +440,8 @@ sub new_fileeditor_open
     if (is_directory($fn)) {
         diag("ERROR: Cannot new_fileeditor_open: $fn is a directory");
     } elsif(make_directory(dirname($fn))) {
-        $f->set_contents($desired_file_contents{$fn});
+        my $src = *$f->{options}->{source} || $fn;
+        $f->set_contents($desired_file_contents{$src});
         *$f->{_mocked}->{fileeditor} = $fileeditor;
     } else {
         diag("ERROR: new_fileeditor_open: failed to create directory for file $fn");

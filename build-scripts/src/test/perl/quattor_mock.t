@@ -72,4 +72,12 @@ $fh = CAF::FileReader->new("$fn2.old");
 is("$fh", $DATA x 2, "Reader reads what Writer fh6 has written as backup");
 $fh->close;
 
+# Editor source
+set_file_contents("/test/fileditor/source", "the source");
+set_file_contents("/test/fileditor/toedit", "to edit");
+$fh = CAF::FileEditor->new("/test/fileditor/toedit");
+is("$fh", "to edit", "FileEditor sets contents from set_file_contents on init");
+$fh = CAF::FileEditor->new("/test/fileditor/toedit", source => "/test/fileditor/source");
+is("$fh", "the source", "FileEditor sets source contents from set_file_contents on init");
+
 done_testing;
