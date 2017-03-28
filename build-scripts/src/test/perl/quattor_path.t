@@ -242,4 +242,17 @@ ok($s->file_exists("$dest.old"), "dest backup $dest.old exists");
 is_deeply($Test::Quattor::caf_path->{move}, [[[$src, $dest, '.old'], {option => 2}]],
           "caf_path hash updated after CAF::Path::move");
 
+=head mock _listdir
+
+=cut
+
+$s->make_file("/listdir/test", "abc");
+$s->directory("/listdir/dir");
+$s->directory("/listdir/testdir");
+set_file_contents("/listdir/anothertest", "source");
+
+is_deeply($s->_listdir("/listdir", sub {return $_[0] =~ m/test/;}),
+          [qw(anothertest test testdir)],
+          "_listdir returns entries from files_contents and desired_file_contents and applies test function");
+
 done_testing();

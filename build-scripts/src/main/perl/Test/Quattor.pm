@@ -726,6 +726,26 @@ $cpath->mock('move', sub {
     return add_caf_path('move', [$src, $dest, $backup], \%opts);
 });
 
+=item C<CAF::Path::_listdir>
+
+Mock underlying _listdir method that does the actual opendir/readdir/closedir.
+
+Has 2 args, one directory and one test function. The is no validation
+of any kind. Do not use this method directly, use C<listdir> instead.
+
+=cut
+
+$cpath->mock('_listdir', sub {
+    my($self, $dir, $test) = @_;
+
+    # find /, use hash to make entries unique
+    my %allfiles = map {$_ => 1} (keys %desired_file_contents, keys %files_contents);
+    # only related files and apply test, sort to make unittests reproducable
+    my @entries = grep {$_ =~ m{^$dir/} && &$test($_, $dir) } sort keys %allfiles;
+    # strip directory prefix
+    return [map {my $a = $_; $a =~ s{^$dir/}{}; $a; } @entries];
+});
+
 =back
 
 =pod
