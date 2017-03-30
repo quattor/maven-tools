@@ -35,18 +35,5 @@ sub make_file
     }
 }
 
-# make a directory
-# if directory already exists, return $EXISTS
-sub make_directory
-{
-    my ($self, $dir) = @_;
-    if ($self->directory_exists($dir)) {
-        return $EXISTS;
-    } else {
-        $self->directory($dir);
-        return SUCCESS;
-    }
-}
-
 
 1;

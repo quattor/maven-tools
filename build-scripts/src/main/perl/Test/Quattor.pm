@@ -75,6 +75,7 @@ use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile)
 use Test::Quattor::Object qw(warn_is_ok);
 use Cwd;
 use Readonly;
+use Scalar::Util qw(dualvar);
 
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
@@ -359,8 +360,13 @@ sub new_filewriter_open
 {
     my $f = $old_open->(@_);
 
+    # Default in mocked FileWriter is to have 'noaction'
+    # option set to 1. Define Test::Quattor::NoAction=0
+    # to override the default.
     if(defined($NoAction)) {
         *$f->{options}->{noaction} = $NoAction;
+    } else {
+        *$f->{options}->{noaction} = 1;
     }
 
     my $fn = *$f->{filename};
@@ -431,10 +437,6 @@ sub new_fileeditor_open
 
     my ($class, $path, %opts) = @_;
     *$f->{options}->{source} = $opts{source} if exists ($opts{source});
-
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
 
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
@@ -694,7 +696,8 @@ $cpath->mock("directory", sub {
     } else {
         $directory = undef;
     }
-    return $directory;
+    my $status = defined($directory) ? SUCCESS : undef;
+    return dualvar ($status, $directory);
 });
 
 =item C<CAF::Path::LC_Check>

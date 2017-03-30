@@ -212,6 +212,10 @@ sub prepare_profile_cache
 
     mkpath($cache);
 
+    # Ensure that Test::Quattor::NoAction=0
+    my $noaction_saved = $Test::Quattor::NoAction;
+    $Test::Quattor::NoAction = 0;
+
     my $fh = CAF::FileWriter->new("$cache/global.lock");
     print $fh "no\n";
     $fh->close();
@@ -256,6 +260,9 @@ sub prepare_profile_cache
 
     my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
     $configs{$cachename} = $cm->getUnlockedConfiguration();
+
+    # Restore caller $Test::Quattor::NoAction
+    $Test::Quattor::NoAction = $noaction_saved;
 
     return $configs{$cachename};
 }
