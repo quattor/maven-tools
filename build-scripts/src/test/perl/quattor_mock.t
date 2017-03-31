@@ -30,6 +30,7 @@ my $fh = CAF::FileWriter->new($fn, log => $obj);
 print $fh $DATA;
 my $changed = $fh->close();
 ok($changed, "New file, so contents changed, NoAction set");
+is(get_file_contents($fn), "$DATA", "get_file_contents returns value set by closed filewriter");
 
 # use new instance, no close/destroy magic?
 my $fh2 = CAF::FileWriter->new($fn, log => $obj);
@@ -70,6 +71,7 @@ my $source_data = "the source";
 my $edit_data = "to edit";
 set_file_contents("/test/fileditor/source", $source_data);
 set_file_contents($efn, $edit_data);
+is(get_file_contents($efn), $edit_data, "get_file_contents returns value set by set_file_contents");
 
 $fh = CAF::FileEditor->new($efn, log => $obj);
 is("$fh", $edit_data, "FileEditor sets contents from set_file_contents on init");
@@ -99,14 +101,12 @@ is("$fh", $source_data, "Reader reads symlinked FileEditor $efns");
 $fh = CAF::FileReader->new($efnh, log => $obj);
 is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh");
 
-dump_contents();
-
-
 # remove hardlink target, should still be able to read the link
 ok($s->cleanup($efn), "(original) hardlink target $efn (hardlink $efnh) successfully removed");
 my $efhh = get_file($efnh);
 isa_ok($efhh, "CAF::FileReader", "cleanup of original hardlink leaves previous CAF::FileReader instance");
 
+is(get_file_contents($efnh), $source_data, "get_file_contents returns value set cleanup of hardlink");
 $fh = CAF::FileReader->new($efnh, log => $obj);
 is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh with cleanup original");
 
@@ -114,6 +114,6 @@ is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh with cleanup o
 # call this function to test it is exported and does not fail.
 # doesn't really test what it prints
 dump_contents();
-
+dump_contents(log => $s, filter => '^/test', prefix => 'this is a test ');
 
 done_testing;

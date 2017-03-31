@@ -205,8 +205,9 @@ Default is 1.
 
 our $NoAction = 1;
 
-our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-                 set_desired_err get_config_for_profile set_command_status
+our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
+                 set_desired_output set_desired_err set_command_status
+                 get_config_for_profile
                  command_history_reset command_history_ok set_service_variant
                  make_directory remove_any reset_caf_path warn_is_ok
                  dump_contents);
@@ -380,6 +381,8 @@ sub new_filewriter_close
 {
     my ($self, @rest) = @_;
 
+    $self->verbose("new_filewriter_close ",*$self->{filename});
+
     my $current_content = $desired_file_contents{*$self->{filename}};
 
     # save is set to 0 in old_close
@@ -417,7 +420,9 @@ $filewriter->mock('_read_contents', sub {
     my ($self, $filename, %opts) = @_;
 
     $filename = sane_path($filename);
+
     my $dfn = $desired_file_contents{$filename};
+    my $res;
     if (defined($dfn)) {
         #diag "_read_contents $filename ", ref($self), "desired $dfn";
         # auto-vivification of directory tree
@@ -425,25 +430,26 @@ $filewriter->mock('_read_contents', sub {
             if (is_file($filename)) {
                 my $pattern = '^(?:'."$HARDLINK|$SYMLINK".')(\S+)$';
                 if ($dfn =~ m/$pattern/) {
-                    diag "_read_contents follow link $filename to $1";
-                    return $self->_read_contents($1);
+                    $self->verbose("_read_contents follow mock link $filename to $1");
+                    $res = $self->_read_contents($1);
                 } else {
                     # return a copy
-                    return "$dfn";
+                    $res = "$dfn";
                 }
             } else {
                 $self->warn("_read_contents $filename not a file: $dfn");
                 # TODO: throw LC exception
-                return;
             }
         } else {
-            diag("ERROR: new_fileeditor_open: failed to create directory for file $filename");
+            $self->warn("ERROR: new_fileeditor_open: failed to create directory for file $filename");
         }
     } else {
         $self->verbose("_read_contents missing $filename");
         # This is not fatal, return empty
-        return;
     };
+
+    $self->verbose("_read_contents end testing filename $filename ", (defined($res) ? $res : '<undef>'));
+    return $res;
 });
 
 
@@ -815,32 +821,46 @@ sub get_file
 }
 
 
-=pod
-
 =item C<set_file_contents>
 
-For file C<$filename>, sets the initial C<$contents> the component shuold see.
+For file C<$filename>, sets the initial C<$contents> the component should see.
+
+Returns the contents on success, undef otherwise.
 
 =cut
 
-
+# undocumented get option, to implement get_file_contents
 sub set_file_contents
 {
-    my ($filename, $contents) = @_;
+    my ($filename, $contents, %opts) = @_;
 
     $filename = sane_path($filename);
 
+    my $mode = $opts{get} ? "get" : "set";
+
     if (is_directory($filename)) {
-        diag("ERROR: Cannot set_file_contents: $filename is a directory");
+        diag("ERROR: Cannot ${mode}_file_contents: $filename is a directory");
     } elsif(make_directory(dirname($filename))) {
-        $desired_file_contents{$filename} = "$contents";
+        # set copy only if get option is false
+        $desired_file_contents{$filename} = "$contents" if ! $opts{get};
         return $desired_file_contents{$filename};
     } else {
-        diag("ERROR: Cannot set_file_contents: cannot create directory for $filename");
+        diag("ERROR: Cannot ${mode}_file_contents: cannot create directory for $filename");
     }
+
     return;
 }
 
+=item C<get_file_contents>
+
+For file C<$filename>, returns the contents on success, undef otherwise.
+
+=cut
+
+sub get_file_contents
+{
+    return set_file_contents($_[0], undef, get => 1);
+};
 
 =pod
 
@@ -1304,12 +1324,45 @@ sub reset_caf_path
 Debug function to show the entries in C<desired_file_contents>
 and C<files_contents>.
 
+Options
+
+=over
+
+=item log
+
+Pass a reporter/logger instance, and report with verbose level.
+By default, C<Test::More::diag> is used.
+
+=item filter
+
+Regex pattern to filter filenames to show (matches are kept).
+
+=item prefix
+
+A message prefix
+
+=back
+
 =cut
 
 sub dump_contents
 {
-    diag "desired_file_contents ",explain \%desired_file_contents;
-    diag "files_contents ", explain \%files_contents;
+    my (%opts) = @_;
+
+    my $log;
+    if (exists($opts{log})) {
+        $log = sub {$opts{log}->verbose(@_)};
+    } else {
+        $log = sub {diag(@_)};
+    }
+
+    my $filter = defined($opts{filter}) ? $opts{filter} : '';
+    my $dfc = {map {$_ => $desired_file_contents{$_}} grep {m/$filter/} keys %desired_file_contents};
+    my $fc = {map {$_ => $files_contents{$_}} grep {m/$filter/} keys %files_contents};
+
+    my $prefix = $opts{prefix} || '';
+    &$log("${prefix}desired_file_contents ", explain $dfc);
+    &$log("${prefix}files_contents ", explain $fc);
 }
 
 
