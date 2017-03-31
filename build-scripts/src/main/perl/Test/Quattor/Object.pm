@@ -71,6 +71,10 @@ sub new
 
     bless($self, $proto);
 
+    if (!defined($self->{is_verbose})) {
+        $self->{is_verbose} = 1;
+    }
+
     $self->_initialize();
 
     return $self;

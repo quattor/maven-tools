@@ -56,7 +56,7 @@ BEGIN {
     use Test::Quattor::Namespace qw(ncm);
 }
 
-use CAF::FileWriter;
+use CAF::FileWriter 17.2.1;
 use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
@@ -202,26 +202,9 @@ E.g. if you want to run tests with C<CAF::Object::NoAction> not set
 
 our $NoAction;
 
-=item * C<caf_file_close_diff>
-
-A boolean to mimic the regular (i.e. when no C<NoAction> is set) behaviour of a
-C<CAF::FileWriter> or C<CAF::FileEditor> C<close> (it returns whether or not the
-file changed). With C<NoAction> set, this check is skipped and C<undef> is returned.
-
-With this boolean set to true, contents difference is reported ( but not any changes
-due to e.g. file permissions or anything else checked with C<LC::Check::file)>.
-
-Defaults to false (to keep regular C<NoAction> behaviour).
-
-=cut
-
-my $caf_file_close_diff = 0;
-
-
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
-                 set_caf_file_close_diff
                  make_directory remove_any reset_caf_path warn_is_ok);
 
 my @logopts = qw(--verbose);
@@ -241,6 +224,7 @@ $main::this_app->verbose("Log options ", join(" ", @logopts));
 our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+our $filereader = Test::MockModule->new("CAF::FileReader");
 our $reporter = Test::MockModule->new("CAF::Reporter");
 our $cpath = Test::MockModule->new("CAF::Path");
 our $iostring = Test::MockModule->new("IO::String");
@@ -343,8 +327,6 @@ foreach my $method (qw(output toutput)) {
     });
 }
 
-=pod
-
 =item C<CAF::FileWriter::open>
 
 Overriding this function allows us to inspect its contents after the
@@ -353,15 +335,13 @@ unit under tests has released it.
 =cut
 
 my $old_open = \&CAF::FileWriter::new;
-my $old_close = \&CAF::FileWriter::close;
 
 sub new_filewriter_open
 {
-    my $f = $old_open->(@_);
+    my ($class, $filename, @rest) = @_;
+    $filename = sane_path($filename);
 
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
+    my $f = $old_open->($class, $filename, @rest);
 
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
@@ -380,77 +360,122 @@ sub new_filewriter_open
     return $f;
 }
 
+$filewriter->mock("open", \&new_filewriter_open);
+$filewriter->mock("new", \&new_filewriter_open);
+
+=item C<CAF::FileWriter::close>
+
+Overriding this function to force noaction and update
+mocked C<%desired_file_contents>.
+
+=cut
+
+my $old_close = \&CAF::FileWriter::close;
+
 sub new_filewriter_close
 {
     my ($self, @rest) = @_;
 
-    my $ret;
     my $current_content = $desired_file_contents{*$self->{filename}};
-    my $new_content = $self->stringify;
 
-    # keep the save value here, since save is forced to 0 in old_close with NoAction set
+    # save is set to 0 in old_close
     my $save = *$self->{save};
 
-    if ($self->noAction()) {
-        $self->cancel();
+    # Override actual action with Test::Quattor::NoAction
+    my $old_noaction = *$self->{options}->{noaction};
+    if(defined($NoAction)) {
+        *$self->{options}->{noaction} = $NoAction;
     }
+    my $ret = $old_close->(@_);
+    *$self->{options}->{noaction} = $old_noaction;
 
-    $desired_file_contents{*$self->{filename}} =  $new_content if $save;
-    $ret = $old_close->(@_);
+    # save content to desired_contents
+    $desired_file_contents{*$self->{filename}} = $self->stringify() if $save;
 
-    if ($caf_file_close_diff && $save) {
-        $ret = (! defined($current_content)) || $current_content ne $new_content;
-    }
-
+    # support backup, normally handled by AtomicWrite; use copy
     if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
-        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} =  $current_content;
+        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} = "$current_content";
     }
 
     return $ret;
 }
 
-$filewriter->mock("open", \&new_filewriter_open);
-$filewriter->mock("new", \&new_filewriter_open);
 $filewriter->mock("close", \&new_filewriter_close);
 
+=item C<CAF::FileWriter::_read_contents>
 
-=pod
-
-=item C<CAF::FileEditor::new>
-
-It's just calling CAF::FileWriter::new, plus initialising its contnts
-with the value of the appropriate entry in C<%desired_file_contents>
+Used to get the original content (for C<<CAF::FileWriter->close>>) and/or source
+(for C<<CAF::FileEditor->new>>) from the C<%desired_file_contents>.
 
 =cut
 
+$filewriter->mock('_read_contents', sub {
+    my ($self, $filename, %opts) = @_;
 
-sub new_fileeditor_open
-{
-
-    my $f = CAF::FileWriter::new(@_);
-
-    my ($class, $path, %opts) = @_;
-    *$f->{options}->{source} = $opts{source} if exists ($opts{source});
-
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
-
-    my $fn = *$f->{filename};
-    if (is_directory($fn)) {
-        diag("ERROR: Cannot new_fileeditor_open: $fn is a directory");
-    } elsif(make_directory(dirname($fn))) {
-        my $src = *$f->{options}->{source} || $fn;
-        $f->set_contents($desired_file_contents{$src});
-        *$f->{_mocked}->{fileeditor} = $fileeditor;
+    $filename = sane_path($filename);
+    my $dfn = $desired_file_contents{$filename};
+    if (defined($dfn)) {
+        #diag "_read_contents $filename ", ref($self), "desired $dfn";
+        # auto-vivification of directory tree
+        if (make_directory(dirname($filename))) {
+            if (is_file($filename)) {
+                my $pattern = '^(?:'."$HARDLINK|$SYMLINK".')(\S+)$';
+                if ($dfn =~ m/$pattern/) {
+                    diag "_read_contents follow link $filename to $1";
+                    return $self->_read_contents($1);
+                } else {
+                    # return a copy
+                    return "$dfn";
+                }
+            } else {
+                $self->warn("_read_contents $filename not a file: $dfn");
+                # TODO: throw LC exception
+                return;
+            }
+        } else {
+            diag("ERROR: new_fileeditor_open: failed to create directory for file $filename");
+        }
     } else {
-        diag("ERROR: new_fileeditor_open: failed to create directory for file $fn");
-    }
-    return $f;
-}
+        $self->verbose("_read_contents missing $filename");
+        # This is not fatal, return empty
+        return;
+    };
+});
 
-$fileeditor->mock("new", \&new_fileeditor_open);
-$fileeditor->mock("open", \&new_fileeditor_open);
+
+=item C<CAF::FileEditor::_is_valid_file>
+
+Mock using C<is_file> function.
+
+=cut
+
+$fileeditor->mock('_is_valid_file', sub {
+    return is_file($_[1])
+});
+
+=item C<CAF::FileEditor::_is_reference_newer>
+
+Mock using C<is_file> function (but no support for pipes or
+age test).
+
+=cut
+
+$fileeditor->mock('_is_reference_newer', sub {
+    my $self = shift;
+    my $src = *$self->{options}->{source};
+    my $newer = $src ? is_file($src) : 0;
+    return $newer;
+});
+
+=item C<CAF::FileReader::_is_valid_file>
+
+Mock using C<is_file> function (but no support for pipes).
+
+=cut
+
+$filereader->mock('_is_valid_file', sub {
+    return is_file($_[1])
+});
 
 =pod
 
@@ -772,7 +797,7 @@ Returns the object that has manipulated C<$filename>
 
 sub get_file
 {
-    my ($filename) = @_;
+    my $filename = sane_path(shift);
 
     if (exists($files_contents{$filename})) {
         if (is_directory($filename)) {
@@ -797,6 +822,8 @@ For file C<$filename>, sets the initial C<$contents> the component shuold see.
 sub set_file_contents
 {
     my ($filename, $contents) = @_;
+
+    $filename = sane_path($filename);
 
     if (is_directory($filename)) {
         diag("ERROR: Cannot set_file_contents: $filename is a directory");
@@ -1044,21 +1071,6 @@ sub force_service_variant
         *{"$subclass::$method"} = *{"$subclass::${method}_$variant"};
     }
 }
-
-
-=pod
-
-=item C<set_caf_file_close_diff>
-
-Set the C<caf_file_close_diff> boolean.
-
-=cut
-
-sub set_caf_file_close_diff
-{
-    my $state = shift;
-    $caf_file_close_diff = $state ? 1 :0;
-};
 
 
 =item sane_path
