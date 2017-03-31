@@ -1203,12 +1203,36 @@ sub remove_any
     $path = sane_path($path);
 
     my $filter = sub {
+        # the mocked filesystem as a hashref
         my $fs = shift;
+        my @del;
+        # add all files that in path (if path were a directory)
         my $pattern = '^'.$path.'/';
-        foreach my $p (grep {m/$pattern/} sort keys %$fs) {
-            delete $fs->{$p};
+        foreach my $tmppath (grep {m/$pattern/} sort keys %$fs) {
+            push(@del, $tmppath);
         }
-        delete $fs->{$path};
+        push(@del, $path);
+
+        foreach my $tmppath (@del) {
+            my $newlink;
+            foreach my $hl (sort keys %$fs) {
+                # look for any hardlink that has $tmppath as target
+                if ($fs->{$hl} && "$fs->{$hl}" eq "$HARDLINK$tmppath") {
+                    if ($newlink) {
+                        # all other matches should have first matched path as new hardlink value
+                        $fs->{$hl} = $newlink;
+                    } else {
+                        # replace the first match with the the target
+                        $newlink = "$HARDLINK$hl";
+                        $fs->{$hl} = $fs->{$tmppath};
+                    }
+                };
+            };
+            if (UNIVERSAL::can($fs->{$tmppath}, 'can') && $fs->{$tmppath}->can('cancel')) {
+                $fs->{$tmppath}->cancel();
+            }
+            delete $fs->{$tmppath};
+        }
     };
     &$filter(\%files_contents);
     &$filter(\%desired_file_contents);

@@ -99,6 +99,18 @@ is("$fh", $source_data, "Reader reads symlinked FileEditor $efns");
 $fh = CAF::FileReader->new($efnh, log => $obj);
 is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh");
 
+dump_contents();
+
+
+# remove hardlink target, should still be able to read the link
+ok($s->cleanup($efn), "(original) hardlink target $efn (hardlink $efnh) successfully removed");
+my $efhh = get_file($efnh);
+isa_ok($efhh, "CAF::FileReader", "cleanup of original hardlink leaves previous CAF::FileReader instance");
+
+$fh = CAF::FileReader->new($efnh, log => $obj);
+is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh with cleanup original");
+
+
 # call this function to test it is exported and does not fail.
 # doesn't really test what it prints
 dump_contents();
