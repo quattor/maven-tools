@@ -99,5 +99,9 @@ is("$fh", $source_data, "Reader reads symlinked FileEditor $efns");
 $fh = CAF::FileReader->new($efnh, log => $obj);
 is("$fh", $source_data, "Reader reads hardlinked FileEditor $efnh");
 
+# call this function to test it is exported and does not fail.
+# doesn't really test what it prints
+dump_contents();
+
 
 done_testing;

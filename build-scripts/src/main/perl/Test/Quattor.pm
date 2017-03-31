@@ -208,7 +208,8 @@ our $NoAction = 1;
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status
                  command_history_reset command_history_ok set_service_variant
-                 make_directory remove_any reset_caf_path warn_is_ok);
+                 make_directory remove_any reset_caf_path warn_is_ok
+                 dump_contents);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -1273,6 +1274,20 @@ sub reset_caf_path
     }
 
 }
+
+=item dump_contents
+
+Debug function to show the entries in C<desired_file_contents>
+and C<files_contents>.
+
+=cut
+
+sub dump_contents
+{
+    diag "desired_file_contents ",explain \%desired_file_contents;
+    diag "files_contents ", explain \%files_contents;
+}
+
 
 1;
 
