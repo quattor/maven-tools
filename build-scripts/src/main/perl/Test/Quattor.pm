@@ -75,6 +75,7 @@ use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile)
 use Test::Quattor::Object qw(warn_is_ok);
 use Cwd;
 use Readonly;
+use Scalar::Util qw(dualvar);
 
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
@@ -719,7 +720,8 @@ $cpath->mock("directory", sub {
     } else {
         $directory = undef;
     }
-    return $directory;
+    my $status = defined($directory) ? SUCCESS : undef;
+    return dualvar ($status, $directory);
 });
 
 =item C<CAF::Path::LC_Check>
