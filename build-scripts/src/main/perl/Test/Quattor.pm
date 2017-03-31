@@ -199,9 +199,11 @@ mocked FileWriter and FileEditor).
 E.g. if you want to run tests with C<CAF::Object::NoAction> not set
 (to test the behaviour of regular C<CAF::Object::NoAction>).
 
+Default is 1.
+
 =cut
 
-our $NoAction;
+our $NoAction = 1;
 
 our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
                  set_desired_err get_config_for_profile set_command_status

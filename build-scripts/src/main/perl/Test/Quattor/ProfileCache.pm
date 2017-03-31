@@ -198,6 +198,11 @@ sub prepare_profile_cache
 {
     my ($profile, $croak_on_error) = @_;
 
+
+    # Do not "use Test::Quattor"
+    # CCM is not using CAF::Path, so we have to set NoAction to 0 here
+    local $Test::Quattor::NoAction = 0;
+
     my $dirs = get_profile_cache_dirs();
 
     # Failure
