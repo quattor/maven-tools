@@ -205,6 +205,11 @@ Default is 1.
 
 our $NoAction = 1;
 
+# undocumented for now
+# if true, use unmocked / original code
+# mainly for some mocked Path code that is used in eg CCM
+our $Original;
+
 our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
                  set_desired_output set_desired_err set_command_status
                  get_config_for_profile
@@ -553,7 +558,11 @@ Return the mocked C<is_file>
 
 =cut
 
-$cpath->mock("file_exists", sub {shift; return is_file(shift);});
+$cpath->mock("file_exists", sub {
+    return $cpath->original('file_exists')->(@_) if $Original;
+
+    return is_file($_[1]);
+});
 
 =item C<CAF::Path::directory_exists>
 
@@ -561,7 +570,11 @@ Return the mocked C<is_directory>
 
 =cut
 
-$cpath->mock("directory_exists", sub {shift; return is_directory(shift);});
+$cpath->mock("directory_exists", sub {
+    return $cpath->original('directory_exists')->(@_) if $Original;
+
+    return is_directory($_[1]);
+});
 
 =item C<CAF::Path::any_exists>
 
@@ -569,7 +582,11 @@ Return the mocked C<is_any>
 
 =cut
 
-$cpath->mock("any_exists", sub {shift; return is_any(shift); });
+$cpath->mock("any_exists", sub {
+    return $cpath->original('any_exists')->(@_) if $Original;
+
+    return is_any($_[1]);
+});
 
 =item is_symlink
 
@@ -578,7 +595,10 @@ Test if given C<path> is a mocked symlink
 =cut
 
 $cpath->mock("is_symlink", sub {
+    return $cpath->original('is_symlink')->(@_) if $Original;
+
     my ($self, $path) = @_;
+
     $path = sane_path($path);
 
     return $desired_file_contents{$path} && "$desired_file_contents{$path}" =~ qr/^$SYMLINK/;
@@ -597,6 +617,8 @@ a hardlink the number of references for the inode is always 1.
 =cut
 
 $cpath->mock("has_hardlinks", sub {
+    return $cpath->original('has_hardlinks')->(@_) if $Original;
+
     my ($self, $path) = @_;
     $path = sane_path($path);
 
@@ -610,6 +632,8 @@ Test if C<path1> and C<path2> are hardlinked
 =cut
 
 $cpath->mock("is_hardlink", sub {
+    return $cpath->original('is_hardlink')->(@_) if $Original;
+
     my ($self, $path1, $path2) = @_;
     $path1 = sane_path($path1);
     $path2 = sane_path($path2);
@@ -653,6 +677,8 @@ and C<set_file_contents($filename, $Test::Quattor::HARDLINK)> for a hardlink.
 =cut
 
 $cpath->mock('_make_link', sub {
+    return $cpath->original('_make_link')->(@_) if $Original;
+
     my ($self, $target, $link_path, %opts) = @_;
     $link_path = sane_path($link_path);
     $target = sane_path($target);
@@ -723,6 +749,8 @@ Return directory name unless mocked C<make_directory> or mocked C<LC_Check> fail
 =cut
 
 $cpath->mock("directory", sub {
+    return $cpath->original('directory')->(@_) if $Original;
+
     my ($self, $directory, %opts) = @_;
     if (make_directory($directory)) {
         $directory = undef if ! $self->LC_Check("directory", [$directory], \%opts);
@@ -739,7 +767,12 @@ Store args in C<caf_path> using C<add_caf_path>.
 
 =cut
 
-$cpath->mock('LC_Check', sub{ shift; return add_caf_path(@_); });
+$cpath->mock('LC_Check', sub{
+    return $cpath->original('LC_Check')->(@_) if $Original;
+
+    shift;
+    return add_caf_path(@_);
+});
 
 =item C<CAF::Path::cleanup>
 
@@ -749,7 +782,9 @@ C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 
 # use ref of copy of args (similar to what is passed to LC_Check)
 $cpath->mock('cleanup', sub {
-    my($self, $dest, $backup, %opts) = @_;
+    return $cpath->original('cleanup')->(@_) if $Original;
+
+    my ($self, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
     remove_any($dest, $newbackup);
     return add_caf_path('cleanup', [$dest, $backup], \%opts);
@@ -763,6 +798,8 @@ C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 
 # use ref of copy of args (similar to what is passed to LC_Check)
 $cpath->mock('move', sub {
+    return $cpath->original('move')->(@_) if $Original;
+
     my($self, $src, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
     move($src, $dest, $newbackup);
@@ -779,7 +816,9 @@ of any kind. Do not use this method directly, use C<listdir> instead.
 =cut
 
 $cpath->mock('_listdir', sub {
-    my($self, $dir, $test) = @_;
+    return $cpath->original('_listdir')->(@_) if $Original;
+
+    my ($self, $dir, $test) = @_;
 
     # find /, use hash to make entries unique
     my %allfiles = map {$_ => 1} (keys %desired_file_contents, keys %files_contents);

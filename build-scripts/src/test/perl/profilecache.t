@@ -27,6 +27,23 @@ use Test::Quattor::Panc qw(get_panc_includepath);
 use Cwd qw(getcwd);
 use File::Temp qw(tempdir);
 use File::Path qw(mkpath);
+use Test::MockModule;
+use CAF::Reporter;
+
+# Ugly CAF::Reporter hacking
+my $defrep = {
+    VERBOSE  => 1,        # verbose
+    DEBUGLV  => 5,        # debug 5
+    QUIET    => 0,        # don't be quiet
+    LOGFILE  => undef,    # no log file
+    FACILITY => 'local1', # syslog facility
+    VERBOSE_LOGFILE => 0,
+    STRUCT => undef,
+};
+
+my $reporter = Test::MockModule->new("CAF::Reporter");
+$reporter->mock("report", sub {shift; diag join('', @_)});
+$reporter->mock("_rep_setup", sub {shift; return $defrep});
 
 is_deeply(\%DEFAULT_PROFILE_CACHE_DIRS,
           {
@@ -72,7 +89,6 @@ is($ccmcfg, $ccm_default,
 
 
 my $cfg = prepare_profile_cache('profilecache');
-
 isa_ok($cfg, $config_class, "get_config_for_profile returns a $config_class instance");
 
 is_deeply($cfg->getElement("/")->getTree(),
