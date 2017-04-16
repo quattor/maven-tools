@@ -156,6 +156,41 @@ minimal contents.
 
 =cut
 
+# internal method that does actual work
+# factored out so it can be run multiple times
+# to work around bug in panc-annotations
+# see https://github.com/quattor/maven-tools/issues/143
+sub _panc_annotations
+{
+    my ($self, $dir, $templates, $msg) = @_;
+
+    $msg = '' if ! defined $msg;
+    my (@ok, @not_ok);
+    my $res = panc_annotations($dir, $self->{panout}, $templates);
+    my ($ec, $output) = @$res;
+
+    if ($ec) {
+        $self->notok("${msg}panc-annotations ended with ec $ec");
+        push(@not_ok, @$templates);
+    } else {
+        my $missing_annotation;
+        foreach my $tmpl (@$templates) {
+            my $anno = "$self->{panout}/$tmpl.annotation.xml";
+            if (-f $anno) {
+                push(@ok, $tmpl);
+            } else {
+                $self->verbose("${msg}Did not find annotation xml $anno for template $tmpl");
+                $missing_annotation = 1;
+                push(@not_ok, $tmpl);
+            }
+        }
+        if (!$missing_annotation) {
+            $self->verbose("${msg}Templates with missing xml with command stdout/stderr $output");
+        };
+    }
+    return \@ok, \@not_ok;
+}
+
 sub pan_annotations
 {
     my $self = shift;
@@ -167,30 +202,20 @@ sub pan_annotations
     foreach my $dir (@{$self->{panpaths}}) {
         my ($okpan, $notok_pan) = $self->gather_pan($dir, $dir, "");
         is(scalar @$notok_pan, 0, "No invalid pan files found in $dir (no namespace checked for annotations)");
-        my @templates = keys %$okpan;
+        my @templates = sort keys %$okpan;
         ok(@templates, "Found valid templates in $dir");
 
-        my $res = panc_annotations($dir, $self->{panout}, \@templates);
-        my ($ec, $output) = @$res;
-
-        if ($ec) {
-            $self->notok("panc-annotations ended with ec $ec");
-            push(@not_ok, @templates);
-        } else {
-            my $missing_annotation;
-            foreach my $tmpl (@templates) {
-                my $anno = "$self->{panout}/$tmpl.annotation.xml";
-                if (-f $anno) {
-                    push(@ok, $tmpl);
-                } else {
-                    $self->verbose("Did not find annotation xml $anno for template $tmpl");
-                    $missing_annotation = 1;
-                    push(@not_ok, $tmpl);
-                }
-            }
-            if (!$missing_annotation) {
-                $self->verbose("Templates with missing xml with command stdout/stderr $output");
+        my ($tmpok, $tmpnot_ok) = $self->_panc_annotations($dir, \@templates, 'run 1: ');
+        if (@$tmpok) {
+            push(@ok, @$tmpok);
+            if (@$tmpnot_ok) {
+                my ($tmpok2, $tmpnot_ok2) = $self->_panc_annotations($dir, $tmpnot_ok, 'run 2: ');
+                push(@not_ok, @$tmpnot_ok2);
+                push(@ok, @$tmpok2);
             };
+        } else {
+            # main failure; do not bother with retry
+            push(@not_ok, @$tmpnot_ok);
         }
     }
 
