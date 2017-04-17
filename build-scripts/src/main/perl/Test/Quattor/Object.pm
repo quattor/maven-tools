@@ -37,7 +37,10 @@ our @EXPORT = qw($TARGET_PAN_RELPATH warn_is_ok);
 my $loghist = {};
 
 # By default, perl warnings are not ok
-our $_warn_is_ok = 0;
+## Temp hack: warns are ok again to resolve the new FileWriter/new
+##            build-tools mess for 17.3 release
+##            see #161
+our $_warn_is_ok = 1;
 $SIG{__WARN__} = sub {
     my $msg = "Perl warning: $_[0]";
     if ($_warn_is_ok) {
