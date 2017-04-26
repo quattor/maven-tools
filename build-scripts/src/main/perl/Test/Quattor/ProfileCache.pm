@@ -198,6 +198,13 @@ sub prepare_profile_cache
 {
     my ($profile, $croak_on_error) = @_;
 
+
+    # Do not "use Test::Quattor"
+    # CCM is not using CAF::Path, so we have to set NoAction to 0 here
+    local $Test::Quattor::NoAction = 0;
+    # CCM uses CAF::FileWriter which uses CAF::Path
+    local $Test::Quattor::Original = 1;
+
     my $dirs = get_profile_cache_dirs();
 
     # Failure
@@ -212,14 +219,8 @@ sub prepare_profile_cache
 
     mkpath($cache);
 
-    my $fh = CAF::FileWriter->new("$cache/global.lock");
+    my $fh = CAF::FileWriter->new("$cache/global.lock", log => $object);
     print $fh "no\n";
-    $fh->close();
-    $fh = CAF::FileWriter->new("$cache/current.cid");
-    print $fh "1\n";
-    $fh->close();
-    $fh = CAF::FileWriter->new("$cache/latest.cid");
-    print $fh "1\n";
     $fh->close();
 
     prepare_profile_cache_panc_includedirs();
@@ -254,8 +255,8 @@ sub prepare_profile_cache
     $f->{CACHE_ROOT} = $cache;
     $f->fetchProfile() or croak "Unable to fetch profile $profile";
 
-    my $cm =  EDG::WP4::CCM::CacheManager->new($cache);
-    $configs{$cachename} = $cm->getUnlockedConfiguration();
+    my $cm = EDG::WP4::CCM::CacheManager->new($cache, , $f->{_CCFG});
+    $configs{$cachename} = $cm->getConfiguration();
 
     return $configs{$cachename};
 }

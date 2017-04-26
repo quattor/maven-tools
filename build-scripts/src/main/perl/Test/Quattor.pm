@@ -56,7 +56,7 @@ BEGIN {
     use Test::Quattor::Namespace qw(ncm);
 }
 
-use CAF::FileWriter;
+use CAF::FileWriter 17.2.1;
 use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
@@ -75,6 +75,7 @@ use Test::Quattor::ProfileCache qw(prepare_profile_cache get_config_for_profile)
 use Test::Quattor::Object qw(warn_is_ok);
 use Cwd;
 use Readonly;
+use Scalar::Util qw(dualvar);
 
 # "File" content that will appear as a directory
 Readonly our $DIRECTORY => 'MAGIC STRING, THIS IS A MOCKED DIRECTORY';
@@ -198,31 +199,23 @@ mocked FileWriter and FileEditor).
 E.g. if you want to run tests with C<CAF::Object::NoAction> not set
 (to test the behaviour of regular C<CAF::Object::NoAction>).
 
-=cut
-
-our $NoAction;
-
-=item * C<caf_file_close_diff>
-
-A boolean to mimic the regular (i.e. when no C<NoAction> is set) behaviour of a
-C<CAF::FileWriter> or C<CAF::FileEditor> C<close> (it returns whether or not the
-file changed). With C<NoAction> set, this check is skipped and C<undef> is returned.
-
-With this boolean set to true, contents difference is reported ( but not any changes
-due to e.g. file permissions or anything else checked with C<LC::Check::file)>.
-
-Defaults to false (to keep regular C<NoAction> behaviour).
+Default is 1.
 
 =cut
 
-my $caf_file_close_diff = 0;
+our $NoAction = 1;
 
+# undocumented for now
+# if true, use unmocked / original code
+# mainly for some mocked Path code that is used in eg CCM
+our $Original;
 
-our @EXPORT = qw(get_command set_file_contents get_file set_desired_output
-                 set_desired_err get_config_for_profile set_command_status
+our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
+                 set_desired_output set_desired_err set_command_status
+                 get_config_for_profile
                  command_history_reset command_history_ok set_service_variant
-                 set_caf_file_close_diff
-                 make_directory remove_any reset_caf_path warn_is_ok);
+                 make_directory remove_any reset_caf_path warn_is_ok
+                 dump_contents set_caf_file_close_diff);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -241,6 +234,7 @@ $main::this_app->verbose("Log options ", join(" ", @logopts));
 our $procs = Test::MockModule->new("CAF::Process");
 our $filewriter = Test::MockModule->new("CAF::FileWriter");
 our $fileeditor = Test::MockModule->new("CAF::FileEditor");
+our $filereader = Test::MockModule->new("CAF::FileReader");
 our $reporter = Test::MockModule->new("CAF::Reporter");
 our $cpath = Test::MockModule->new("CAF::Path");
 our $iostring = Test::MockModule->new("IO::String");
@@ -343,8 +337,6 @@ foreach my $method (qw(output toutput)) {
     });
 }
 
-=pod
-
 =item C<CAF::FileWriter::open>
 
 Overriding this function allows us to inspect its contents after the
@@ -353,15 +345,13 @@ unit under tests has released it.
 =cut
 
 my $old_open = \&CAF::FileWriter::new;
-my $old_close = \&CAF::FileWriter::close;
 
 sub new_filewriter_open
 {
-    my $f = $old_open->(@_);
+    my ($class, $filename, @rest) = @_;
+    $filename = sane_path($filename);
 
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
+    my $f = $old_open->($class, $filename, @rest);
 
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
@@ -380,77 +370,127 @@ sub new_filewriter_open
     return $f;
 }
 
+$filewriter->mock("open", \&new_filewriter_open);
+$filewriter->mock("new", \&new_filewriter_open);
+
+=item C<CAF::FileWriter::close>
+
+Overriding this function to force noaction and update
+mocked C<%desired_file_contents>.
+
+=cut
+
+my $old_close = \&CAF::FileWriter::close;
+
 sub new_filewriter_close
 {
     my ($self, @rest) = @_;
 
-    my $ret;
-    my $current_content = $desired_file_contents{*$self->{filename}};
-    my $new_content = $self->stringify;
+    $self->verbose("new_filewriter_close ",*$self->{filename});
 
-    # keep the save value here, since save is forced to 0 in old_close with NoAction set
+    my $current_content = $desired_file_contents{*$self->{filename}};
+
+    # save is set to 0 in old_close
     my $save = *$self->{save};
 
-    if ($self->noAction()) {
-        $self->cancel();
+    # Override actual action with Test::Quattor::NoAction
+    my $old_noaction = *$self->{options}->{noaction};
+    if(defined($NoAction)) {
+        *$self->{options}->{noaction} = $NoAction;
     }
+    my $ret = $old_close->(@_);
+    *$self->{options}->{noaction} = $old_noaction;
 
-    $desired_file_contents{*$self->{filename}} =  $new_content if $save;
-    $ret = $old_close->(@_);
+    # save content to desired_contents
+    $desired_file_contents{*$self->{filename}} = $self->stringify() if $save;
 
-    if ($caf_file_close_diff && $save) {
-        $ret = (! defined($current_content)) || $current_content ne $new_content;
-    }
-
+    # support backup, normally handled by AtomicWrite; use copy
     if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
-        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} =  $current_content;
+        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} = "$current_content";
     }
 
     return $ret;
 }
 
-$filewriter->mock("open", \&new_filewriter_open);
-$filewriter->mock("new", \&new_filewriter_open);
 $filewriter->mock("close", \&new_filewriter_close);
 
+=item C<CAF::FileWriter::_read_contents>
 
-=pod
-
-=item C<CAF::FileEditor::new>
-
-It's just calling CAF::FileWriter::new, plus initialising its contnts
-with the value of the appropriate entry in C<%desired_file_contents>
+Used to get the original content (for C<<CAF::FileWriter->close>>) and/or source
+(for C<<CAF::FileEditor->new>>) from the C<%desired_file_contents>.
 
 =cut
 
+$filewriter->mock('_read_contents', sub {
+    my ($self, $filename, %opts) = @_;
 
-sub new_fileeditor_open
-{
+    $filename = sane_path($filename);
 
-    my $f = CAF::FileWriter::new(@_);
-
-    my ($class, $path, %opts) = @_;
-    *$f->{options}->{source} = $opts{source} if exists ($opts{source});
-
-    if(defined($NoAction)) {
-        *$f->{options}->{noaction} = $NoAction;
-    }
-
-    my $fn = *$f->{filename};
-    if (is_directory($fn)) {
-        diag("ERROR: Cannot new_fileeditor_open: $fn is a directory");
-    } elsif(make_directory(dirname($fn))) {
-        my $src = *$f->{options}->{source} || $fn;
-        $f->set_contents($desired_file_contents{$src});
-        *$f->{_mocked}->{fileeditor} = $fileeditor;
+    my $dfn = $desired_file_contents{$filename};
+    my $res;
+    if (defined($dfn)) {
+        #diag "_read_contents $filename ", ref($self), "desired $dfn";
+        # auto-vivification of directory tree
+        if (make_directory(dirname($filename))) {
+            if (is_file($filename)) {
+                my $pattern = '^(?:'."$HARDLINK|$SYMLINK".')(\S+)$';
+                if ($dfn =~ m/$pattern/) {
+                    $self->verbose("_read_contents follow mock link $filename to $1");
+                    $res = $self->_read_contents($1);
+                } else {
+                    # return a copy
+                    $res = "$dfn";
+                }
+            } else {
+                $self->warn("_read_contents $filename not a file: $dfn");
+                # TODO: throw LC exception
+            }
+        } else {
+            $self->warn("ERROR: new_fileeditor_open: failed to create directory for file $filename");
+        }
     } else {
-        diag("ERROR: new_fileeditor_open: failed to create directory for file $fn");
-    }
-    return $f;
-}
+        $self->verbose("_read_contents missing $filename");
+        # This is not fatal, return empty
+    };
 
-$fileeditor->mock("new", \&new_fileeditor_open);
-$fileeditor->mock("open", \&new_fileeditor_open);
+    $self->verbose("_read_contents end testing filename $filename ", (defined($res) ? $res : '<undef>'));
+    return $res;
+});
+
+
+=item C<CAF::FileEditor::_is_valid_file>
+
+Mock using C<is_file> function.
+
+=cut
+
+$fileeditor->mock('_is_valid_file', sub {
+    return is_file($_[1])
+});
+
+=item C<CAF::FileEditor::_is_reference_newer>
+
+Mock using C<is_file> function (but no support for pipes or
+age test).
+
+=cut
+
+$fileeditor->mock('_is_reference_newer', sub {
+    my $self = shift;
+    my $src = *$self->{options}->{source};
+    my $newer = $src ? is_file($src) : 0;
+    return $newer;
+});
+
+=item C<CAF::FileReader::_is_valid_file>
+
+Mock using C<is_file> function (but no support for pipes).
+
+=cut
+
+$filereader->mock('_is_valid_file', sub {
+    return is_file($_[1])
+});
 
 =pod
 
@@ -518,7 +558,11 @@ Return the mocked C<is_file>
 
 =cut
 
-$cpath->mock("file_exists", sub {shift; return is_file(shift);});
+$cpath->mock("file_exists", sub {
+    return $cpath->original('file_exists')->(@_) if $Original;
+
+    return is_file($_[1]);
+});
 
 =item C<CAF::Path::directory_exists>
 
@@ -526,7 +570,11 @@ Return the mocked C<is_directory>
 
 =cut
 
-$cpath->mock("directory_exists", sub {shift; return is_directory(shift);});
+$cpath->mock("directory_exists", sub {
+    return $cpath->original('directory_exists')->(@_) if $Original;
+
+    return is_directory($_[1]);
+});
 
 =item C<CAF::Path::any_exists>
 
@@ -534,7 +582,11 @@ Return the mocked C<is_any>
 
 =cut
 
-$cpath->mock("any_exists", sub {shift; return is_any(shift); });
+$cpath->mock("any_exists", sub {
+    return $cpath->original('any_exists')->(@_) if $Original;
+
+    return is_any($_[1]);
+});
 
 =item is_symlink
 
@@ -543,7 +595,10 @@ Test if given C<path> is a mocked symlink
 =cut
 
 $cpath->mock("is_symlink", sub {
+    return $cpath->original('is_symlink')->(@_) if $Original;
+
     my ($self, $path) = @_;
+
     $path = sane_path($path);
 
     return $desired_file_contents{$path} && "$desired_file_contents{$path}" =~ qr/^$SYMLINK/;
@@ -562,6 +617,8 @@ a hardlink the number of references for the inode is always 1.
 =cut
 
 $cpath->mock("has_hardlinks", sub {
+    return $cpath->original('has_hardlinks')->(@_) if $Original;
+
     my ($self, $path) = @_;
     $path = sane_path($path);
 
@@ -575,6 +632,8 @@ Test if C<path1> and C<path2> are hardlinked
 =cut
 
 $cpath->mock("is_hardlink", sub {
+    return $cpath->original('is_hardlink')->(@_) if $Original;
+
     my ($self, $path1, $path2) = @_;
     $path1 = sane_path($path1);
     $path2 = sane_path($path2);
@@ -618,6 +677,8 @@ and C<set_file_contents($filename, $Test::Quattor::HARDLINK)> for a hardlink.
 =cut
 
 $cpath->mock('_make_link', sub {
+    return $cpath->original('_make_link')->(@_) if $Original;
+
     my ($self, $target, $link_path, %opts) = @_;
     $link_path = sane_path($link_path);
     $target = sane_path($target);
@@ -688,13 +749,16 @@ Return directory name unless mocked C<make_directory> or mocked C<LC_Check> fail
 =cut
 
 $cpath->mock("directory", sub {
+    return $cpath->original('directory')->(@_) if $Original;
+
     my ($self, $directory, %opts) = @_;
     if (make_directory($directory)) {
         $directory = undef if ! $self->LC_Check("directory", [$directory], \%opts);
     } else {
         $directory = undef;
     }
-    return $directory;
+    my $status = defined($directory) ? SUCCESS : undef;
+    return dualvar ($status, $directory);
 });
 
 =item C<CAF::Path::LC_Check>
@@ -703,7 +767,12 @@ Store args in C<caf_path> using C<add_caf_path>.
 
 =cut
 
-$cpath->mock('LC_Check', sub{ shift; return add_caf_path(@_); });
+$cpath->mock('LC_Check', sub{
+    return $cpath->original('LC_Check')->(@_) if $Original;
+
+    shift;
+    return add_caf_path(@_);
+});
 
 =item C<CAF::Path::cleanup>
 
@@ -713,7 +782,9 @@ C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 
 # use ref of copy of args (similar to what is passed to LC_Check)
 $cpath->mock('cleanup', sub {
-    my($self, $dest, $backup, %opts) = @_;
+    return $cpath->original('cleanup')->(@_) if $Original;
+
+    my ($self, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
     remove_any($dest, $newbackup);
     return add_caf_path('cleanup', [$dest, $backup], \%opts);
@@ -727,6 +798,8 @@ C<remove_any> and store args in C<caf_path> using C<add_caf_path>.
 
 # use ref of copy of args (similar to what is passed to LC_Check)
 $cpath->mock('move', sub {
+    return $cpath->original('move')->(@_) if $Original;
+
     my($self, $src, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
     move($src, $dest, $newbackup);
@@ -743,7 +816,9 @@ of any kind. Do not use this method directly, use C<listdir> instead.
 =cut
 
 $cpath->mock('_listdir', sub {
-    my($self, $dir, $test) = @_;
+    return $cpath->original('_listdir')->(@_) if $Original;
+
+    my ($self, $dir, $test) = @_;
 
     # find /, use hash to make entries unique
     my %allfiles = map {$_ => 1} (keys %desired_file_contents, keys %files_contents);
@@ -772,7 +847,7 @@ Returns the object that has manipulated C<$filename>
 
 sub get_file
 {
-    my ($filename) = @_;
+    my $filename = sane_path(shift);
 
     if (exists($files_contents{$filename})) {
         if (is_directory($filename)) {
@@ -785,30 +860,46 @@ sub get_file
 }
 
 
-=pod
-
 =item C<set_file_contents>
 
-For file C<$filename>, sets the initial C<$contents> the component shuold see.
+For file C<$filename>, sets the initial C<$contents> the component should see.
+
+Returns the contents on success, undef otherwise.
 
 =cut
 
-
+# undocumented get option, to implement get_file_contents
 sub set_file_contents
 {
-    my ($filename, $contents) = @_;
+    my ($filename, $contents, %opts) = @_;
+
+    $filename = sane_path($filename);
+
+    my $mode = $opts{get} ? "get" : "set";
 
     if (is_directory($filename)) {
-        diag("ERROR: Cannot set_file_contents: $filename is a directory");
+        diag("ERROR: Cannot ${mode}_file_contents: $filename is a directory");
     } elsif(make_directory(dirname($filename))) {
-        $desired_file_contents{$filename} = "$contents";
+        # set copy only if get option is false
+        $desired_file_contents{$filename} = "$contents" if ! $opts{get};
         return $desired_file_contents{$filename};
     } else {
-        diag("ERROR: Cannot set_file_contents: cannot create directory for $filename");
+        diag("ERROR: Cannot ${mode}_file_contents: cannot create directory for $filename");
     }
+
     return;
 }
 
+=item C<get_file_contents>
+
+For file C<$filename>, returns the contents on success, undef otherwise.
+
+=cut
+
+sub get_file_contents
+{
+    return set_file_contents($_[0], undef, get => 1);
+};
 
 =pod
 
@@ -1046,21 +1137,6 @@ sub force_service_variant
 }
 
 
-=pod
-
-=item C<set_caf_file_close_diff>
-
-Set the C<caf_file_close_diff> boolean.
-
-=cut
-
-sub set_caf_file_close_diff
-{
-    my $state = shift;
-    $caf_file_close_diff = $state ? 1 :0;
-};
-
-
 =item sane_path
 
 sanitize path by
@@ -1186,12 +1262,36 @@ sub remove_any
     $path = sane_path($path);
 
     my $filter = sub {
+        # the mocked filesystem as a hashref
         my $fs = shift;
+        my @del;
+        # add all files that in path (if path were a directory)
         my $pattern = '^'.$path.'/';
-        foreach my $p (grep {m/$pattern/} sort keys %$fs) {
-            delete $fs->{$p};
+        foreach my $tmppath (grep {m/$pattern/} sort keys %$fs) {
+            push(@del, $tmppath);
         }
-        delete $fs->{$path};
+        push(@del, $path);
+
+        foreach my $tmppath (@del) {
+            my $newlink;
+            foreach my $hl (sort keys %$fs) {
+                # look for any hardlink that has $tmppath as target
+                if ($fs->{$hl} && "$fs->{$hl}" eq "$HARDLINK$tmppath") {
+                    if ($newlink) {
+                        # all other matches should have first matched path as new hardlink value
+                        $fs->{$hl} = $newlink;
+                    } else {
+                        # replace the first match with the the target
+                        $newlink = "$HARDLINK$hl";
+                        $fs->{$hl} = $fs->{$tmppath};
+                    }
+                };
+            };
+            if (UNIVERSAL::can($fs->{$tmppath}, 'can') && $fs->{$tmppath}->can('cancel')) {
+                $fs->{$tmppath}->cancel();
+            }
+            delete $fs->{$tmppath};
+        }
     };
     &$filter(\%files_contents);
     &$filter(\%desired_file_contents);
@@ -1256,6 +1356,60 @@ sub reset_caf_path
         $caf_path = {};
     }
 
+}
+
+=item dump_contents
+
+Debug function to show the entries in C<desired_file_contents>
+and C<files_contents>.
+
+Options
+
+=over
+
+=item log
+
+Pass a reporter/logger instance, and report with verbose level.
+By default, C<Test::More::diag> is used.
+
+=item filter
+
+Regex pattern to filter filenames to show (matches are kept).
+
+=item prefix
+
+A message prefix
+
+=back
+
+=cut
+
+sub dump_contents
+{
+    my (%opts) = @_;
+
+    my $log;
+    if (exists($opts{log})) {
+        $log = sub {$opts{log}->verbose(@_)};
+    } else {
+        $log = sub {diag(@_)};
+    }
+
+    my $filter = defined($opts{filter}) ? $opts{filter} : '';
+    my $dfc = {map {$_ => $desired_file_contents{$_}} grep {m/$filter/} keys %desired_file_contents};
+    my $fc = {map {$_ => $files_contents{$_}} grep {m/$filter/} keys %files_contents};
+
+    my $prefix = $opts{prefix} || '';
+    &$log("${prefix}desired_file_contents ", explain $dfc);
+    &$log("${prefix}files_contents ", explain $fc);
+}
+
+## Temp hack: readd set_caf_file_close_diff as noop to resolve the new FileWriter/new
+##            build-tools mess for 17.3 release
+##            see #161
+sub set_caf_file_close_diff
+{
+    warn "deprecated set_caf_file_close_diff called; will be removed again";
 }
 
 1;
