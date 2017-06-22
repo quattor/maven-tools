@@ -13,6 +13,7 @@ BEGIN {
 }
 
 use Test::More;
+use File::Copy qw(copy);
 
 use Cwd;
 
@@ -136,6 +137,14 @@ is($dirs->{resources}, "$currentdir/src/test/resources/myresources",
 is($dirs->{cache}, "$currentdir/target/test/cache/mycache",
     "Set and retrieved custom profile_cache cache dir");
 
+my $testdir = "/some/path";
+my $tdirs = get_profile_cache_dirs($testdir);
+is($tdirs->{resources}, "$testdir/src/test/resources/myresources",
+    "Set and retrieved custom profile_cache resources dir with basedir $testdir");
+is($tdirs->{cache}, "$testdir/target/test/cache/mycache",
+    "Set and retrieved custom profile_cache cache dir with basedir $testdir");
+
+
 $ccmcfg = Test::Quattor::ProfileCache::get_ccm_config_default();
 like($ccmcfg, qr{^cache_root .*/cache/mycache$}m,
      "get_ccm_config_default returned expected config with custom cache_root");
@@ -153,11 +162,24 @@ my $profile = "$dirs->{resources}/absprofilecache.pan";
 ok (-f $profile, "Found profile $profile");
 my $abscfg = prepare_profile_cache($profile);
 
-isa_ok($abscfg, $config_class, "get_config_for_profile returns a $config_class instance for abs profile");
+isa_ok($abscfg, $config_class,
+       "get_config_for_profile returns a $config_class instance for abs profile");
 
 is_deeply($abscfg->getElement("/")->getTree(),
             {test => "data"},
             "getTree of root element returns correct hashref for abs profile");
+
+# test already compiled profile
+my $srcjsonprof = "$dirs->{profiles}/absprofilecache.json";
+my $jsonprof = "$dirs->{profiles}/absprofilecachecopy.json";
+copy($srcjsonprof, $jsonprof);
+my $jsoncfg = prepare_profile_cache($jsonprof);
+isa_ok($jsoncfg, $config_class,
+       "get_config_for_profile returns a $config_class instance for compiled json profile (copy of abs profile)");
+
+is_deeply($jsoncfg->getElement("/")->getTree(),
+            {test => "data"},
+            "getTree of root element returns correct hashref for compiled profile (copy of abs profile)");
 
 
 
