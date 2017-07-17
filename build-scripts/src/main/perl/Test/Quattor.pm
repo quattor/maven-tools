@@ -215,7 +215,7 @@ our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
                  get_config_for_profile
                  command_history_reset command_history_ok set_service_variant
                  make_directory remove_any reset_caf_path warn_is_ok
-                 dump_contents set_caf_file_close_diff);
+                 dump_contents);
 
 my @logopts = qw(--verbose);
 my $debuglevel = $ENV{QUATTOR_TEST_LOG_DEBUGLEVEL};
@@ -1404,13 +1404,6 @@ sub dump_contents
     &$log("${prefix}files_contents ", explain $fc);
 }
 
-## Temp hack: readd set_caf_file_close_diff as noop to resolve the new FileWriter/new
-##            build-tools mess for 17.3 release
-##            see #161
-sub set_caf_file_close_diff
-{
-    warn "deprecated set_caf_file_close_diff called; will be removed again";
-}
 
 1;
 
