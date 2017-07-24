@@ -61,7 +61,7 @@ use CAF::Process;
 use CAF::FileEditor;
 use CAF::Application;
 use CAF::Path;
-use CAF::Object qw(SUCCESS CHANGED);
+use CAF::Object qw(SUCCESS CHANGED throw_error);
 use IO::String;
 use base 'Exporter';
 use Cwd;
@@ -205,6 +205,18 @@ Default is 1.
 
 our $NoAction = 1;
 
+=item * C<%immutable>
+
+The content of this hash (keys are the absolute path names) indicates
+if paths (files, directories, ...) are immutable (or not).
+Any modification to an immutable path will result in an error.
+
+You can add paths using the L<set_immutable> function.
+
+=cut
+
+our %immutable;
+
 # undocumented for now
 # if true, use unmocked / original code
 # mainly for some mocked Path code that is used in eg CCM
@@ -215,6 +227,7 @@ our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
                  get_config_for_profile
                  command_history_reset command_history_ok set_service_variant
                  make_directory remove_any reset_caf_path warn_is_ok
+                 set_immutable
                  dump_contents);
 
 my @logopts = qw(--verbose);
@@ -356,7 +369,9 @@ sub new_filewriter_open
     my $fn = *$f->{filename};
     if (is_directory($fn)) {
         diag("ERROR: Cannot new_filewriter_open: $fn is a directory");
-    } elsif(make_directory(dirname($fn))) {
+    } elsif (make_directory(dirname($fn, undef, 1))) {
+        # the make_directory above should not fail too early;
+        #   only close is fatal wrt immutable
         delete $files_contents{$fn};
         $files_contents{$fn} = $f;
         *$f->{_mocked} = {
@@ -398,21 +413,51 @@ sub new_filewriter_close
     if(defined($NoAction)) {
         *$self->{options}->{noaction} = $NoAction;
     }
-    my $ret = $old_close->(@_);
-    *$self->{options}->{noaction} = $old_noaction;
 
-    # save content to desired_contents
-    $desired_file_contents{*$self->{filename}} = $self->stringify() if $save;
+    my $ret;
+    # parent dir failure is handled in old_close,
+    #   but that runs in temporary mocked NoAction; so nothing is actually tried
+    # *$self->{filename} is already sane (in open)
+    # test with self->opened, so we can use $self->SUPER::close to flag it as not opened
+    #   and avoid throw_error on DESTROY
+    if ($old_noaction || !$self->opened() || is_mutable(*$self->{filename}, "mocked FileWriter close")) {
+        $ret = $old_close->(@_);
+        # save content to desired_contents
+        $desired_file_contents{*$self->{filename}} = $self->stringify() if $save;
 
-    # support backup, normally handled by AtomicWrite; use copy
-    if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
-        $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} = "$current_content";
+        # support backup, normally handled by AtomicWrite; use copy
+        if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
+            $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} = "$current_content";
+        }
+    } else {
+        my $msg = "Failed to close immutable file ".*$self->{filename};
+        $self->warn($msg);
+        throw_error($msg);
     }
 
+    *$self->{options}->{noaction} = $old_noaction;
     return $ret;
 }
 
 $filewriter->mock("close", \&new_filewriter_close);
+
+=item C<CAF::FileWriter::_close>
+
+Mock-only method to make the FileWriter instance not opened
+(in L<IO::String> sense).
+
+Required for cleanup of filehandles left by eg immutable paths.
+
+=cut
+
+$filewriter->mock("_close", sub {
+    my $self = shift;
+
+    *$self->{save} = 0;
+    # cannot use $self->SUPER::close (IO::String close method is mocked below),
+    # buf attribute is what $self->opened() checks
+    delete *$self->{buf};
+});
 
 =item C<CAF::FileWriter::_read_contents>
 
@@ -431,7 +476,8 @@ $filewriter->mock('_read_contents', sub {
     if (defined($dfn)) {
         #diag "_read_contents $filename ", ref($self), "desired $dfn";
         # auto-vivification of directory tree
-        if (make_directory(dirname($filename))) {
+        # the file exists, always create the directory tree.
+        if (make_directory(dirname($filename), undef, 1)) {
             if (is_file($filename)) {
                 my $pattern = '^(?:'."$HARDLINK|$SYMLINK".')(\S+)$';
                 if ($dfn =~ m/$pattern/) {
@@ -683,6 +729,8 @@ $cpath->mock('_make_link', sub {
     $link_path = sane_path($link_path);
     $target = sane_path($target);
 
+    my $linkmode = ($opts{hard} ? "hard" : "sym") . "link";
+
     # Check options passed
     Readonly my @MAKE_LINK_VALID_OPTS => qw(hard backup nocheck force keeps_state);
     for my $opt (sort keys %opts) {
@@ -700,7 +748,7 @@ $cpath->mock('_make_link', sub {
     # Check that target exists if it is a hardlink or if option 'nocheck' is false
     if ( $opts{hard} or ! $opts{nocheck} ) {
         unless ($self->file_exists($target_full_path)) {
-            my $msg = ($opts{hard} ? "Hard" : "Sym")."link target ($target_full_path) doesn't exist";
+            my $msg = ucfirst($linkmode)." target ($target_full_path) doesn't exist";
             ok(0, $msg);
             return $self->fail($msg);
         }
@@ -735,9 +783,12 @@ $cpath->mock('_make_link', sub {
         }
     }
 
-    $desired_file_contents{$link_path} = "$link_pattern$target";
-
-    return CHANGED;
+    if (is_mutable($link_path, "_make_link $linkmode")) {
+        $desired_file_contents{$link_path} = "$link_pattern$target";
+        return CHANGED;
+    } else {
+        return $self->fail("_make_link $linkmode immutable link_path $link_path");
+    }
 });
 
 =item C<CAF::Path::directory>
@@ -757,8 +808,7 @@ $cpath->mock("directory", sub {
     } else {
         $directory = undef;
     }
-    my $status = defined($directory) ? SUCCESS : undef;
-    return dualvar ($status, $directory);
+    return defined($directory) ? dualvar(SUCCESS, $directory) : undef;
 });
 
 =item C<CAF::Path::LC_Check>
@@ -786,8 +836,11 @@ $cpath->mock('cleanup', sub {
 
     my ($self, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
-    remove_any($dest, $newbackup);
-    return add_caf_path('cleanup', [$dest, $backup], \%opts);
+    if (remove_any($dest, $newbackup)) {
+        return add_caf_path('cleanup', [$dest, $backup], \%opts);
+    } else {
+        return $self->fail("cleanup dest $dest remove_any failed");
+    }
 });
 
 =item C<CAF::Path::move>
@@ -802,8 +855,11 @@ $cpath->mock('move', sub {
 
     my($self, $src, $dest, $backup, %opts) = @_;
     my $newbackup = defined($backup) ? $backup : $self->{backup};
-    move($src, $dest, $newbackup);
-    return add_caf_path('move', [$src, $dest, $backup], \%opts);
+    if (move($src, $dest, $newbackup)) {
+        return add_caf_path('move', [$src, $dest, $backup], \%opts);
+    } else {
+        return $self->fail("move src $src dest $dest move failed");
+    }
 });
 
 =item C<CAF::Path::_listdir>
@@ -879,7 +935,7 @@ sub set_file_contents
 
     if (is_directory($filename)) {
         diag("ERROR: Cannot ${mode}_file_contents: $filename is a directory");
-    } elsif(make_directory(dirname($filename))) {
+    } elsif (make_directory(dirname($filename))) {
         # set copy only if get option is false
         $desired_file_contents{$filename} = "$contents" if ! $opts{get};
         return $desired_file_contents{$filename};
@@ -1136,6 +1192,51 @@ sub force_service_variant
     }
 }
 
+=item set_immutable
+
+Make C<path> immutable. Pass a false C<bool> to make the path mutable again
+(not <undef>, default is to make the path immutable).
+
+=cut
+
+sub set_immutable
+{
+    my $path = sane_path(shift);
+
+    my $bool = shift;
+    $bool = 1 if ! defined $bool;
+
+    $immutable{$path} = $bool ? 1 : 0;
+
+    diag "INFO: $path is ".($immutable{$path} ? '' : 'not ')."immutable";
+}
+
+=item is_mutable
+
+Check if the path and parent path are mutable.
+(Parent path is not checked when C<skip_parent> argument is true).
+
+Report an error prefixed with C<prefix> and return 0
+when path (and/or parent path) is immutable.
+
+=cut
+
+sub is_mutable
+{
+    my ($path, $prefix, $skip_parent) = @_;
+    $path = sane_path($path);
+
+    my $msg;
+    if ($immutable{$path}) {
+        $msg = "final";
+    } elsif (!$skip_parent && $immutable{dirname($path)}) {
+        $msg = "parent";
+    }
+
+    diag "ERROR: $prefix: immutable $msg path $path" if ($msg);
+    return $msg ? 0 : 1;
+}
+
 
 =item sane_path
 
@@ -1216,6 +1317,8 @@ sub is_any
 Add a directory to the mocked directories.
 If C<rec> is true or undef, also add all underlying directories.
 
+If C<mutable> is true, always create the directory.
+
 If directory already exists and is a directory, return SUCCESS (undef otherwise).
 
 =cut
@@ -1225,7 +1328,7 @@ make_directory('/', 0);
 
 sub make_directory
 {
-    my ($path, $rec) = @_;
+    my ($path, $rec, $mutable) = @_;
 
     $rec = 1 if ! defined($rec);
 
@@ -1239,10 +1342,22 @@ sub make_directory
             my $tmppath = '';
             foreach my $p (split(/\/+/, $path)) {
                 $tmppath = "$tmppath/$p";
-                return if ! make_directory($tmppath, 0);
+                if (!($mutable || is_mutable($tmppath, "make_directory tmppath"))) {
+                    diag("ERROR: cannot make_directory $path immutable tmppath $tmppath");
+                    return;
+                } elsif (!make_directory($tmppath, 0, $mutable)) {
+                    diag("ERROR: cannot make_directory $path rec=0 tmppath $tmppath");
+                    return;
+                };
             }
         } else {
-            $files_contents{$path} = $DIRECTORY;
+            if ($mutable || is_mutable($path, "make_directory")) {
+                $files_contents{$path} = $DIRECTORY;
+            } else {
+                # TODO: cannot recreate an immutable existing directory?
+                diag("ERROR: cannot make_directory immutable $path");
+                return;
+            }
         }
     }
 
@@ -1273,6 +1388,8 @@ sub remove_any
         push(@del, $path);
 
         foreach my $tmppath (@del) {
+            return if ! is_mutable($tmppath, "remove_any path $path filter tmppath");
+
             my $newlink;
             foreach my $hl (sort keys %$fs) {
                 # look for any hardlink that has $tmppath as target
@@ -1292,11 +1409,17 @@ sub remove_any
             }
             delete $fs->{$tmppath};
         }
-    };
-    &$filter(\%files_contents);
-    &$filter(\%desired_file_contents);
 
-    return SUCCESS;
+        return SUCCESS;
+    };
+
+    if (&$filter(\%files_contents) &&
+        &$filter(\%desired_file_contents)) {
+        return SUCCESS;
+    } else {
+        diag "ERROR: remove_any path $path failed";
+        return;
+    };
 }
 
 =item move
@@ -1313,13 +1436,27 @@ sub move
     if (is_any($src)) {
         if (is_any($dest)) {
             if (defined($backup) && $backup ne '') {
-                move($dest,$dest.$backup);
+                if (!move($dest, $dest.$backup)) {
+                    diag "ERROR: move: failed to move dest $dest to backup ".$dest.$backup;
+                    return;
+                };
             }
-            remove_any($dest);
+            if (!remove_any($dest)) {
+                diag "ERROR: move: failed to remove dest $dest";
+                return;
+            };
         };
         # Move src to dest
-        $files_contents{$dest} = delete $files_contents{$src};
-        $desired_file_contents{$dest} = delete $desired_file_contents{$src};
+        foreach my $fs (\%files_contents, \%desired_file_contents) {
+            if (exists($fs->{$src})) {
+                if (is_mutable($src, "move src") && is_mutable($dest, "move dest")) {
+                    $fs->{$dest} = delete $fs->{$src};
+                } else {
+                    diag "ERROR: move: failed to move src $src to dest $dest";
+                    return;
+                }
+            }
+        };
     };
     return SUCCESS;
 };
@@ -1398,10 +1535,12 @@ sub dump_contents
     my $filter = defined($opts{filter}) ? $opts{filter} : '';
     my $dfc = {map {$_ => $desired_file_contents{$_}} grep {m/$filter/} keys %desired_file_contents};
     my $fc = {map {$_ => $files_contents{$_}} grep {m/$filter/} keys %files_contents};
+    my $im = {map {$_ => $immutable{$_}} grep {m/$filter/} keys %immutable};
 
     my $prefix = $opts{prefix} || '';
     &$log("${prefix}desired_file_contents ", explain $dfc);
     &$log("${prefix}files_contents ", explain $fc);
+    &$log("${prefix}immutable ", explain $im);
 }
 
 
