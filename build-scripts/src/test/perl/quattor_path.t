@@ -9,8 +9,8 @@ use Test::Quattor::Object;
 
 use simple_caf;
 
-use CAF::Object;
-$CAF::Object::NoAction = 1;
+use LC::Exception;
+my $EC = LC::Exception::Context->new->will_store_all;
 
 use Readonly;
 Readonly my $BASEPATH => "/some/where";
@@ -254,5 +254,117 @@ set_file_contents("/listdir/anothertest", "source");
 is_deeply($s->_listdir("/listdir", sub {return $_[0] =~ m/test/;}),
           [qw(anothertest test testdir)],
           "_listdir returns entries from files_contents and desired_file_contents and applies test function");
+
+=head immutable
+
+=cut
+
+my $imm = "/immutable";
+ok(!$s->directory_exists($imm), "directory $imm does not exist");
+# directory doesn't need to exist
+set_immutable($imm);
+ok(!$s->directory_exists($imm), "directory $imm does not exist 2");
+
+# test directory creation, immutable parent dir
+ok(! defined($s->directory("$imm/subdir")),
+   "cannot create subdir of immutable directory");
+ok(!$s->directory_exists("$imm/subdir"), "directory $imm does not exist 3");
+
+ok(! defined($s->directory($imm)),
+   "cannot create immutable directory");
+ok(!$s->directory_exists($imm), "directory $imm does not exist 4");
+
+# unset immutable flag
+set_immutable($imm, 0);
+ok($s->directory($imm), "directory created after unset the immutable flag for $imm");
+ok($s->directory_exists($imm), "directory $imm does exist 5");
+
+
+# test file creation, immutable parent dir
+# reset exceptions (if any)
+$EC->ignore_error() if $EC->error();
+
+# immutable for new; shouldn't be fatal and should work
+set_immutable($imm);
+my $fhimm = CAF::FileWriter->new("$imm/test1", log => $s);
+# LC exception supports formatted stringification
+ok(!$EC->error(), "no exception thrown in filewriter new with immutable path");
+
+# immutable for close
+print $fhimm "abc";
+ok(! defined($fhimm->close()), "close on immutable file failed");
+#diag explain $fhimm, explain $EC, $EC->error(), explain \%LC::Exception::Context::_Active;
+# LC exception supports formatted stringification
+like(''.$EC->error(), qr{immutable.*/test1}, "exception thrown with failed close imm parent");
+$EC->ignore_error();
+
+# _close filehandle for cleanup reasons
+# (regular close on DESTROY of mocked FileWriter would raise new exception)
+$fhimm->_close();
+
+# test file creation: mutable parent, immutable file
+my $immf = "/somepath/immfile";
+set_immutable($immf);
+my $fhimmf = CAF::FileWriter->new($immf, log => $s);
+# LC exception supports formatted stringification
+ok(!$EC->error(), "no exception thrown in filewriter new with immutable file path");
+
+# immutable for close
+print $fhimmf "abc";
+ok(! defined($fhimmf->close()), "close on immutable file failed");
+#diag explain $fhimmf, explain $EC, $EC->error(), explain \%LC::Exception::Context::_Active;
+# LC exception supports formatted stringification
+like(''.$EC->error(), qr{immutable.*/immfile}, "exception thrown with failed close imm file");
+$EC->ignore_error();
+
+# _close filehandle for cleanup reasons
+# (regular close on DESTROY of mocked FileWriter would raise new exception)
+$fhimmf->_close();
+
+# test cleanup / move
+$imm = "/immtest2";
+$immf = "$imm/test";
+$s->make_file($immf, "abc");
+$s->make_file("/afile", "abc");
+ok($s->directory_exists($imm), "directory $imm does exist 1");
+ok($s->file_exists($immf), "file $immf does exist 1");
+
+# parent dir operations
+set_immutable($imm);
+ok(! defined($s->cleanup($immf)), "cleanup of file with immutable parent dir failed");
+ok(! defined($s->cleanup($imm)), "cleanup of immutable parent dir failed");
+ok($s->directory_exists($imm), "directory $imm does exist 2");
+ok($s->file_exists($immf), "file $immf does exist 2");
+ok(! defined($s->move($immf, "/somewhere")), "move file with immutable parent dir failed");
+ok(! defined($s->move("/afile", "$imm/movedest")), "move file to immutable parent dir failed");
+
+# file operations
+set_immutable($imm, 0);
+set_immutable($immf);
+
+ok(! defined($s->cleanup($immf)), "cleanup of immutable file failed");
+ok(! defined($s->cleanup($imm)), "cleanup of parent dir of immutable file failed");
+ok($s->directory_exists($imm), "directory $imm does exist 3");
+ok($s->file_exists($immf), "file $immf does exist 3");
+ok(! defined($s->move($immf, "/somewhere")), "move immutable file failed");
+set_immutable("/otherimm");
+ok(! defined($s->move("/afile", "/otherimm")), "move file to immutable file failed");
+
+# test symlink
+my $imml = "$imm/link";
+set_immutable($imm);
+ok(! defined($s->symlink("/somepath", $imml)), "symlink name with immutable parent failed");
+ok(! $s->any_exists($imml), "link $imml does not exist 1");
+
+set_immutable($imm, 0);
+set_immutable($imml);
+ok(! defined($s->symlink("/somepath", $imml)), "symlink immutable name failed");
+ok(! $s->any_exists($imml), "link $imml does not exist 2");
+
+
+# make sure close for filehandles from $s->make_file works
+set_immutable($imm, 0);
+set_immutable($immf, 0);
+
 
 done_testing();

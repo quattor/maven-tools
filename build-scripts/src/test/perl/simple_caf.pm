@@ -28,7 +28,7 @@ sub make_file
     if ($self->file_exists($filename)) {
         return $EXISTS;
     } else {
-        my $fh = CAF::FileWriter->new($filename);
+        my $fh = CAF::FileWriter->new($filename, log => $self);
         print $fh $text;
         $fh->close();
         return SUCCESS;
