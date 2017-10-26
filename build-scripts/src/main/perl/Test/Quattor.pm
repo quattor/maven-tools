@@ -211,7 +211,7 @@ The content of this hash (keys are the absolute path names) indicates
 if paths (files, directories, ...) are immutable (or not).
 Any modification to an immutable path will result in an error.
 
-You can add paths using the L<set_immutable> function.
+You can add paths using the C<set_immutable> function.
 
 =cut
 
