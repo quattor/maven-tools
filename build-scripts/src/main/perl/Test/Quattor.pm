@@ -467,6 +467,8 @@ Used to get the original content (for C<<CAF::FileWriter->close>>) and/or source
 =cut
 
 $filewriter->mock('_read_contents', sub {
+    return $filewriter->original('_read_contents')->(@_) if $Original;
+
     my ($self, $filename, %opts) = @_;
 
     $filename = sane_path($filename);
