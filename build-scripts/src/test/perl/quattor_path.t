@@ -366,5 +366,49 @@ ok(! $s->any_exists($imml), "link $imml does not exist 2");
 set_immutable($imm, 0);
 set_immutable($immf, 0);
 
+=head mock status / set_status
+
+=cut
+
+%Test::Quattor::status = ();
+
+my $statw = "/the/status/filewriter";
+my $statc = "/the/status/contents";
+
+my $fhstat = CAF::FileWriter->new($statw, log => $s);
+print $fhstat "test";
+ok($fhstat->close(), "close returns true written content");
+
+set_file_contents($statc, "hooray");
+
+is_deeply(\%Test::Quattor::status, {
+    $statc => {mode => oct(644)},
+    $statw => {mode => oct(644)},
+}, "status for files after mocked filewriter and via set_file_contents");
+
+
+$fhstat = CAF::FileWriter->new($statw, log => $s);
+print $fhstat "test";
+ok(!$fhstat->close(), "close returns false on same written content");
+
+$fhstat = CAF::FileWriter->new($statw, log => $s, mode => oct(755));
+print $fhstat "test";
+ok($fhstat->close(), "close returns true on same written content with different perms");
+is_deeply($Test::Quattor::status{$statw}, {mode => oct(755)},
+          "status mocked fielwriter with non-default permission");
+
+set_status($statw, group => "agroup");
+is_deeply($Test::Quattor::status{$statw}, {group => "agroup"},
+          "set_status resests old status and sets new one");
+
+set_immutable($statc, 1);
+
+is($s->status($statw, group => "agroup"), SUCCESS, "status returned success (nothing changed)");
+is($s->status($statw, owner => "me"), CHANGED, "status returned changed");
+is_deeply($Test::Quattor::status{$statw}, {group => "agroup", owner => "me"},
+          "status keeps old status and adds/updates new one");
+
+ok(!defined $s->status($statc, owner => "me"), "status returned undef on immutable file");
+
 
 done_testing();
