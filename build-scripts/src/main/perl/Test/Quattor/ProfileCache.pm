@@ -11,6 +11,7 @@ use warnings;
 use base 'Exporter';
 
 use CAF::FileWriter;
+use CAF::FileReader;
 use Test::More;
 
 use Cwd;
@@ -22,6 +23,8 @@ use Test::Quattor::Object;
 use Test::Quattor::Panc qw(panc is_object_template set_panc_includepath get_panc_includepath);
 
 use EDG::WP4::CCM::CacheManager;
+use EDG::WP4::CCM::CacheManager qw($PROFILE_DIR_N);
+use EDG::WP4::CCM::CacheManager::Encode qw($PATH2EID $EID2DATA);
 use EDG::WP4::CCM::Fetch;
 use EDG::WP4::CCM::Path 16.10.0 qw(escape unescape);
 use EDG::WP4::CCM::CCfg;
@@ -202,7 +205,7 @@ sub prepare_profile_cache
     # Do not "use Test::Quattor"
     # CCM is not using CAF::Path, so we have to set NoAction to 0 here
     local $Test::Quattor::NoAction = 0;
-    # CCM uses CAF::FileWriter which uses CAF::Path
+    # CCM uses CAF::FileWriter/Reader which uses CAF::Path
     local $Test::Quattor::Original = 1;
 
     my $dirs = get_profile_cache_dirs();
@@ -245,17 +248,38 @@ sub prepare_profile_cache
     }
 
     # Setup CCM
+    my $prof_fn = "$dirs->{profiles}/".unescape($cachename).".json";
     my $f = EDG::WP4::CCM::Fetch->new({
                FOREIGN => 0,
                CONFIG => $ccmconfig,
                CACHE_ROOT => $cache,
-               PROFILE_URL => "file://$dirs->{profiles}/".unescape($cachename).".json",
+               PROFILE_URL => "file://$prof_fn",
                })
         or croak ("Couldn't create fetch object");
-    $f->{CACHE_ROOT} = $cache;
-    $f->fetchProfile() or croak "Unable to fetch profile $profile";
 
-    my $cm = EDG::WP4::CCM::CacheManager->new($cache, , $f->{_CCFG});
+    $f->{CACHE_ROOT} = $cache;
+    # Not going to fetch locally available instant compiled profile
+    # Going straight to DB
+    #$f->fetchProfile() or croak "Unable to fetch profile $profile";
+    my $cid = 1;
+
+    $fh = CAF::FileWriter->new("$cache/current.cid", log => $object);
+    print $fh "$cid\n";
+    $fh->close();
+
+    $fh = CAF::FileWriter->new("$cache/latest.cid", log => $object);
+    print $fh "$cid\n";
+    $fh->close();
+
+    my $db_basedir = "$PROFILE_DIR_N$cid";
+    $f->MakeCacheRoot($cache, {mode => oct(755)}, $db_basedir);
+
+    my $dir = "$cache/$db_basedir";
+    my $profile_fh = CAF::FileReader->new($prof_fn);
+    $f->process_profile("$profile_fh", eiddata => "$dir/$EID2DATA", eidpath => "$dir/$PATH2EID")
+        or croak "Unable to process profile $profile";
+
+    my $cm = EDG::WP4::CCM::CacheManager->new($cache, $f->{_CCFG});
     $configs{$cachename} = $cm->getConfiguration();
 
     return $configs{$cachename};

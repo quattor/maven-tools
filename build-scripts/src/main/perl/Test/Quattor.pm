@@ -217,6 +217,18 @@ You can add paths using the C<set_immutable> function.
 
 our %immutable;
 
+
+=item * C<%status>
+
+The content of this hash (keys are the absolute path names) indicates
+current C<CAF::Path::status> (C<mode>, C<mtime>, C<owner> and/or C<group>).
+
+You can add paths using the C<set_status> function.
+
+=cut
+
+our %status;
+
 # undocumented for now
 # if true, use unmocked / original code
 # mainly for some mocked Path code that is used in eg CCM
@@ -227,7 +239,7 @@ our @EXPORT = qw(get_command set_file_contents get_file_contents get_file
                  get_config_for_profile
                  command_history_reset command_history_ok set_service_variant
                  make_directory remove_any reset_caf_path warn_is_ok
-                 set_immutable
+                 set_immutable set_status
                  dump_contents);
 
 my @logopts = qw(--verbose);
@@ -410,7 +422,7 @@ sub new_filewriter_close
 
     # Override actual action with Test::Quattor::NoAction
     my $old_noaction = *$self->{options}->{noaction};
-    if(defined($NoAction)) {
+    if (defined($NoAction)) {
         *$self->{options}->{noaction} = $NoAction;
     }
 
@@ -429,6 +441,15 @@ sub new_filewriter_close
         if ($ret && defined($current_content) && defined(*$self->{options}->{backup})) {
             $desired_file_contents{*$self->{filename} . *$self->{options}->{backup}} = "$current_content";
         }
+
+        # set the permission/... (normally by AtomicWrite)
+        my %fileopts;
+        foreach my $name (qw(mode mtime owner group)) {
+            $fileopts{$name} = *$self->{options}->{$name} if exists(*$self->{options}->{$name});
+        };
+        # they are set twice if content is the same
+        #    first time via CAF::Path::status in old_close()
+        set_status(*$self->{filename}, %fileopts) if !$old_noaction;
     } else {
         my $msg = "Failed to close immutable file ".*$self->{filename};
         $self->warn($msg);
@@ -467,6 +488,8 @@ Used to get the original content (for C<<CAF::FileWriter->close>>) and/or source
 =cut
 
 $filewriter->mock('_read_contents', sub {
+    return $filewriter->original('_read_contents')->(@_) if $Original;
+
     my ($self, $filename, %opts) = @_;
 
     $filename = sane_path($filename);
@@ -862,6 +885,44 @@ $cpath->mock('move', sub {
     }
 });
 
+=item C<CAF::Path::status>
+
+Set and compare status.
+
+=cut
+
+$cpath->mock('status', sub {
+    return $cpath->original('status')->(@_) if $Original;
+
+    my ($self, $filename, %opts) = @_;
+    $filename = sane_path($filename);
+
+    my %curr = %{$status{$filename} || {}};
+    my $diff = 0;
+    my %stat;
+    foreach my $name (qw(mode mtime owner group)) {
+        if (exists($opts{$name})) {
+            $stat{$name} = $opts{$name};
+            # forced string compare
+            $diff += ((!exists($curr{$name})) or ("$curr{$name}" ne "$stat{$name}")) ? 1 : 0;
+        } else {
+            # keep existing status, status does not reset other options
+            $stat{$name} = $curr{$name} if exists($curr{$name});
+        }
+    };
+
+
+    if ($diff && ! is_mutable($filename, "status")) {
+        return $self->fail("status $filename failed (immutable)");
+    } else {
+        set_status($filename, %stat);
+        # all opts
+        add_caf_path('status', [$filename], \%opts);
+        return $diff ? CHANGED : SUCCESS;
+    }
+});
+
+
 =item C<CAF::Path::_listdir>
 
 Mock underlying _listdir method that does the actual opendir/readdir/closedir.
@@ -919,6 +980,7 @@ sub get_file
 =item C<set_file_contents>
 
 For file C<$filename>, sets the initial C<$contents> the component should see.
+It also sets the default C<CAF::FileWriter> permissions (C<mode> 644).
 
 Returns the contents on success, undef otherwise.
 
@@ -937,7 +999,10 @@ sub set_file_contents
         diag("ERROR: Cannot ${mode}_file_contents: $filename is a directory");
     } elsif (make_directory(dirname($filename))) {
         # set copy only if get option is false
-        $desired_file_contents{$filename} = "$contents" if ! $opts{get};
+        if (! $opts{get}) {
+            $desired_file_contents{$filename} = "$contents";
+            set_status($filename, mode => oct(644));
+        };
         return $desired_file_contents{$filename};
     } else {
         diag("ERROR: Cannot ${mode}_file_contents: cannot create directory for $filename");
@@ -1209,6 +1274,29 @@ sub set_immutable
     $immutable{$path} = $bool ? 1 : 0;
 
     diag "INFO: $path is ".($immutable{$path} ? '' : 'not ')."immutable";
+}
+
+
+=item set_status
+
+(Re)set status of C<path> to the options (C<mode>, C<mtime>, C<owner> and/or C<group>).
+
+=cut
+
+sub set_status
+{
+    my $path = sane_path(shift);
+
+    my %opts = @_;
+
+    my %stat;
+    foreach my $name (qw(mode mtime owner group)) {
+        $stat{$name} = $opts{$name} if exists($opts{$name});
+    };
+
+    $status{$path} = \%stat;
+
+    diag "INFO: $path status is ".join(", ", map {"$_=$opts{$_}"} sort keys %stat);
 }
 
 =item is_mutable
