@@ -68,7 +68,7 @@ bind '/software/components/${project.artifactId}' = ${project.artifactId}_compon
 
 '/software/packages' = pkg_repl('ncm-${project.artifactId}', '${no-snapshot-version}-${rpm.release}', 'noarch');
 
-include if_exists('components/${project.artifactId}/site-config.pan');
+include if_exists('components/${project.artifactId}/site-config');
 
 prefix '/software/components/${project.artifactId}';
 'active' ?= true;
