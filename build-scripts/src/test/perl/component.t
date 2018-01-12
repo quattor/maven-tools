@@ -13,6 +13,7 @@ BEGIN {
 use Test::More;
 use Test::Quattor::Component;
 use NCM::Component;
+use NCM::Component::Test::Example;
 
 use EDG::WP4::CCM::Path qw(escape unescape);
 
@@ -38,5 +39,7 @@ sub test
 test($test_comp, "Test::Quattor::Component");
 test($ncm_comp, "NCM::Component");
 
+my $test = NCM::Component::Test::Example->new('test');
+is($test->prefix(), '/software/components/test');
 
 done_testing();

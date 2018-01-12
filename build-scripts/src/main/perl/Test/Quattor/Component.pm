@@ -53,7 +53,7 @@ sub prefix
     my $self = shift;
 
     my @ns = split(/::/, ref($self));
-    return "/software/components/$ns[-1]";
+    return "/software/components/" . (scalar @ns == 3 ? $ns[-1] : $self->{name});
 }
 
 # A private method only here to disable the deprecation warnings
