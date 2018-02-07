@@ -267,7 +267,7 @@ bind '/software/components/$project' = ${project}_component;
 
 '/software/packages' = pkg_repl('ncm-$project', '$version-$snapshot', 'noarch');
 
-include if_exists('components/$project/site-config.pan');
+include if_exists('components/$project/site-config');
 
 prefix '/software/components/$project';
 'active' ?= true;
