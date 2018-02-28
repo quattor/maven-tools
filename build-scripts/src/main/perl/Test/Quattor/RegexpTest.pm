@@ -13,6 +13,7 @@ use Test::More;
 use base qw(Test::Quattor::Object);
 
 use EDG::WP4::CCM::Path qw(escape);
+use Text::Diff qw(diff);
 
 use Readonly;
 
@@ -346,8 +347,9 @@ sub parse_tests
         # TODO is quote a regexp or literal match (with eq operator)?
         $self->verbose("multiline set but ignored with quote flag") if $self->{flags}->{multiline};
         my $flags = $self->make_re_flags('multiline');
-        my $test = {reg => qr{(?$flags:^$blocktxt$)}};
-        $test->{count} = 0 if $self->{flags}->{negate};
+        my $test = {reg => qr{(?$flags:^$blocktxt$)}, quote => $blocktxt};
+        # one count when match expected, 0 when no match expected
+        $test->{count} = $self->{flags}->{negate} ? 0 : 1;
         push(@{$self->{tests}}, $test);
 
         # return here to avoid extra indentation
@@ -416,6 +418,15 @@ sub match
 
         # always make all matches for the whole text
         my $remainder = $self->{text};
+
+        # Additional debugging
+        if (exists($test->{quote}) &&
+            $self->{text} ne $test->{quote}) {
+            my $diff = diff(\$self->{text}, \$test->{quote}, { STYLE => "Unified" });
+            $self->verbose("Rendered text (-) does not match quote test (+):\n$diff\n");
+        }
+
+
         my (@before, @after);
         my $count = 0;
         while ($remainder =~ /$test->{reg}/g) {
@@ -455,8 +466,8 @@ sub postprocess
         if (exists($test->{count})) {
             is($test->{count}, $match->{count},
                 "Number of matches as expected (test $test->{count} match $match->{count}) $msg");
-            if ($test->{count} == 0) {
-                $self->verbose("No ordering test since no match is expected $msg");
+            if ($test->{count} <= 1) {
+                $self->verbose("No ordering test since ".($test->{count} ? 'only one' : 'no')." match is expected $msg");
                 $test_ordered = 0;
             }
         } else {
