@@ -271,7 +271,7 @@ declaration template components/${project.artifactId}/schema;
           <plugin>
             <groupId>org.quattor.pan</groupId>
             <artifactId>panc-maven-plugin</artifactId>
-            <version>10.2</version>
+            <version>10.7</version>
             <executions>
               <execution>
                 <id>check-generated-pan-syntax</id>
