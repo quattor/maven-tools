@@ -940,9 +940,12 @@ $cpath->mock('_listdir', sub {
     # find /, use hash to make entries unique
     my %allfiles = map {$_ => 1} (keys %desired_file_contents, keys %files_contents);
     # only related files and apply test, sort to make unittests reproducable
-    my @entries = grep {$_ =~ m{^$dir/} && &$test($_, $dir) } sort keys %allfiles;
+    my @entries = grep { &$test($_, $dir) }
+        map { my $x = $_; $x =~ s{^$dir/}{}; $x; }
+        grep {$_ =~ m{^$dir/}}
+        sort keys %allfiles;
     # strip directory prefix
-    return [map {my $a = $_; $a =~ s{^$dir/}{}; $a; } @entries];
+    return \@entries;
 });
 
 =back

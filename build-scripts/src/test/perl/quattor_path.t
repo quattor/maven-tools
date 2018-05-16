@@ -251,7 +251,8 @@ $s->directory("/listdir/dir");
 $s->directory("/listdir/testdir");
 set_file_contents("/listdir/anothertest", "source");
 
-is_deeply($s->_listdir("/listdir", sub {return $_[0] =~ m/test/;}),
+# the !~ listdir is to make sure the filename is passed as first arg to test
+is_deeply($s->_listdir("/listdir", sub {return $_[0] =~ m/test/ && $_[0] !~ m/listdir/;}),
           [qw(anothertest test testdir)],
           "_listdir returns entries from files_contents and desired_file_contents and applies test function");
 
