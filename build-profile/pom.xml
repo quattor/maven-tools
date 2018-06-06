@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>build-profile</artifactId>
@@ -19,7 +20,7 @@
     </build-info>
     <man.page.dir>/usr/share/man</man.page.dir>
     <prove.args>-q</prove.args>
-    <unittest />
+    <unittest/>
     <!-- perl module headers.
          Usage: at the beginning of the module put:
          #${PMpre} Some::Namespace::packagename${PMpost}
@@ -48,7 +49,6 @@ use version;
 our $VERSION = version-&gt;new("v${no-snapshot-version}");
 ${line.separator}
     </PMpost>
-
     <!--
         Generic component config.pan template
             Assumes main component type to be named <name>_component
@@ -75,12 +75,10 @@ prefix '/software/components/${project.artifactId}';
 'dispatch' ?= true;
 'version' ?= '${no-snapshot-version}';
     </componentconfignospma>
-
     <componentconfig>
 ${componentconfignospma}
 'dependencies/pre' ?= list('spma');
     </componentconfig>
-
     <componentschema>
 ${license-info}
 ${developer-info}
@@ -88,7 +86,6 @@ ${author-info}
 
 declaration template components/${project.artifactId}/schema;
     </componentschema>
-
     <changelogtimestamp>${maven.build.timestamp}</changelogtimestamp>
     <maven.build.timestamp.format>E MMM dd yyyy</maven.build.timestamp.format>
   </properties>

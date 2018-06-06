@@ -1,45 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>assemblies</artifactId>
   <packaging>pom</packaging>
-
   <name>assemblies</name>
-
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
     <version>1.58-SNAPSHOT</version>
   </parent>
-
   <build>
     <plugins>
-
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <extensions>true</extensions>
-
         <executions>
-
-	  <execution>
-	    <id>assemblies</id>
-	    <phase>package</phase>
-	    <goals>
-	      <goal>attached</goal>
-	    </goals>
-	    <configuration>
-	      <descriptors>
-		<descriptor>src/main/assembly/assemblies.xml</descriptor>
-	      </descriptors>
-	    </configuration>
-	  </execution>
-
+          <execution>
+            <id>assemblies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/assemblies.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
         </executions>
-
       </plugin>
-
     </plugins>
   </build>
-
 </project>

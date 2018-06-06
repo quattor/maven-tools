@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.quattor.client.libraries</groupId>
@@ -9,7 +10,7 @@
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
     <version>1.49</version>
-    <relativePath />
+    <relativePath/>
   </parent>
   <licenses>
     <license>
@@ -35,7 +36,7 @@
     </contributor>
   </contributors>
   <properties>
-    <unittest />
+    <unittest/>
   </properties>
   <build>
     <plugins>
@@ -118,9 +119,9 @@
             <configuration>
               <tasks name="Rename">
                 <move filtering="true" todir="${project.build.directory}/doc/pod/Test">
-                  <fileset dir="${project.build.directory}/doc/pod/Test" />
+                  <fileset dir="${project.build.directory}/doc/pod/Test"/>
                   <mapper>
-                    <globmapper from="*.pm" to="*.pod" />
+                    <globmapper from="*.pm" to="*.pod"/>
                   </mapper>
                 </move>
                 <echo>Renaming stuff?</echo>
