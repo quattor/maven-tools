@@ -1,17 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.quattor.maven</groupId>
   <artifactId>maven</artifactId>
   <version>1.58-SNAPSHOT</version>
   <packaging>pom</packaging>
-
   <name>quattor maven build tools</name>
   <description>quattor maven build tools</description>
   <url>http://quattor.org</url>
-
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -19,17 +15,14 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
-
   <prerequisites>
     <maven>3.0.0</maven>
   </prerequisites>
-
   <modules>
     <module>assemblies</module>
     <module>build-profile</module>
@@ -37,23 +30,19 @@
     <module>cfg-module</module>
     <module>quattor-build-maven-plugin</module>
   </modules>
-
   <organization>
     <name>Quattor</name>
     <url>http://quattor.org/</url>
   </organization>
-
   <scm>
     <connection>scm:git:git://github.com/quattor/maven-tools.git</connection>
     <developerConnection>scm:git:git@github.com:quattor/maven-tools.git</developerConnection>
     <url>https://github.com/quattor/maven-tools</url>
   </scm>
-
   <issueManagement>
     <system>GitHub tracker</system>
     <url>https://github.com/quattor/maven-tools</url>
   </issueManagement>
-
   <mailingLists>
     <mailingList>
       <name>Quattor Discuss</name>
@@ -62,7 +51,6 @@
       <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=quattor-discuss</archive>
     </mailingList>
   </mailingLists>
-
   <developers>
     <developer>
       <id>loomisc</id>
@@ -70,28 +58,22 @@
       <email>loomis@lal.in2p3.fr</email>
     </developer>
   </developers>
-
   <profiles>
     <profile>
       <id>release-signed-artifacts</id>
       <activation>
-
-	<!--
+        <!--
         <file>
           <exists>/tmp</exists>
         </file>
 	-->
-
-	<property>
-	  <name>performRelease</name>
-	  <value>true</value>
-	</property>
-
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
       </activation>
       <build>
-
         <plugins>
-
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
@@ -106,123 +88,108 @@
               </execution>
             </executions>
           </plugin>
-
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-release-plugin</artifactId>
-	    <configuration>
-	      <arguments>-Dmyprop=value -Psonatype-oss-release</arguments>
-	    </configuration>
-	  </plugin>
-
-	</plugins>
-
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <arguments>-Dmyprop=value -Psonatype-oss-release</arguments>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>
-
   <build>
     <pluginManagement>
       <plugins>
-
-	<plugin>
-	  <artifactId>maven-release-plugin</artifactId>
-	  <configuration>
-	    <arguments>${arguments} -Psonatype-oss-release</arguments>
-	  </configuration>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-assembly-plugin</artifactId>
-	  <version>2.5.5</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-plugin-plugin</artifactId>
-	  <version>2.6</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-jar-plugin</artifactId>
-	  <version>2.5</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-surefire-plugin</artifactId>
-	  <version>2.18.1</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-compiler-plugin</artifactId>
-	  <version>3.2</version>
-	  <configuration>
-	    <target>1.5</target>
-	    <source>1.5</source>
-	  </configuration>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-clean-plugin</artifactId>
-	  <version>2.6.1</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-deploy-plugin</artifactId>
-	  <version>2.8.2</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-install-plugin</artifactId>
-	  <version>2.5.2</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-site-plugin</artifactId>
-	  <version>3.4</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-dependency-plugin</artifactId>
-	  <version>2.10</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-resources-plugin</artifactId>
-	  <version>2.4.3</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>exec-maven-plugin</artifactId>
-	  <version>1.4.0</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>rpm-maven-plugin</artifactId>
-	  <version>2.1.5</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-antrun-plugin</artifactId>
-	  <version>1.8</version>
-	</plugin>
-
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <configuration>
+            <arguments>${arguments} -Psonatype-oss-release</arguments>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <additionalparam>-Xdoclint:none</additionalparam>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.5.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>2.6</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.2</version>
+          <configuration>
+            <target>1.5</target>
+            <source>1.5</source>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.6.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.10</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.4.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.4.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>2.1.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.8</version>
+        </plugin>
       </plugins>
-
     </pluginManagement>
   </build>
-
 </project>

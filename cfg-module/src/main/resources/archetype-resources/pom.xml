@@ -1,23 +1,16 @@
-<project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}</artifactId>
-
   <packaging>pom</packaging>
   <version>${version}</version>
   <name>${description}</name>
-
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>build-profile</artifactId>
     <version>%%{version}%%</version>
   </parent>
-
   <licenses>
     <license>
       <name>Apache 2 License</name>
@@ -25,29 +18,26 @@
       <comments>Copyright (c) Responsible Organization</comments>
     </license>
   </licenses>
-
   <developers>
     <developer>
       <name>${developer}</name>
       <email>${developer-email}</email>
     </developer>
   </developers>
-
   <contributors>
     <contributor>
       <name>Jane SMITH</name>
       <email>smith@example.com</email>
       <roles>
-	<role>author</role>
+        <role>author</role>
       </roles>
     </contributor>
     <contributor>
       <name>Joe DOE</name>
       <email>doe@example.org</email>
       <roles>
-	<role>author</role>
+        <role>author</role>
       </roles>
     </contributor>
   </contributors>
-
 </project>
