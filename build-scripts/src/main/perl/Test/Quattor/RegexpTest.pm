@@ -93,7 +93,7 @@ sub _initialize
 Parse the regexp file in 3 sections: description, flags and tests.
 
 Each section is converted in an instance attribute named 'description',
- 'flags' and 'tests'.
+'flags' and 'tests'.
 
 =cut
 
@@ -188,7 +188,7 @@ negate / negate = 0/1
 
 Negate all regexps, none of the regexps can match
 (is an alias for C<COUNT 0> on every regtest;
- overwritten when COUNT is set for individual regexp)
+overwritten when COUNT is set for individual regexp)
 
 =item quote
 
@@ -316,7 +316,7 @@ has to be an exact match, incl EOF newline etc.
 Without the C<quote> flag set, the tests are parsed line by line,
 and seen as one regexp per line.
 
-Lines starting with C<\s*#{3} > (trailing space!) are comments.
+Lines starting with C< \s*#{3}  > (trailing space!) are comments.
 
 Lines ending with C<\s#{3}> are interpreted as having options set.
 Supported options
@@ -325,8 +325,8 @@ Supported options
 
 =item COUNT
 
-C<COUNT \d+> is the exact number of matches
-(use C<COUNT 0 >to make sure a line doesn't match).
+The exact number of matches is C<COUNT \d+>
+(use C<COUNT 0> to make sure a line doesn't match).
 
 This is a global count, e.g. in ordered mode the count
 itself is not number of matches since previous test match.
