@@ -133,6 +133,7 @@ Read default config followed by optional configfile C<tqu.cfg> and optional
 variable C<$main::TQU>.
 
 Variable can be defined in main test as follows
+
     BEGIN {
         our $TQU = <<'EOF';
     ...
@@ -282,7 +283,7 @@ Documentation tests using C<Test::Quattor::Doc>.
 
 Configuration options C<poddirs>, C<podfiles>, C<emptypoddirs>, C<panpaths> and
 C<panout> are parsed as comma-seperated lists
-and passed to C<Test::Quattor::Doc->new>.
+and passed to C<< Test::Quattor::Doc->new >>.
 
 If the C<nopodflag> attribute is true, and no C<emptypoddirs> are defined,
 the C<Test::Quattor::Doc::DOC_TARGET_POD> is set as C<emptypoddirs>.
@@ -319,7 +320,7 @@ Run TT unittests using C<Test::Quattor::TextRender::Component>.
 (This does not apply to C<metaconfig> tests).
 
 Configuration options are passed to
-C<<Test::Quattor::TextRender::Component->new>>.
+C<< Test::Quattor::TextRender::Component->new >>.
 
 The tests are only run if the basepath (default to C<src/main/resources>)
 exists.

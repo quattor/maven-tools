@@ -61,7 +61,7 @@ our $inc_orig;
 
 =item inc_history
 
-C<$inc_history> is an arrayref with copy of all references of all C<@INC>s modified
+C<$inc_history> is an arrayref with copy of all references of all C<@INC>'s modified
 
 =cut
 
