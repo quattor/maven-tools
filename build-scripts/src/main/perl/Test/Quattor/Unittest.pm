@@ -197,6 +197,8 @@ sub test
         my $cfg = $self->{cfg}->{$test};
         if (! defined($cfg)) {
             $self->notok("No configuration section for test $test");
+        } elsif (defined($cfg->{enable}) && $cfg->{enable} =~ m/^[0nNfF]/) {
+            $self->ok("Test $test is disabled as requested");
         } else {
             $self->$test($cfg);
         };
