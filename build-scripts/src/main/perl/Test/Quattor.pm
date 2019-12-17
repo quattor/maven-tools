@@ -1139,7 +1139,7 @@ sub command_history_ok
     if ($forbidden_commands) {
         foreach my $cmd (@$forbidden_commands) {
             if (grep {$_ =~ /$cmd/} @command_history) {
-                diag "command_history_ok: forbidden command '$cmd' found in history; return false";
+                diag "command_history_ok: forbidden command '$_' found in history; return false";
                 return 0;
             };
         }
