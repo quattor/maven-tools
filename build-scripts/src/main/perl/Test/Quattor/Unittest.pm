@@ -70,10 +70,10 @@ enable = 1
 enable = 1
 
 [critic]
-enable = 1
+enable = 0
 
 [tidy]
-enable = 1
+enable = 0
 
 EOF
 
