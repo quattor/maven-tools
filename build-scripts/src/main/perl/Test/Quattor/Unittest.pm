@@ -141,7 +141,7 @@ Variable can be defined in main test as follows
     }
 
 Every test section has at least the C<enable> option,
-set to true by default.
+set by default.
 For all other options, read the respective method
 documentation.
 

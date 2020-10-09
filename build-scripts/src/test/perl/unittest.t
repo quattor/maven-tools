@@ -21,9 +21,13 @@ is_deeply(\@Test::Quattor::Unittest::TESTS, [qw(load doc tt critic tidy)],
 $u->read_cfg();
 is($u->{cfg}->{notarealtestsection}->{a}, 'b', 'expected value from merge main TQU');
 
-# check defaults, all tests enabled
+# check defaults, all tests enabled apart from linters
 foreach my $test (@Test::Quattor::Unittest::TESTS) {
-    ok($u->{cfg}->{$test}->{enable}, "Default config has test $test enabled");
+    my $expected_state = 1;
+    if ($test eq 'critic' || $test eq 'tidy') {
+        $expected_state = 0;
+    };
+    is($u->{cfg}->{$test}->{enable}, $expected_state, "Default config has test $test enabled");
     ok($u->can($test), "Test $test method found");
 }
 
