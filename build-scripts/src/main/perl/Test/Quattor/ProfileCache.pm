@@ -14,10 +14,10 @@ use CAF::FileWriter;
 use CAF::FileReader;
 use Test::More;
 
-use Cwd;
-use Carp qw(carp croak);
-use File::Path qw(mkpath);
 use Cwd qw(getcwd);
+use Carp qw(carp croak);
+use File::Basename;
+use File::Path qw(mkpath);
 
 use Test::Quattor::Object;
 use Test::Quattor::Panc qw(panc is_object_template set_panc_includepath get_panc_includepath);
@@ -108,14 +108,17 @@ the profile cache: 'cache', 'resources' and 'profiles'.
 The values are generated from the defaults or C<profilecacheoptions>
 (to be set via C<set_profile_cache_options>).
 
-Relative paths are assumed to be relative wrt current directory;
+Relative paths are assumed to be relative wrt C<basedir>
+(defaults to current directory);
 absolute paths are used for the returned values.
 
 =cut
 
 sub get_profile_cache_dirs
 {
-    my $currentdir = getcwd();
+    my ($basedir) = @_;
+
+    $basedir = getcwd() if ! $basedir;
 
     my %dirs;
 
@@ -123,7 +126,7 @@ sub get_profile_cache_dirs
     foreach my $type (@types) {
         my $dir = $DEFAULT_PROFILE_CACHE_DIRS{$type};
         $dir = $profilecacheoptions{$type} if (exists($profilecacheoptions{$type}));
-        $dir = "$currentdir/$dir" if ($dir !~ m/^\//);
+        $dir = "$basedir/$dir" if ($dir !~ m/^\//);
         $dirs{$type} = $dir;
     }
 
@@ -186,8 +189,11 @@ sub prepare_profile_cache_panc_includedirs
 =head2 prepare_profile_cache
 
 Prepares a cache for the profile given as an argument. This means
-compiling the profile, fetching it and saving the binary cache
+compiling the profile if needed, fetching it and saving the binary cache
 wherever the CCM configuration tells us.
+
+If the C<profile> ends with C<.(json|xml)(.gz)?> it is assumed
+to be already compiled and used as-is.
 
 Returns the configuration object for this profile.
 
@@ -210,13 +216,23 @@ sub prepare_profile_cache
 
     my $dirs = get_profile_cache_dirs();
 
-    # Failure
-    if (!is_object_template($profile, $dirs->{resources})) {
-        note("Profile $profile is not a valid object template");
-        return 1; # failure
+    my ($compile, $profile_url, $cachename);
+    if ($profile =~ m/^(.*?)\.(xml|json)(?:\.gz)?$/) {
+        note("Profile $profile is already compiled");
+        $compile = 0;
+        $profile_url = $profile;
+        $profile = basename($1);
+        $cachename = $profile;
+    } else {
+        # Failure
+        if (!is_object_template($profile, $dirs->{resources})) {
+            note("Profile $profile is not a valid object template");
+            return 1; # failure
+        }
+        $compile = 1;
+        $cachename = profile_cache_name($profile);
+        $profile_url = "$dirs->{profiles}/".unescape($cachename).".json";
     }
-
-    my $cachename = profile_cache_name($profile);
 
     my $cache = "$dirs->{cache}/$cachename";
 
@@ -226,12 +242,14 @@ sub prepare_profile_cache
     print $fh "no\n";
     $fh->close();
 
-    prepare_profile_cache_panc_includedirs();
+    if ($compile) {
+        prepare_profile_cache_panc_includedirs();
 
-    # Compile profiles
-    my $ec = panc($profile, $dirs->{resources}, $dirs->{profiles}, $croak_on_error);
-    # on failure, there's nothing to do any further.
-    return $ec if($ec);
+        # Compile profiles
+        my $ec = panc($profile, $dirs->{resources}, $dirs->{profiles}, $croak_on_error);
+        # on failure, there's nothing to do any further.
+        return $ec if($ec);
+    }
 
     # Support non-existing ccm.cfg
     # (also prevents having to ship same file over and over again)
