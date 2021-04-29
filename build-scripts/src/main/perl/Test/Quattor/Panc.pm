@@ -26,7 +26,7 @@ our @EXPORT = qw(panc panc_annotations is_object_template
                  set_panc_options reset_panc_options get_panc_options
                  set_panc_includepath get_panc_includepath);
 
-Readonly my $PANC_MINIMAL => '10.2';
+Readonly my $PANC_MINIMAL => '10.7';
 
 
 # A Test::Quattor::Object instance, can be used as logger.
