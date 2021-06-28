@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.60</version>
+    <version>1.61-SNAPSHOT</version>
   </parent>
   <build>
     <plugins>
