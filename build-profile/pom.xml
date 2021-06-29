@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
-    <version>1.61</version>
+    <version>1.62-SNAPSHOT</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,14 +94,14 @@ declaration template components/${project.artifactId}/schema;
       <groupId>org.quattor.maven</groupId>
       <artifactId>assemblies</artifactId>
       <type>tar.gz</type>
-      <version>1.61</version>
+      <version>1.62-SNAPSHOT</version>
       <classifier>assemblies</classifier>
     </dependency>
     <dependency>
       <groupId>org.quattor.maven</groupId>
       <artifactId>build-scripts</artifactId>
       <type>tar.gz</type>
-      <version>1.61</version>
+      <version>1.62-SNAPSHOT</version>
       <classifier>scripts</classifier>
     </dependency>
   </dependencies>
@@ -418,7 +418,7 @@ declaration template components/${project.artifactId}/schema;
         <plugin>
           <groupId>org.quattor.maven</groupId>
           <artifactId>quattor-build-maven-plugin</artifactId>
-          <version>1.61</version>
+          <version>1.62-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
