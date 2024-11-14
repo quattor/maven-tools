@@ -4,6 +4,9 @@
   <artifactId>quattor-build-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>quattor build maven plugin</name>
+  <prerequisites>
+    <maven>3.5.4</maven>
+  </prerequisites>
   <parent>
     <groupId>org.quattor.maven</groupId>
     <artifactId>maven</artifactId>
@@ -26,4 +29,28 @@
       <version>2.2.1</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.5.4</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
