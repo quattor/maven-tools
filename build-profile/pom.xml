@@ -500,6 +500,7 @@ declaration template components/${project.artifactId}/schema;
             <changelogFile>${project.build.directory}/ChangeLog.template</changelogFile>
             <needarch>noarch</needarch>
             <description>${project.name}</description>
+            <rpmbuildStage>-ba</rpmbuildStage><!-- Build binary and source packages -->
             <mappings>
               <mapping>
                 <directory>/usr/lib</directory>
