@@ -150,7 +150,7 @@ part.
 
 *Note:* deploying a release requires to have GPG keys: create them if necessary before producing a release
 and publish your public key on one GPG key server (they are all synchronised, see
-http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key) and wait for
+https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key) and wait for
 your key to be present on http://pgp.mit.edu:11371. Also, as for any `gpg` command,
 you need to have a running `gpg-agent`. It also requires that you have the appropriate Maven configuration
 in `~/.m2/settings.xml` (see below).
@@ -164,7 +164,7 @@ it is a good practice to deploy a snapshot. This is done with the `deploy` phase
 as specified at the beginning of this document).
 To deploy a snapshot rather than a release, check that the artifact version in the pom file ends with -SNAPSHOT,
 before running the deploy phase. This allows the
-basic configuration to be checked for correctness (in particular the parameters used to upload to Sonatype Nexus).
+basic configuration to be checked for correctness (in particular the parameters used to upload to the central repository).
 
 ### Build release and push to nexus
 
@@ -192,24 +192,49 @@ an up-to-date version of `template-library-core` repository (required by tests).
 
 ### Promoting from staging to release
 
-1. After successfully executing `release:perform`, the new release will be in a staging area on Sonatype nexus server
-(https://oss.sonatype.org). Before the release can be used, you must log in to the nexus server, close the staging
-area and ask for the staging area being released.
+1. After successfully executing `release:perform`, the new release will be held in the Portal OSSRH Staging API compatibility service.
+Before the release can be used, you must make an API call to transfer the deployment from the compatibility service to the main Central Publisher Portal area.
 
-1. Select `Staging Repositories` in the left side menu (appearing
-after you logged in) and search for [org.quattor.maven](https://oss.sonatype.org/#nexus-search;quick~org.quattor.maven).
+1. Call `./ossrh-staging-api search` to verify that the new release exists, you should see something similar to the following:
+```json
+{
+  "repositories": [
+    {
+      "key": "ABCdef/198.51.100.119/org.quattor--default-repository",
+      "state": "open",
+      "description": null,
+      "portal_deployment_id": null
+    }
+  ]
+}
 
-1. Select the appropriate repository (you may have several if you did several attempts from different machines) and close it.
+```
 
-1. When the operation is successful (click on `Refresh`), click on the `Release` button. Once successfully released, you may have to wait a couple of hours before the release appears on the [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.quattor.maven).
+1. Call `./ossrh-staging-api upload` to request transfer of all open repositories to the Central Publisher Portal.
+
+1. Call `./ossrh-staging-api search` again to verify that the new release has been closed:
+```json
+{
+  "repositories": [
+    {
+      "key": "ABCdef/198.51.100.119/org.quattor--default-repository",
+      "state": "closed",
+      "description": null,
+      "portal_deployment_id": "6d9f74b9-ac49-487d-9bc3-7b8e448eb4fa"
+    }
+  ]
+}
+```
+
+1. If successful go to https://central.sonatype.com/publishing/deployments and wait for the release to appear and pass validation. Once it does, press the "Publish" button to release it to Maven Central.
+
 
 ### Additional notes
 
 * If something went wrong during `release:perform` (which pushes the release to the staging area), it is sometimes necessary to drop the staging directory after closing it to be able to run `release:perform` again (particularly if it complains that the packages are already present in the repository).
- * A good documentation of the staging process can be found at http://books.sonatype.com/nexus-book/reference/staging-repositories.html
- * Detailed information on using Maven to deploy releases at Sonatype is available at http://central.sonatype.org/pages/apache-maven.html.
+ * Documentation of the staging process can be found at https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/
 
-* If when the release becomes available on http://search.maven.org Maven complains that it cannot find the new release, add the `-U` option to the Maven command line. The execution of Maven may still result in an error but the local repository should be updated allowing the next execution of Maven to work.
+* If when the release becomes available on https://central.sonatype.com/ Maven complains that it cannot find the new release, add the `-U` option to the Maven command line. The execution of Maven may still result in an error but the local repository should be updated allowing the next execution of Maven to work.
 
 * If you really want to cancel the release process after doing `release:prepare` but before doing `release:perform` (it is preferable to fix the problem and rerun `release:prepare`), you need to issue the appropriate commands depending on whether `release:prepare` added some commits to the upstream branch whose commit message starts with `[maven-release-plugin]`:
 
@@ -231,7 +256,7 @@ after you logged in) and search for [org.quattor.maven](https://oss.sonatype.org
   Connect to GitHub and delete the new tag if it has been created
   ```
 
-  * **Note: after a first execution of `release:perform` which pushed things to Sonatype Central Repository, it is not recommended that you attempt to revert a failed release. If the problems with the release in progress cannot be fixed, simply start a new release.**
+  * **Note: after a first execution of `release:perform` which pushed things to the Central Repository, it is not recommended that you attempt to revert a failed release. If the problems with the release in progress cannot be fixed, simply start a new release.**
 
 Recommended Maven configuration
 -------------------------------
@@ -269,5 +294,5 @@ Below is a typical Maven configuration file (`~/.m2/settings.xml`) to be able to
 </settings>
 ```
 
-In the above example `your_userid` and the password refer to your account at http://sonatype.org.
-To get an account at Sonatype, follow the instructions at http://central.sonatype.org/pages/ossrh-guide.html.
+In the above example `your_userid` and the password refer to your account at https://identity.sonatype.com.
+To get an account, follow the instructions at https://central.sonatype.org/register/central-portal/#create-an-account
