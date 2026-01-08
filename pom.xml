@@ -39,6 +39,18 @@
     <developerConnection>scm:git:git@github.com:quattor/maven-tools.git</developerConnection>
     <url>https://github.com/quattor/maven-tools</url>
   </scm>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
   <issueManagement>
     <system>GitHub tracker</system>
     <url>https://github.com/quattor/maven-tools</url>
