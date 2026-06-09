@@ -1,0 +1,45 @@
+#!/bin/bash
+# vim: noai:et:ts=4:sw=4
+
+SETTINGS="$HOME/.m2/settings.xml"
+SERVPATH="/settings/servers/server[id='sonatype-nexus-staging']"
+
+if [[ $# -ne 1 || ! "$1" =~ ^(search|upload)$ ]]; then
+    echo "Usage: ossrh-staging-api [search | upload]"
+    exit 2
+fi
+
+action="$1"
+
+if [[ ! -s "$SETTINGS" ]]; then
+    echo "Couldn't find $SETTINGS, cannot continue."
+    exit 1
+fi
+
+for util in curl jq xmllint; do
+    if ! which $util > /dev/null 2>&1; then
+        echo "Required utility $util not found"
+        exit 1
+    fi
+done
+
+user="$(xmllint --xpath "string($SERVPATH/username)" "$SETTINGS")"
+pass="$(xmllint --xpath "string($SERVPATH/password)" "$SETTINGS")"
+auth="Bearer $(base64 <(printf "%s:%s" "$user" "$pass"))"
+
+function api {
+    curl \
+    --silent \
+    --request "$1" \
+    --header @<( echo "Authorization: $auth") \
+    https://ossrh-staging-api.central.sonatype.com/$2
+}
+
+case "$action" in
+    "search")
+        api 'GET' 'manual/search/repositories?ip=any&profile_id=org.quattor' | jq .
+    ;;
+    "upload")
+        api 'POST' 'manual/upload/defaultRepository/org.quattor' | jq .
+    ;;
+esac
